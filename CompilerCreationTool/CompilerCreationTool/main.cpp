@@ -4,25 +4,75 @@
 #include "pch.h"
 #include <iostream>
 
-#include <wx/wx.h>
-
-int main()
+class MyFrame : public wxFrame
 {
-	wxString wxHelloWorldString = "Hello, world\n";
+public:
+	enum Button
+	{
+		Hello
+	};
 
-	double value = 12;
-	wxHelloWorldString.ToCDouble(&value);
+	MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
+		: wxFrame(nullptr, wxID_ANY, title, pos, size)
+	{
+		wxMenu* fileItem = new wxMenu;
+		fileItem->Append(Hello, "&Hello...\tCtrl-H", "Help string shown in status bar for this menu item");
+		fileItem->AppendSeparator();
+		fileItem->Append(wxID_EXIT);
 
-	std::cout << "value = " << value << std::endl;
-}
+		wxMenu* helpItem = new wxMenu;
+		helpItem->Append(wxID_ABOUT);
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
+		wxMenuBar* menuBar = new wxMenuBar;
+		menuBar->Append(fileItem, "&File");
+		menuBar->Append(helpItem, "&Help");
+		SetMenuBar(menuBar);
 
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
+		CreateStatusBar();
+		SetStatusText("Welcome to wxWidgets!");
+	}
+
+private:
+	void OnHello(wxCommandEvent& event)
+	{
+		wxMessageBox("Hello world from wxWidgets!");
+	}
+
+	void OnExit(wxCommandEvent& event)
+	{
+		Close(true);
+	}
+
+	void OnAbout(wxCommandEvent& event)
+	{
+		wxMessageBox(
+			"This is a wxWidgets' Hello world sample",
+			"About Hello World",
+			wxOK | wxICON_INFORMATION);
+	}
+
+	wxDECLARE_EVENT_TABLE();
+};
+
+wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
+	EVT_MENU(MyFrame::Hello, MyFrame::OnHello)
+	EVT_MENU(wxID_EXIT, MyFrame::OnExit)
+	EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
+wxEND_EVENT_TABLE()
+
+class App : public wxApp
+{
+public:
+	bool OnInit() override
+	{
+		MyFrame* frame = new MyFrame("CompilerCreationTool", wxPoint(50, 50), wxSize(450, 340));
+		frame->Show(true);
+		return true;
+	}
+};
+
+#ifndef _DEBUG
+	wxIMPLEMENT_APP(App);
+#else
+	wxIMPLEMENT_APP_CONSOLE(App);
+#endif

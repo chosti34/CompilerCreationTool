@@ -11,4 +11,10 @@
 
 // TODO: add headers that you want to pre-compile here
 
+// For compilers that support precompilation, includes "wx/wx.h".
+#include <wx/wxprec.h>
+#ifndef WX_PRECOMP
+	#include <wx/wx.h>
+#endif
+
 #endif //PCH_H

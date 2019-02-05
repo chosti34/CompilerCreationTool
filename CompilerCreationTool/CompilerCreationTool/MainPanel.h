@@ -1,9 +1,6 @@
 #pragma once
-#include "GrammarTextCtrlView.h"
-#include "ParserTableView.h"
-#include "ParserEnvironmentView.h"
-#include <wx/frame.h>
-#include <wx/notebook.h>
+#include "fwd.h"
+#include <wx/panel.h>
 
 class MainPanel : public wxPanel
 {
@@ -12,7 +9,7 @@ public:
 
 private:
 	wxNotebook* m_notebook;
-	GrammarTextCtrlView* m_grammarTextCtrlView;
-	ParserTableView* m_parserTableView;
-	ParserEnvironmentView* m_environmentView;
+	GrammarPanel* m_grammarPanel;
+	TablePanel* m_tablePanel;
+	EnvironmentPanel* m_environmentPanel;
 };

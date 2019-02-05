@@ -1,7 +1,8 @@
 #include "pch.h"
-#include "ParserEnvironmentView.h"
+#include "EnvironmentPanel.h"
+#include <wx/statbox.h>
 
-ParserEnvironmentView::ParserEnvironmentView(wxWindow* parent)
+EnvironmentPanel::EnvironmentPanel(wxWindow* parent)
 	: wxPanel(parent, wxID_ANY)
 	, m_box(new wxStaticBox(this, wxID_ANY, wxT("Label")))
 {

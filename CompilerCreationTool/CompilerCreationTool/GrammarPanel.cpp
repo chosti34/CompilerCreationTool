@@ -1,13 +1,12 @@
 #include "pch.h"
-#include "GrammarTextCtrlView.h"
+#include "GrammarPanel.h"
 
+#include <wx/window.h>
+#include <wx/textctrl.h>
 #include <wx/statbox.h>
 #include <wx/notebook.h>
-#include <wx/listctrl.h>
 
-#include <wx/aui/aui.h>
-
-GrammarTextCtrlView::GrammarTextCtrlView(wxWindow* parent)
+GrammarPanel::GrammarPanel(wxWindow* parent)
 	: wxPanel(parent, wxID_ANY)
 	, m_textCtrl(new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_PROCESS_TAB | wxTE_DONTWRAP))
 {

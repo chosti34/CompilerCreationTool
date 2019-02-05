@@ -1,7 +1,8 @@
 #include "pch.h"
-#include "ParserTableView.h"
+#include "TablePanel.h"
+#include <wx/listctrl.h>
 
-ParserTableView::ParserTableView(wxWindow* parent)
+TablePanel::TablePanel(wxWindow* parent)
 	: wxPanel(parent, wxID_ANY)
 	, m_table(new wxListView(this, wxID_ANY))
 {

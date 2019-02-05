@@ -24,13 +24,16 @@
     <ClInclude Include="MainPanel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GrammarTextCtrlView.h">
+    <ClInclude Include="GrammarPanel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ParserTableView.h">
+    <ClInclude Include="TablePanel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ParserEnvironmentView.h">
+    <ClInclude Include="EnvironmentPanel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fwd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -47,13 +50,13 @@
     <ClCompile Include="MainPanel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GrammarTextCtrlView.cpp">
+    <ClCompile Include="GrammarPanel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ParserTableView.cpp">
+    <ClCompile Include="TablePanel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ParserEnvironmentView.cpp">
+    <ClCompile Include="EnvironmentPanel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

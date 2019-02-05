@@ -1,6 +1,6 @@
 #pragma once
+#include "fwd.h"
 #include "MainPanel.h"
-#include <wx/string.h>
 
 class MainFrame : public wxFrame
 {
@@ -9,6 +9,7 @@ public:
 
 private:
 	wxDECLARE_EVENT_TABLE();
+
 	void OnExit(wxCommandEvent& event);
 	void OnAbout(wxCommandEvent& event);
 

@@ -25,14 +25,22 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	wxIcon saveAsIcon = wxArtProvider::GetIcon(wxART_FILE_SAVE_AS, wxART_OTHER, wxSize(24, 24));
 	wxIcon infoIcon = wxArtProvider::GetIcon(wxART_INFORMATION, wxART_OTHER, wxSize(24, 24));
 	wxIcon buildIcon = wxArtProvider::GetIcon(wxART_EXECUTABLE_FILE, wxART_OTHER, wxSize(24, 24));
+	wxIcon openIcon = wxArtProvider::GetIcon(wxART_FILE_OPEN, wxART_OTHER, wxSize(24, 24));
+	wxIcon undoIcon = wxArtProvider::GetIcon(wxART_UNDO, wxART_OTHER, wxSize(24, 24));
+	wxIcon redoIcon = wxArtProvider::GetIcon(wxART_REDO, wxART_OTHER, wxSize(24, 24));
+	wxIcon helpIcon = wxArtProvider::GetIcon(wxART_QUESTION, wxART_OTHER, wxSize(24, 24));
 
 	toolbar->AddTool(1, wxT("New"), newIcon, wxT("New Document"));
-	toolbar->AddTool(2, wxT("Save"), saveIcon, wxT("Save Document"));
-	toolbar->AddTool(3, wxT("Save As"), saveAsIcon, wxT("Save Document As"));
+	toolbar->AddTool(2, wxT("Open"), openIcon, wxT("Open Document"));
+	toolbar->AddTool(3, wxT("Save"), saveIcon, wxT("Save Document"));
+	toolbar->AddTool(4, wxT("Save As"), saveAsIcon, wxT("Save Document As"));
 	toolbar->AddSeparator();
-	toolbar->AddTool(4, wxT("Info"), infoIcon, wxT("Get Information"));
-	toolbar->AddTool(5, wxT("Build"), buildIcon, wxT("Build"));
-
+	toolbar->AddTool(5, wxT("Undo"), undoIcon, wxT("Undo Command"));
+	toolbar->AddTool(6, wxT("Redo"), redoIcon, wxT("Redo Command"));
+	toolbar->AddSeparator();
+	toolbar->AddTool(7, wxT("Build"), buildIcon, wxT("Build"));
+	toolbar->AddTool(8, wxT("Info"), infoIcon, wxT("Get Information"));
+	toolbar->AddTool(9, wxT("Help"), helpIcon, wxT("Help"));
 	toolbar->Realize();
 
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
@@ -55,8 +63,8 @@ void MainFrame::OnExit(wxCommandEvent& event)
 void MainFrame::OnAbout(wxCommandEvent& event)
 {
 	wxMessageBox(
-		"This is a wxWidgets' Hello world sample",
-		"About Hello World",
+		"Tool for building compiler.",
+		"About CompilerCreationTool",
 		wxOK | wxICON_INFORMATION
 	);
 }

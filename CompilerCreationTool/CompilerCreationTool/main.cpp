@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "MainFrame.h"
 
+#include "../Parser/ParserTable.h"
+
 namespace
 {
 const wxString TITLE = wxT("CompilerCreationTool");

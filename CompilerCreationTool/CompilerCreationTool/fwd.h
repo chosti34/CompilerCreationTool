@@ -1,11 +1,12 @@
 #pragma once
 
-class wxStaticBox;
+class wxFrame;
+class wxString;
 class wxWindow;
 class wxListView;
-class wxFrame;
 class wxNotebook;
-class GrammarPanel;
+class wxStaticBox;
+
 class TablePanel;
+class GrammarPanel;
 class EnvironmentPanel;
-class wxString;

@@ -33,7 +33,7 @@ const std::string& Grammar::GetStartingNonterminal() const
 	{
 		throw std::runtime_error("empty grammar does't have starting nonterminal");
 	}
-	return m_productions.front()->GetLeft();
+	return m_productions.front()->GetLeftPart();
 }
 
 const std::string& Grammar::GetEndingTerminal() const
@@ -44,7 +44,7 @@ const std::string& Grammar::GetEndingTerminal() const
 	}
 
 	const Production& production = *m_productions.front();
-	const Entity& entity = production.GetRight().back();
+	const Entity& entity = production.GetRightPart().back();
 
 	return entity.GetName();
 }

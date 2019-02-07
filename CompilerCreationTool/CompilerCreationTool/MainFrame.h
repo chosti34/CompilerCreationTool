@@ -12,6 +12,7 @@ private:
 
 	void OnExit(wxCommandEvent& event);
 	void OnAbout(wxCommandEvent& event);
+	void OnBuild(wxCommandEvent& event);
 
 private:
 	MainPanel* m_panel;

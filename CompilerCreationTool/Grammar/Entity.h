@@ -20,6 +20,8 @@ public:
 
 	const std::string& GetName() const;
 	Type GetType() const;
+
+	void SetAttribute(boost::optional<std::string> attribute);
 	boost::optional<std::string> GetAttribute() const;
 
 private:

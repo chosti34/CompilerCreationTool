@@ -1,8 +1,24 @@
 #include "pch.h"
 #include "MainFrame.h"
+#include "GrammarPanel.h"
+
+#include "../Grammar/Grammar.h"
+#include "../Grammar/Production.h"
+#include "../Grammar/ProductionFactory.h"
 
 #include <wx/artprov.h>
 #include <wx/statline.h>
+
+#include <string>
+#include <sstream>
+
+namespace
+{
+enum Buttons
+{
+	Build = 7
+};
+}
 
 MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	: wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, size)
@@ -39,7 +55,7 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	toolbar->AddTool(5, wxT("Undo"), undoIcon, wxT("Undo Command"));
 	toolbar->AddTool(6, wxT("Redo"), redoIcon, wxT("Redo Command"));
 	toolbar->AddSeparator();
-	toolbar->AddTool(7, wxT("Build"), buildIcon, wxT("Build"));
+	toolbar->AddTool(Buttons::Build, wxT("Build"), buildIcon, wxT("Build"));
 	toolbar->AddTool(8, wxT("Info"), infoIcon, wxT("Get Information"));
 	toolbar->AddTool(9, wxT("Help"), helpIcon, wxT("Help"));
 	toolbar->Realize();
@@ -70,7 +86,35 @@ void MainFrame::OnAbout(wxCommandEvent& event)
 	);
 }
 
+void MainFrame::OnBuild(wxCommandEvent& event)
+{
+	GrammarPanel* grammarPanel = m_panel->GetGrammarPanel();
+	const std::string grammarText = grammarPanel->GetGrammarText();
+
+	try
+	{
+		auto grammar = std::make_unique<grammarlib::Grammar>();
+		auto factory = std::make_unique<grammarlib::ProductionFactory>();
+
+		std::string line;
+		std::istringstream strm(grammarText);
+
+		while (getline(strm, line))
+		{
+			auto production = factory->CreateProduction(line);
+			grammar->AddProduction(std::move(production));
+		}
+
+		std::cout << grammar->GetProductionsCount() << std::endl;
+	}
+	catch (const std::exception& ex)
+	{
+		wxMessageBox("Can't build grammar: " + std::string(ex.what()));
+	}
+}
+
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(wxID_EXIT, MainFrame::OnExit)
 	EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
+	EVT_TOOL(Buttons::Build, MainFrame::OnBuild)
 wxEND_EVENT_TABLE()

@@ -56,3 +56,8 @@ GrammarPanel::GrammarPanel(wxWindow* parent)
 
 	SetSizerAndFit(hSizer);
 }
+
+std::string GrammarPanel::GetGrammarText() const
+{
+	return m_textCtrl->GetValue().ToStdString();
+}

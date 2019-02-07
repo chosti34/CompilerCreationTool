@@ -20,6 +20,11 @@ Entity::Type Entity::GetType() const
 	return m_type;
 }
 
+void grammarlib::Entity::SetAttribute(boost::optional<std::string> attribute)
+{
+	m_attribute = std::move(attribute);
+}
+
 boost::optional<std::string> Entity::GetAttribute() const
 {
 	return m_attribute;

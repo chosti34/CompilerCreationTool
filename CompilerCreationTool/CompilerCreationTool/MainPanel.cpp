@@ -22,3 +22,18 @@ MainPanel::MainPanel(wxFrame* parent)
 	sizer->Add(m_notebook, 1, wxEXPAND | wxALL, 5);
 	SetSizerAndFit(sizer);
 }
+
+GrammarPanel* MainPanel::GetGrammarPanel()
+{
+	return m_grammarPanel;
+}
+
+TablePanel* MainPanel::GetTablePanel()
+{
+	return m_tablePanel;
+}
+
+EnvironmentPanel* MainPanel::GetEnvironmentPanel()
+{
+	return m_environmentPanel;
+}

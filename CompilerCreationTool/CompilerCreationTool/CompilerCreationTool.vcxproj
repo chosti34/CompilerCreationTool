@@ -174,6 +174,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Grammar\Grammar.vcxproj">
+      <Project>{555eef01-0f20-4390-abf1-05e69d985b70}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Parser\Parser.vcxproj">
       <Project>{3e9a10f4-a58f-4281-88f0-ff583fb4244b}</Project>
     </ProjectReference>

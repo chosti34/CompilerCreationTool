@@ -1,9 +1,11 @@
 #include "stdafx.h"
-#include "ProductionFactory.h"
-#include "Production.h"
+#include "GrammarProductionFactory.h"
+#include "GrammarProduction.h"
+#include "GrammarSymbol.h"
 
-#include <cctype>
+#include <boost/format.hpp> //! include this before cctype
 #include <unordered_set>
+#include <cctype>
 
 using namespace grammarlib;
 
@@ -142,7 +144,7 @@ bool ReadAsAttribute(const std::string& text, size_t& offset, std::string& attri
 }
 }
 
-std::unique_ptr<Production> ProductionFactory::CreateProduction(const std::string& line)
+std::unique_ptr<IGrammarProduction> GrammarProductionFactory::CreateProduction(const std::string& line)
 {
 	size_t offset = 0;
 
@@ -157,27 +159,41 @@ std::unique_ptr<Production> ProductionFactory::CreateProduction(const std::strin
 		throw std::invalid_argument("production's right and left parts must be delimited by arrow");
 	}
 
-	std::vector<Entity> rightPart;
+	std::vector<std::unique_ptr<IGrammarSymbol>> rightPart;
 	std::string buffer;
 
 	while (true)
 	{
 		if (ReadAsEpsilon(line, offset))
 		{
-			rightPart.emplace_back(EPSILON_SYMBOL, Entity::Epsilon);
+			rightPart.push_back(std::make_unique<GrammarSymbol>(EPSILON_SYMBOL, GrammarSymbolType::Epsilon));
 		}
 		else if (ReadAsNonterminal(line, offset, buffer))
 		{
-			rightPart.emplace_back(buffer, Entity::Nonterminal);
+			rightPart.push_back(std::make_unique<GrammarSymbol>(buffer, GrammarSymbolType::Nonterminal));
 		}
 		else if (ReadAsTerminal(line, offset, buffer))
 		{
-			rightPart.emplace_back(buffer, Entity::Terminal);
+			rightPart.emplace_back(std::make_unique<GrammarSymbol>(buffer, GrammarSymbolType::Terminal));
 		}
 		else if (ReadAsAttribute(line, offset, buffer))
 		{
-			assert(!rightPart.empty());
-			rightPart.back().SetAttribute(buffer);
+			if (rightPart.empty())
+			{
+				const auto fmt = boost::format("attribute '%1%' must be attached to any symbol in production '%2%'")
+					% buffer
+					% ("<" + leftNonterminal + "> -> ...");
+				throw std::invalid_argument(fmt.str());
+			}
+			if (rightPart.back()->GetAttribute())
+			{
+				const auto fmt = boost::format("symbol '%1%' already have attribute '%2%' in production '%3%'")
+					% rightPart.back()->GetName()
+					% *rightPart.back()->GetAttribute()
+					% ("<" + leftNonterminal + "> -> ...");
+				throw std::invalid_argument(fmt.str());
+			}
+			rightPart.back()->SetAttribute(buffer);
 		}
 		else
 		{
@@ -195,7 +211,7 @@ std::unique_ptr<Production> ProductionFactory::CreateProduction(const std::strin
 
 	if (!rightPart.empty())
 	{
-		return std::make_unique<Production>(leftNonterminal, rightPart);
+		return std::make_unique<GrammarProduction>(leftNonterminal, std::move(rightPart));
 	}
-	throw std::invalid_argument("production's left part can't be empty: " + line);
+	throw std::invalid_argument("production's right part can't be empty: " + line);
 }

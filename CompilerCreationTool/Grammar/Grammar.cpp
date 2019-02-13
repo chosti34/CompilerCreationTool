@@ -4,16 +4,16 @@
 
 using namespace grammarlib;
 
-void Grammar::AddProduction(std::unique_ptr<Production> && production)
+void Grammar::AddProduction(std::unique_ptr<IGrammarProduction> && production)
 {
-	if (m_productions.empty() && !production->EndsWith(Entity::Terminal))
+	if (m_productions.empty() && !production->EndsWith(GrammarSymbolType::Terminal))
 	{
 		throw std::runtime_error("grammar's first production should end with terminal");
 	}
 	m_productions.push_back(std::move(production));
 }
 
-const Production& Grammar::GetProduction(size_t index) const
+const IGrammarProduction& Grammar::GetProduction(size_t index) const
 {
 	if (index >= m_productions.size())
 	{
@@ -27,7 +27,7 @@ size_t Grammar::GetProductionsCount() const
 	return m_productions.size();
 }
 
-const std::string& Grammar::GetStartingNonterminal() const
+const std::string& Grammar::GetStartSymbol() const
 {
 	if (m_productions.empty())
 	{
@@ -36,15 +36,16 @@ const std::string& Grammar::GetStartingNonterminal() const
 	return m_productions.front()->GetLeftPart();
 }
 
-const std::string& Grammar::GetEndingTerminal() const
+const std::string& Grammar::GetEndTerminal() const
 {
 	if (m_productions.empty())
 	{
 		throw std::runtime_error("empty grammar doesn't have ending terminal");
 	}
 
-	const Production& production = *m_productions.front();
-	const Entity& entity = production.GetRightPart().back();
+	const IGrammarProduction& production = *m_productions.front();
+	const IGrammarSymbol& symbol = production.GetBackSymbol();
 
-	return entity.GetName();
+	assert(symbol.GetType() == GrammarSymbolType::Terminal);
+	return symbol.GetName();
 }

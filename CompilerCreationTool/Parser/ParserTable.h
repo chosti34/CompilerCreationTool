@@ -1,24 +1,19 @@
 #pragma once
+#include "IParserTable.h"
+#include "../Grammar/IGrammar.h"
 #include <vector>
-#include <memory>
 
-class ParserState;
-class Grammar;
-
-class ParserTable
+class ParserTable : public IParserTable
 {
 public:
-	ParserTable() = delete;
-	ParserTable& operator =(const ParserTable& table) = delete;
+	void AddState(std::unique_ptr<IParserState> && state) override;
+	size_t GetStatesCount() const override;
 
-	void AddState(std::unique_ptr<ParserState> && state);
+	IParserState& GetState(size_t index) override;
+	const IParserState& GetState(size_t index) const override;
 
-	ParserState& GetState(size_t index);
-	const ParserState& GetState(size_t index) const;
-	size_t GetStatesCount() const;
-
-	static std::unique_ptr<ParserTable> Create(const Grammar& grammar);
+	static std::unique_ptr<IParserTable> Create(const grammarlib::IGrammar& grammar);
 
 private:
-	std::vector<std::unique_ptr<ParserState>> m_states;
+	std::vector<std::unique_ptr<IParserState>> m_states;
 };

@@ -30,6 +30,12 @@
     <ClInclude Include="ParserTable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IParserTable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IParserState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="ParserState.h">
       <Filter>Header Files</Filter>
     </ClInclude>

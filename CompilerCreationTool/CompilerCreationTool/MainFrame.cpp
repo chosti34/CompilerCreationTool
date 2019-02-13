@@ -3,8 +3,10 @@
 #include "GrammarPanel.h"
 
 #include "../Grammar/Grammar.h"
-#include "../Grammar/Production.h"
-#include "../Grammar/ProductionFactory.h"
+#include "../Grammar/GrammarProduction.h"
+#include "../Grammar/GrammarProductionFactory.h"
+#include "../Parser/ParserTable.h"
+#include "../Parser/ParserState.h"
 
 #include <wx/artprov.h>
 #include <wx/statline.h>
@@ -94,7 +96,7 @@ void MainFrame::OnBuild(wxCommandEvent& event)
 	try
 	{
 		auto grammar = std::make_unique<grammarlib::Grammar>();
-		auto factory = std::make_unique<grammarlib::ProductionFactory>();
+		auto factory = std::make_unique<grammarlib::GrammarProductionFactory>();
 
 		std::string line;
 		std::istringstream strm(grammarText);

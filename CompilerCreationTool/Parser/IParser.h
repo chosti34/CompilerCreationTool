@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-template <typename T>
+template <typename T = void>
 class IParser
 {
 public:

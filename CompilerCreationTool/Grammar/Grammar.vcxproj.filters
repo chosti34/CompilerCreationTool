@@ -24,19 +24,31 @@
     <ClInclude Include="Grammar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Entity.h">
+    <ClInclude Include="IGrammar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Production.h">
+    <ClInclude Include="GrammarProduction.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ProductionFactory.h">
+    <ClInclude Include="GrammarProductionFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Utils.h">
+    <ClInclude Include="GrammarSymbol.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Fwd.h">
+    <ClInclude Include="GrammarUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IGrammarProduction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IGrammarSymbol.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GrammarSymbolType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IGrammarProductionFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -47,16 +59,16 @@
     <ClCompile Include="Grammar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Entity.cpp">
+    <ClCompile Include="GrammarProduction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Production.cpp">
+    <ClCompile Include="GrammarProductionFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Utils.cpp">
+    <ClCompile Include="GrammarSymbol.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ProductionFactory.cpp">
+    <ClCompile Include="GrammarUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

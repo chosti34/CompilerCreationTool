@@ -1,38 +1,37 @@
 #pragma once
-#include <set>
-#include <string>
+#include "IParserState.h"
 
-class ParserState
+class ParserState : public IParserState
 {
 public:
-	static const int64_t NO_NEXT_ADDRESS;
+	bool GetShiftFlag() const override;
+	void SetShiftFlag(bool shift) override;
 
-public:
-	void SetName(const std::string& name);
-	const std::string& GetName() const;
+	bool GetPushFlag() const override;
+	void SetPushFlag(bool push) override;
 
-	void SetShiftFlag(bool shift);
-	bool GetShiftFlag() const;
+	bool GetErrorFlag() const override;
+	void SetErrorFlag(bool error) override;
 
-	void SetHasAlternativesFlag(bool hasAlternatives);
-	bool GetHasAlternativesFlag() const;
+	bool GetEndFlag() const override;
+	void SetEndFlag(bool end) override;
 
-	void SetEndFlag(bool end);
-	bool GetEndFlag() const;
+	const std::string& GetName() const override;
+	void SetName(const std::string& name) override;
 
-	void SetNextAddress(int64_t next);
-	int64_t GetNextAddress() const;
+	boost::optional<size_t> GetNextAddress() const override;
+	void SetNextAddress(boost::optional<size_t> address) override;
 
-	const std::set<std::string> & GetAcceptableTerminals() const;
-	bool AddAcceptableTerminal(const std::string& terminal);
-	bool Accepts(const std::string& terminal);
+	const std::set<std::string>& GetAcceptableTerminals() const override;
+	void SetAcceptableTerminals(const std::set<std::string>& terminals) override;
+	bool AcceptsTerminal(const std::string & terminal) const override;
 
 private:
-	std::string m_name;
 	bool m_shift;
-	bool m_hasAlternative;
-	bool m_end;
 	bool m_push;
-	int64_t m_next;
-	std::set<std::string> m_acceptableTerminals;
+	bool m_error;
+	bool m_end;
+	std::string m_name;
+	boost::optional<size_t> m_nextAddress;
+	std::set<std::string> m_acceptables;
 };

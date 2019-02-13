@@ -1,21 +1,21 @@
 #pragma once
-#include "Production.h"
-#include <memory>
+#include "IGrammar.h"
+#include <vector>
 
 namespace grammarlib
 {
-class Grammar
+class Grammar : public IGrammar
 {
 public:
-	void AddProduction(std::unique_ptr<Production> && production);
+	void AddProduction(std::unique_ptr<IGrammarProduction> && production) override;
 
-	const Production& GetProduction(size_t index) const;
-	size_t GetProductionsCount() const;
+	const IGrammarProduction& GetProduction(size_t index) const override;
+	size_t GetProductionsCount() const override;
 
-	const std::string& GetStartingNonterminal() const;
-	const std::string& GetEndingTerminal() const;
+	const std::string& GetStartSymbol() const override;
+	const std::string& GetEndTerminal() const override;
 
 private:
-	std::vector<std::unique_ptr<Production>> m_productions;
+	std::vector<std::unique_ptr<IGrammarProduction>> m_productions;
 };
 }

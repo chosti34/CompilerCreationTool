@@ -1,16 +1,9 @@
 #include "stdafx.h"
 #include "ParserState.h"
 
-const int64_t ParserState::NO_NEXT_ADDRESS = -1;
-
-void ParserState::SetName(const std::string& name)
+bool ParserState::GetShiftFlag() const
 {
-	m_name = name;
-}
-
-const std::string & ParserState::GetName() const
-{
-	return m_name;
+	return m_shift;
 }
 
 void ParserState::SetShiftFlag(bool shift)
@@ -18,24 +11,24 @@ void ParserState::SetShiftFlag(bool shift)
 	m_shift = shift;
 }
 
-bool ParserState::GetShiftFlag() const
+bool ParserState::GetPushFlag() const
 {
-	return m_shift;
+	return m_push;
 }
 
-void ParserState::SetHasAlternativesFlag(bool hasAlternatives)
+void ParserState::SetPushFlag(bool push)
 {
-	m_hasAlternative = hasAlternatives;
+	m_push = push;
 }
 
-bool ParserState::GetHasAlternativesFlag() const
+bool ParserState::GetErrorFlag() const
 {
-	return m_hasAlternative;
+	return m_error;
 }
 
-void ParserState::SetEndFlag(bool end)
+void ParserState::SetErrorFlag(bool error)
 {
-	m_end = end;
+	m_error = error;
 }
 
 bool ParserState::GetEndFlag() const
@@ -43,28 +36,42 @@ bool ParserState::GetEndFlag() const
 	return m_end;
 }
 
-void ParserState::SetNextAddress(int64_t next)
+void ParserState::SetEndFlag(bool end)
 {
-	m_next = next;
+	m_end = end;
 }
 
-int64_t ParserState::GetNextAddress() const
+const std::string& ParserState::GetName() const
 {
-	return m_next;
+	return m_name;
 }
 
-const std::set<std::string> & ParserState::GetAcceptableTerminals() const
+void ParserState::SetName(const std::string& name)
 {
-	return m_acceptableTerminals;
+	m_name = name;
 }
 
-bool ParserState::AddAcceptableTerminal(const std::string& terminal)
+boost::optional<size_t> ParserState::GetNextAddress() const
 {
-	auto inserted = m_acceptableTerminals.insert(terminal);
-	return inserted.second;
+	return m_nextAddress;
 }
 
-bool ParserState::Accepts(const std::string& terminal)
+void ParserState::SetNextAddress(boost::optional<size_t> address)
 {
-	return m_acceptableTerminals.find(terminal) != m_acceptableTerminals.end();
+	m_nextAddress = address;
+}
+
+const std::set<std::string>& ParserState::GetAcceptableTerminals() const
+{
+	return m_acceptables;
+}
+
+void ParserState::SetAcceptableTerminals(const std::set<std::string>& terminals)
+{
+	m_acceptables = terminals;
+}
+
+bool ParserState::AcceptsTerminal(const std::string& terminal) const
+{
+	return m_acceptables.find(terminal) != m_acceptables.end();
 }

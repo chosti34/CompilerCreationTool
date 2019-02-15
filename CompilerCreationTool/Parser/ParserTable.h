@@ -12,7 +12,7 @@ public:
 	IParserState& GetState(size_t index) override;
 	const IParserState& GetState(size_t index) const override;
 
-	static std::unique_ptr<IParserTable> Create(const grammarlib::IGrammar& grammar);
+	static std::unique_ptr<ParserTable> Create(const grammarlib::IGrammar& grammar);
 
 private:
 	std::vector<std::unique_ptr<IParserState>> m_states;

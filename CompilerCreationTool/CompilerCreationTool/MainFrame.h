@@ -2,6 +2,8 @@
 #include "fwd.h"
 #include "MainPanel.h"
 
+class Parser;
+
 class MainFrame : public wxFrame
 {
 public:
@@ -16,4 +18,5 @@ private:
 
 private:
 	MainPanel* m_panel;
+	std::unique_ptr<Parser> m_parser;
 };

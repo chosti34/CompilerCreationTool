@@ -39,7 +39,7 @@
     <ClInclude Include="ParserState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StateFlags.h">
+    <ClInclude Include="StateFlag.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

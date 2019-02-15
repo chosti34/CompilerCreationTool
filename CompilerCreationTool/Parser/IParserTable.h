@@ -3,7 +3,7 @@
 #include <boost/noncopyable.hpp>
 #include <memory>
 
-class IParserTable : private boost::noncopyable
+class IParserTable
 {
 public:
 	virtual ~IParserTable() = default;

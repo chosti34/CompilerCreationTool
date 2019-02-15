@@ -1,5 +1,5 @@
 #pragma once
-#include "StateFlags.h"
+#include "StateFlag.h"
 #include <boost/optional.hpp>
 #include <string>
 #include <set>
@@ -9,8 +9,8 @@ class IParserState
 public:
 	virtual ~IParserState() = default;
 
-	virtual void SetFlags(int flags) = 0;
-	virtual int GetFlags() const = 0;
+	virtual bool GetFlag(StateFlag flag) const = 0;
+	virtual void SetFlag(StateFlag flag, bool value) = 0;
 
 	virtual const std::string& GetName() const = 0;
 	virtual void SetName(const std::string& name) = 0;

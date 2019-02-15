@@ -5,8 +5,10 @@
 #include "../Grammar/Grammar.h"
 #include "../Grammar/GrammarProduction.h"
 #include "../Grammar/GrammarProductionFactory.h"
+
 #include "../Parser/ParserTable.h"
 #include "../Parser/ParserState.h"
+#include "../Parser/Parser.h"
 
 #include <wx/artprov.h>
 #include <wx/statline.h>
@@ -106,8 +108,6 @@ void MainFrame::OnBuild(wxCommandEvent& event)
 			auto production = factory->CreateProduction(line);
 			grammar->AddProduction(std::move(production));
 		}
-
-		std::cout << grammar->GetProductionsCount() << std::endl;
 	}
 	catch (const std::exception& ex)
 	{

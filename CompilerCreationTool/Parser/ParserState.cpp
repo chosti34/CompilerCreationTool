@@ -1,14 +1,33 @@
 #include "stdafx.h"
 #include "ParserState.h"
 
-int ParserState::GetFlags() const
+ParserState::ParserState()
 {
-	return m_flags;
+	m_flags = {
+		{ StateFlag::End, false },
+		{ StateFlag::Push, false },
+		{ StateFlag::Error, false },
+		{ StateFlag::Shift, false },
+		{ StateFlag::Attribute, false }
+	};
 }
 
-void ParserState::SetFlags(int flags)
+ParserState::~ParserState()
 {
-	m_flags = flags;
+}
+
+bool ParserState::GetFlag(StateFlag flag) const
+{
+	auto found = m_flags.find(flag);
+	assert(found != m_flags.end());
+	return found->second;
+}
+
+void ParserState::SetFlag(StateFlag flag, bool value)
+{
+	auto found = m_flags.find(flag);
+	assert(found != m_flags.end());
+	found->second = value;
 }
 
 const std::string& ParserState::GetName() const

@@ -18,7 +18,101 @@ std::set<std::string> GatherAcceptablesAndFollowingsIfHasEmptiness(
 	}
 	return acceptables;
 }
+
+class ParserStateFactory
+{
+public:
+	ParserStateFactory(IGrammar& grammar, IParserTable& table)
+		: m_grammar(grammar)
+		, m_table(table)
+	{
+	}
+
+	std::unique_ptr<ParserState> CreateState(const IGrammarSymbol& symbol, int row, int col)
+	{
+		switch (symbol.GetType())
+		{
+		case GrammarSymbolType::Terminal:
+			return OnTerminal(symbol, row, col);
+		case GrammarSymbolType::Nonterminal:
+			return OnNonterminal(symbol, row, col);
+		case GrammarSymbolType::Epsilon:
+			return OnEpsilon(symbol, row, col);
+		}
+		throw std::logic_error("can't create parser state because of undefined grammar symbol type");
+	}
+
+private:
+	std::unique_ptr<ParserState> OnTerminal(const IGrammarSymbol& symbol, int row, int col)
+	{
+		assert(symbol.GetType() == GrammarSymbolType::Terminal);
+		auto state = std::make_unique<ParserState>();
+
+		int flags = StateFlags::Error;
+		if (!symbol.HasAttribute())
+		{
+			flags |= StateFlags::Shift;
+		}
+		if (symbol.GetName() == m_grammar.GetEndTerminal() && !symbol.HasAttribute())
+		{
+			flags |= StateFlags::End;
+		}
+		state->SetFlags(flags);
+
+		const IGrammarProduction& production = m_grammar.GetProduction(row);
+		if (production.IsLastSymbol(col) && !symbol.HasAttribute())
+		{
+			state->SetNextAddress(boost::none);
+		}
+		else
+		{
+			state->SetNextAddress(m_table.GetStatesCount() + 1);
+		}
+
+		state->SetAcceptableTerminals({ symbol.GetName() });
+		state->SetName(symbol.GetName());
+		return state;
+	}
+
+	std::unique_ptr<ParserState> OnNonterminal(const IGrammarSymbol& symbol, int row, int col)
+	{
+		assert(symbol.GetType() == GrammarSymbolType::Nonterminal);
+		auto state = std::make_unique<ParserState>();
+
+		int flags = StateFlags::Error;
+		auto production = m_grammar.GetProduction(row);
+		if (!production.IsLastSymbol(col) || symbol.HasAttribute())
+		{
+			flags |= StateFlags::Push;
+		}
+		state->SetFlags(flags);
+
+		state->SetNextAddress(GetProductionIndex(m_grammar, symbol.GetName()));
+		state->SetAcceptableTerminals(GatherAcceptablesAndFollowingsIfHasEmptiness(m_grammar, symbol.GetName()));
+		state->SetName(symbol.GetName());
+		return state;
+	}
+
+	std::unique_ptr<ParserState> OnEpsilon(const IGrammarSymbol& symbol, int row, int col)
+	{
+		assert(symbol.GetType() == GrammarSymbolType::Epsilon);
+		auto state = std::make_unique<ParserState>();
+		int flags = StateFlags::Error;
+		state->SetFlags(flags);
+		using boost::make_optional;
+		state->SetNextAddress(symbol.HasAttribute() ? make_optional(m_table.GetStatesCount() + 1) : boost::none);
+		state->SetAcceptableTerminals(GatherBeginningSymbolsOfProduction(m_grammar, row));
+		state->SetName(symbol.GetName());
+		return state;
+	}
+
+private:
+	IGrammar& m_grammar;
+	IParserTable& m_table;
+};
 }
+
+using namespace grammarlib;
 
 void ParserTable::AddState(std::unique_ptr<IParserState> && state)
 {
@@ -51,17 +145,15 @@ size_t ParserTable::GetStatesCount() const
 std::unique_ptr<IParserTable> ParserTable::Create(const grammarlib::IGrammar& grammar)
 {
 	auto table = std::make_unique<ParserTable>();
+	auto factory = std::make_unique<ParserStateFactory>(grammar, *table);
 
 	for (size_t i = 0; i < grammar.GetProductionsCount(); ++i)
 	{
 		auto state = std::make_unique<ParserState>();
-		state->SetPushFlag(false);
-		state->SetShiftFlag(false);
-		state->SetErrorFlag(!grammarlib::ProductionHasAlternativeWithHigherIndex(grammar, i));
-		state->SetEndFlag(false);
+		state->SetFlags(!ProductionHasAlternativeWithHigherIndex(grammar, i) ? StateFlags::Error : 0);
 		state->SetName(grammar.GetProduction(i).GetLeftPart());
 		state->SetNextAddress(boost::none); // Address will be reassigned later
-		state->SetAcceptableTerminals(grammarlib::GatherBeginningSymbolsOfProduction(grammar, int(i)));
+		state->SetAcceptableTerminals(GatherBeginningSymbolsOfProduction(grammar, int(i)));
 		table->AddState(std::move(state));
 	}
 
@@ -72,29 +164,12 @@ std::unique_ptr<IParserTable> ParserTable::Create(const grammarlib::IGrammar& gr
 
 		for (size_t col = 0; col < production.GetSymbolsCount(); ++col)
 		{
-			const grammarlib::IGrammarSymbol& symbol = production.GetSymbol(col);
-			auto state = std::make_unique<ParserState>();
+			const IGrammarSymbol& symbol = production.GetSymbol(col);
 
 			switch (symbol.GetType())
 			{
 			case GrammarSymbolType::Terminal:
-				state->SetName(symbol.GetName());
-				// Always shift when terminal doesn't have attribute
-				state->SetShiftFlag(!bool(symbol.GetAttribute()));
-				state->SetPushFlag(false);
-				state->SetErrorFlag(true);
-				// If symbol with end terminal have attribute, it will not have ending state
-				state->SetEndFlag(symbol.GetName() == grammar.GetEndTerminal() && !bool(symbol.GetAttribute()));
-				// If symbol is last in production AND it doesn't have attribute, there is no next address for this state
-				if (col == production.GetSymbolsCount() - 1 && !bool(symbol.GetAttribute()))
-				{
-					state->SetNextAddress(boost::none);
-				}
-				else
-				{
-					state->SetNextAddress(table->GetStatesCount() + 1);
-				}
-				state->SetAcceptableTerminals({ symbol.GetName() });
+				table->AddState(factory->CreateState(symbol, row, col));
 				break;
 			case GrammarSymbolType::Nonterminal:
 				state->SetName(symbol.GetName());
@@ -123,12 +198,12 @@ std::unique_ptr<IParserTable> ParserTable::Create(const grammarlib::IGrammar& gr
 				break;
 			}
 
-			table->AddState(std::move(state));
+			
+
 			if (auto attribute = symbol.GetAttribute())
 			{
 				auto attributeState = std::make_unique<ParserState>();
 				attributeState->SetName(*attribute);
-				// If attribute for symbol of terminal type, then we need to shift on this state
 				attributeState->SetShiftFlag(symbol.GetType() == GrammarSymbolType::Terminal);
 				attributeState->SetPushFlag(false);
 				attributeState->SetErrorFlag(false);

@@ -15,5 +15,6 @@ public:
 
 	virtual void SetAttribute(boost::optional<std::string> attribute) = 0;
 	virtual boost::optional<std::string> GetAttribute() const = 0;
+	virtual bool HasAttribute() const = 0;
 };
 }

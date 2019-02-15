@@ -1,44 +1,14 @@
 #include "stdafx.h"
 #include "ParserState.h"
 
-bool ParserState::GetShiftFlag() const
+int ParserState::GetFlags() const
 {
-	return m_shift;
+	return m_flags;
 }
 
-void ParserState::SetShiftFlag(bool shift)
+void ParserState::SetFlags(int flags)
 {
-	m_shift = shift;
-}
-
-bool ParserState::GetPushFlag() const
-{
-	return m_push;
-}
-
-void ParserState::SetPushFlag(bool push)
-{
-	m_push = push;
-}
-
-bool ParserState::GetErrorFlag() const
-{
-	return m_error;
-}
-
-void ParserState::SetErrorFlag(bool error)
-{
-	m_error = error;
-}
-
-bool ParserState::GetEndFlag() const
-{
-	return m_end;
-}
-
-void ParserState::SetEndFlag(bool end)
-{
-	m_end = end;
+	m_flags = flags;
 }
 
 const std::string& ParserState::GetName() const
@@ -61,9 +31,13 @@ void ParserState::SetNextAddress(boost::optional<size_t> address)
 	m_nextAddress = address;
 }
 
-const std::set<std::string>& ParserState::GetAcceptableTerminals() const
+const std::set<std::string>* ParserState::GetAcceptableTerminals() const
 {
-	return m_acceptables;
+	if (bool(m_acceptables))
+	{
+		return m_acceptables.get_ptr();
+	}
+	return nullptr;
 }
 
 void ParserState::SetAcceptableTerminals(const std::set<std::string>& terminals)
@@ -73,5 +47,9 @@ void ParserState::SetAcceptableTerminals(const std::set<std::string>& terminals)
 
 bool ParserState::AcceptsTerminal(const std::string& terminal) const
 {
-	return m_acceptables.find(terminal) != m_acceptables.end();
+	if (!bool(m_acceptables))
+	{
+		throw std::runtime_error("acceptable terminals aren't defined yet");
+	}
+	return m_acceptables->find(terminal) != m_acceptables->end();
 }

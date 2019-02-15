@@ -10,6 +10,7 @@ public:
 
 	virtual const std::string& GetLeftPart() const = 0;
 	virtual bool EndsWith(GrammarSymbolType type) const = 0;
+	virtual bool IsLastSymbol(size_t index) const = 0;
 
 	virtual size_t GetSymbolsCount() const = 0;
 	virtual const IGrammarSymbol& GetSymbol(size_t index) const = 0;

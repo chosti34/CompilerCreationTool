@@ -14,6 +14,7 @@ public:
 
 	const std::string& GetLeftPart() const override;
 	bool EndsWith(GrammarSymbolType type) const override;
+	bool IsLastSymbol(size_t index) const override;
 
 	size_t GetSymbolsCount() const override;
 	const IGrammarSymbol& GetSymbol(size_t index) const override;

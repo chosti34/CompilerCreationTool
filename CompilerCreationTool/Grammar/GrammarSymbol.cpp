@@ -32,3 +32,8 @@ boost::optional<std::string> GrammarSymbol::GetAttribute() const
 {
 	return m_attribute;
 }
+
+bool grammarlib::GrammarSymbol::HasAttribute() const
+{
+	return bool(m_attribute);
+}

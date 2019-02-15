@@ -40,6 +40,12 @@ bool GrammarProduction::EndsWith(GrammarSymbolType type) const
 	return GetBackSymbol().GetType() == type;
 }
 
+bool grammarlib::GrammarProduction::IsLastSymbol(size_t index) const
+{
+	assert(!m_right.empty());
+	return index == (m_right.size() - 1);
+}
+
 const IGrammarSymbol& GrammarProduction::GetFrontSymbol() const
 {
 	assert(!m_right.empty());

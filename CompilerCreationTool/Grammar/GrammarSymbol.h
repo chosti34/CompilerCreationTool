@@ -17,6 +17,7 @@ public:
 
 	void SetAttribute(boost::optional<std::string> attribute) override;
 	boost::optional<std::string> GetAttribute() const override;
+	bool HasAttribute() const override;
 
 private:
 	GrammarSymbolType m_type;

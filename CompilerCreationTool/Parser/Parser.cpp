@@ -69,3 +69,8 @@ bool Parser::Parse(const std::string& text)
 	assert(false);
 	return false;
 }
+
+const IParserTable& Parser::GetTable() const
+{
+	return *m_table;
+}

@@ -7,6 +7,7 @@ class Parser : public IParser<bool>
 public:
 	explicit Parser(std::unique_ptr<IParserTable> && table);
 	bool Parse(const std::string& text) override;
+	const IParserTable& GetTable() const override;
 
 private:
 	std::unique_ptr<IParserTable> m_table;

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "MainFrame.h"
 #include "GrammarPanel.h"
+#include "TablePanel.h"
 
 #include "../Grammar/Grammar.h"
 #include "../Grammar/GrammarProduction.h"
@@ -10,8 +11,11 @@
 #include "../Parser/ParserState.h"
 #include "../Parser/Parser.h"
 
+#include "../Utils/string_utils.h"
+
 #include <wx/artprov.h>
 #include <wx/statline.h>
+#include <wx/listctrl.h>
 
 #include <string>
 #include <sstream>
@@ -22,6 +26,19 @@ enum Buttons
 {
 	Build = 7
 };
+
+std::string GetStateFlagsRepresentation(const IParserState& state)
+{
+	std::set<std::string> flags;
+	for (const StateFlag& flag : GetAllStateFlags())
+	{
+		if (state.GetFlag(flag))
+		{
+			flags.insert(ToString(flag));
+		}
+	}
+	return flags.empty() ? "<none>" : string_utils::JoinStrings(flags);
+}
 }
 
 MainFrame::MainFrame(const wxString& title, const wxSize& size)
@@ -74,6 +91,7 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	SetStatusText(wxT("Welcome to CompilerCreationTool!"));
 
 	Centre();
+	m_panel->GetTablePanel()->AdjustColumnWidths();
 }
 
 void MainFrame::OnExit(wxCommandEvent& event)
@@ -92,8 +110,12 @@ void MainFrame::OnAbout(wxCommandEvent& event)
 
 void MainFrame::OnBuild(wxCommandEvent& event)
 {
-	GrammarPanel* grammarPanel = m_panel->GetGrammarPanel();
-	const std::string grammarText = grammarPanel->GetGrammarText();
+	// 1. Достать текст из панели грамматики
+	// 2. Создать объекты грамматики и парсера
+	// 3. Заполнить таблицу данными парсера
+
+	GrammarPanel* panel = m_panel->GetGrammarPanel();
+	wxListView* list = m_panel->GetTablePanel()->GetListView();
 
 	try
 	{
@@ -101,12 +123,32 @@ void MainFrame::OnBuild(wxCommandEvent& event)
 		auto factory = std::make_unique<grammarlib::GrammarProductionFactory>();
 
 		std::string line;
-		std::istringstream strm(grammarText);
+		std::istringstream strm(panel->GetGrammarText());
 
 		while (getline(strm, line))
 		{
 			auto production = factory->CreateProduction(line);
 			grammar->AddProduction(std::move(production));
+		}
+
+		m_parser = std::make_unique<Parser>(ParserTable::Create(*grammar));
+		const IParserTable& table = m_parser->GetTable();
+
+		list->DeleteAllItems();
+		for (size_t i = 0; i < table.GetStatesCount(); ++i)
+		{
+			long index = list->InsertItem(list->GetItemCount(), std::to_string(i));
+			list->SetItem(index, 1, table.GetState(i).GetName());
+			list->SetItem(index, 2, table.GetState(i).GetNextAddress() ? std::to_string(*table.GetState(i).GetNextAddress()) : "<none>");
+			list->SetItem(index, 3, GetStateFlagsRepresentation(table.GetState(i)));
+			if (table.GetState(i).GetFlag(StateFlag::Attribute))
+			{
+				list->SetItem(index, 4, "<none>");
+			}
+			else
+			{
+				list->SetItem(index, 4, string_utils::JoinStrings(*table.GetState(i).GetAcceptableTerminals()));
+			}
 		}
 	}
 	catch (const std::exception& ex)
@@ -115,8 +157,15 @@ void MainFrame::OnBuild(wxCommandEvent& event)
 	}
 }
 
+void MainFrame::OnSize(wxSizeEvent & event)
+{
+	std::cout << event.GetSize().x << " " << event.GetSize().y << std::endl;
+	event.Skip();
+}
+
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(wxID_EXIT, MainFrame::OnExit)
 	EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
+	EVT_SIZE(MainFrame::OnSize)
 	EVT_TOOL(Buttons::Build, MainFrame::OnBuild)
 wxEND_EVENT_TABLE()

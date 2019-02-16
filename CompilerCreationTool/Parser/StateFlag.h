@@ -1,4 +1,6 @@
 #pragma once
+#include <string>
+#include <vector>
 
 enum class StateFlag
 {
@@ -8,3 +10,6 @@ enum class StateFlag
 	Shift,
 	Attribute
 };
+
+std::string ToString(const StateFlag& flag);
+std::vector<StateFlag> GetAllStateFlags();

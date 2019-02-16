@@ -20,9 +20,9 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{3E9A10F4-A58F-4281-88F0-FF583FB4244B}</ProjectGuid>
+    <ProjectGuid>{50B37C27-7CC6-42FE-B6AD-7EC4CB0F9439}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Parser</RootNamespace>
+    <RootNamespace>Utils</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -147,21 +147,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="IParser.h" />
-    <ClInclude Include="IParserState.h" />
-    <ClInclude Include="IParserTable.h" />
-    <ClInclude Include="Parser.h" />
-    <ClInclude Include="ParserState.h" />
-    <ClInclude Include="ParserTable.h" />
-    <ClInclude Include="StateFlag.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="string_utils.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Parser.cpp" />
-    <ClCompile Include="ParserState.cpp" />
-    <ClCompile Include="ParserTable.cpp" />
-    <ClCompile Include="StateFlag.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

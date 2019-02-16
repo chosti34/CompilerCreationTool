@@ -1,8 +1,7 @@
 #pragma once
 #include "fwd.h"
 #include "MainPanel.h"
-
-class Parser;
+#include "../Parser/IParser.h"
 
 class MainFrame : public wxFrame
 {
@@ -15,8 +14,9 @@ private:
 	void OnExit(wxCommandEvent& event);
 	void OnAbout(wxCommandEvent& event);
 	void OnBuild(wxCommandEvent& event);
+	void OnSize(wxSizeEvent& event);
 
 private:
 	MainPanel* m_panel;
-	std::unique_ptr<Parser> m_parser;
+	std::unique_ptr<IParser<bool>> m_parser;
 };

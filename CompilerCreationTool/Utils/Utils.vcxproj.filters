@@ -21,42 +21,12 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Parser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ParserTable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IParserTable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IParserState.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ParserState.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="StateFlag.h">
+    <ClInclude Include="string_utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Parser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ParserTable.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ParserState.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="StateFlag.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

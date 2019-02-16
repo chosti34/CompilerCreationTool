@@ -7,6 +7,11 @@ class TablePanel : public wxPanel
 public:
 	TablePanel(wxWindow* parent);
 
+	wxListView* GetListView();
+	const wxListView* GetListView() const;
+
+	void AdjustColumnWidths();
+
 private:
-	wxListView* m_table;
+	wxListView* m_list;
 };

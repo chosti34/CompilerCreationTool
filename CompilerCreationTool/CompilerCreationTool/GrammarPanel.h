@@ -2,13 +2,15 @@
 #include "fwd.h"
 #include <wx/panel.h>
 
+#include <wx/stc/stc.h>
+#include <wx/richtext/richtextctrl.h>
+
 class GrammarPanel : public wxPanel
 {
 public:
 	GrammarPanel(wxWindow* parent);
-
 	std::string GetGrammarText() const;
 
 private:
-	wxTextCtrl* m_textCtrl;
+	wxStyledTextCtrl* m_textCtrl;
 };

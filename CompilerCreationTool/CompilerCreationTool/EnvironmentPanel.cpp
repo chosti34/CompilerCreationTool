@@ -4,9 +4,15 @@
 
 EnvironmentPanel::EnvironmentPanel(wxWindow* parent)
 	: wxPanel(parent, wxID_ANY)
-	, m_box(new wxStaticBox(this, wxID_ANY, wxT("Label")))
+	, m_userInput(new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_LEFT | wxTE_MULTILINE))
+	, m_intermediateCodeOutput(new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_LEFT | wxTE_MULTILINE))
 {
-	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-	sizer->Add(m_box, 1, wxEXPAND | wxALL, 5);
-	SetSizerAndFit(sizer);
+	m_intermediateCodeOutput->SetEditable(false);
+
+	wxBoxSizer* hSizer = new wxBoxSizer(wxHORIZONTAL);
+
+	hSizer->Add(m_userInput, 1, wxEXPAND | wxALL, 5);
+	hSizer->Add(m_intermediateCodeOutput, 1, wxEXPAND | wxALL, 5);
+
+	SetSizerAndFit(hSizer);
 }

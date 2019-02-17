@@ -6,6 +6,7 @@ class wxWindow;
 class wxListView;
 class wxNotebook;
 class wxStaticBox;
+class wxLogWindow;
 
 class TablePanel;
 class GrammarPanel;

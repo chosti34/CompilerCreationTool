@@ -8,8 +8,12 @@
 
 GrammarPanel::GrammarPanel(wxWindow* parent)
 	: wxPanel(parent, wxID_ANY)
-	, m_textCtrl(new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_PROCESS_TAB | wxTE_DONTWRAP))
+	, m_textCtrl(new wxStyledTextCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize))
 {
+	m_textCtrl->SetMarginType(1, wxSTC_MARGIN_NUMBER);
+	m_textCtrl->SetMarginWidth(1, 25);
+	m_textCtrl->SetMarginBackground(1, wxColour(255, 0, 0));
+
 	wxBoxSizer* hSizer = new wxBoxSizer(wxHORIZONTAL);
 	hSizer->Add(m_textCtrl, 1, wxEXPAND | wxALL, 5);
 

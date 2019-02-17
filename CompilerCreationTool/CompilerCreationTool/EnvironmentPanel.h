@@ -9,4 +9,7 @@ public:
 
 private:
 	wxStaticBox* m_box;
+	wxTextCtrl* m_userInput;
+	wxTextCtrl* m_intermediateCodeOutput;
+	wxLogWindow* m_log;
 };

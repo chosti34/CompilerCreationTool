@@ -3,14 +3,18 @@
 #include <wx/panel.h>
 #include <wx/stc/stc.h>
 #include <wx/splitter.h>
+#include <string>
 
 class GrammarPanel : public wxPanel
 {
 public:
 	GrammarPanel(wxWindow* parent);
 	std::string GetGrammarText() const;
+	void Split();
 
 private:
-	wxSplitterWindow* m_splitter;
-	wxStyledTextCtrl* m_textCtrl;
+	wxStyledTextCtrl* mTextControl;
+	wxSplitterWindow* mSplitter;
+	wxPanel* mLeftTextControlPanel;
+	wxPanel* mRightNotebookPanel;
 };

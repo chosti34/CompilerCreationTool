@@ -6,31 +6,61 @@
 #include <wx/statbox.h>
 #include <wx/notebook.h>
 
+namespace
+{
+// Setting up margins and line numbers of styled text control
+void ConfigureStyledTextControl(wxStyledTextCtrl& ctrl)
+{
+	const int cLeftMarginIndex = 0;
+	const int cRightMarginIndex = 1;
+
+	ctrl.SetMarginWidth(cLeftMarginIndex, 15);
+	ctrl.SetMarginType(cLeftMarginIndex, wxSTC_MARGIN_COLOUR);
+	ctrl.SetMarginBackground(cLeftMarginIndex, wxColour(245, 245, 245));
+
+	ctrl.SetMarginWidth(cRightMarginIndex, 20);
+	ctrl.StyleSetForeground(wxSTC_STYLE_LINENUMBER, wxColour(0, 191, 255));
+	ctrl.StyleSetBackground(wxSTC_STYLE_LINENUMBER, wxColour(255, 255, 255));
+	ctrl.SetMarginType(cRightMarginIndex, wxSTC_MARGIN_NUMBER);
+
+	ctrl.SetMarginLeft(10);
+}
+}
+
 GrammarPanel::GrammarPanel(wxWindow* parent)
 	: wxPanel(parent, wxID_ANY)
-	, m_textCtrl(new wxStyledTextCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTE_DONTWRAP))
 {
-	m_textCtrl->SetMarginWidth(0, 15);
-	m_textCtrl->SetMarginType(0, wxSTC_MARGIN_COLOUR);
-	m_textCtrl->SetMarginBackground(0, wxColour(245, 245, 245));
+	mSplitter = new wxSplitterWindow(
+		this, wxID_ANY, wxDefaultPosition,
+		wxDefaultSize, wxSP_LIVE_UPDATE);
+	mSplitter->SetMinimumPaneSize(150);
 
-	m_textCtrl->SetMarginWidth(1, 20);
-	m_textCtrl->SetMarginLeft(10);
-	m_textCtrl->StyleSetForeground(wxSTC_STYLE_LINENUMBER, wxColour(0, 191, 255));
-	m_textCtrl->StyleSetBackground(wxSTC_STYLE_LINENUMBER, wxColour(255, 255, 255));
-	m_textCtrl->SetMarginType(1, wxSTC_MARGIN_NUMBER);
+	mLeftTextControlPanel = new wxPanel(mSplitter, wxID_ANY);
+	mTextControl = new wxStyledTextCtrl(
+		mLeftTextControlPanel, wxID_ANY, wxDefaultPosition,
+		wxDefaultSize, wxTE_DONTWRAP);
+	ConfigureStyledTextControl(*mTextControl);
 
-	wxBoxSizer* hSizer = new wxBoxSizer(wxHORIZONTAL);
-	hSizer->Add(m_textCtrl, 1, wxEXPAND | wxALL, 5);
+	wxBoxSizer* leftTextControlPanelSizer = new wxBoxSizer(wxVERTICAL);
+	leftTextControlPanelSizer->Add(mTextControl, 1, wxEXPAND | wxALL, 5);
+	mLeftTextControlPanel->SetSizer(leftTextControlPanelSizer);
 
-	wxNotebook* notebook = new wxNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
-	hSizer->Add(notebook, 1, wxEXPAND | wxALL, 5);
+	mRightNotebookPanel = new wxPanel(mSplitter, wxID_ANY);
+	wxNotebook* notebook = new wxNotebook(
+		mRightNotebookPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+
+	wxBoxSizer* rightNotebookPanelSizer = new wxBoxSizer(wxVERTICAL);
+	rightNotebookPanelSizer->Add(notebook, 1, wxEXPAND | wxALL, 5);
+	mRightNotebookPanel->SetSizer(rightNotebookPanelSizer);
 
 	wxPanel* terminalsPanel = new wxPanel(notebook, wxID_ANY);
 	wxBoxSizer* terminalsPanelSizer = new wxBoxSizer(wxVERTICAL);
 
-	wxListBox* terminalsList = new wxListBox(terminalsPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxArrayString(), wxBORDER_SIMPLE);
-	terminalsList->Insert(wxT("string"), 0);
+	wxListBox* terminalsList = new wxListBox(
+		terminalsPanel, wxID_ANY, wxDefaultPosition,
+		wxDefaultSize, wxArrayString(), wxBORDER_SIMPLE);
+	terminalsList->Insert(wxT("SomeTerminalExample1"), 0);
+	terminalsList->Insert(wxT("SomeTerminalExample2"), 1);
 	terminalsPanelSizer->Add(terminalsList, 1, wxEXPAND | wxALL, 5);
 
 	// Buttons for terminals list
@@ -47,7 +77,11 @@ GrammarPanel::GrammarPanel(wxWindow* parent)
 	wxPanel* actionsPanel = new wxPanel(notebook, wxID_ANY);
 	wxBoxSizer* actionsPanelSizer = new wxBoxSizer(wxVERTICAL);
 
-	wxListBox* actionsList = new wxListBox(actionsPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxArrayString(), wxBORDER_SIMPLE);
+	wxListBox* actionsList = new wxListBox(
+		actionsPanel, wxID_ANY, wxDefaultPosition,
+		wxDefaultSize, wxArrayString(), wxBORDER_SIMPLE);
+	actionsList->Insert(wxT("SomeActionExample1"), 0);
+	actionsList->Insert(wxT("SomeActionExample2"), 1);
 	actionsPanelSizer->Add(actionsList, 1, wxEXPAND | wxALL, 5);
 
 	// Buttons for actions list
@@ -64,11 +98,25 @@ GrammarPanel::GrammarPanel(wxWindow* parent)
 	notebook->AddPage(terminalsPanel, wxT("Terminals"));
 	notebook->AddPage(actionsPanel, wxT("Actions"));
 
-	SetSizerAndFit(hSizer);
+	wxBoxSizer* horizontalSizer = new wxBoxSizer(wxHORIZONTAL);
+	horizontalSizer->Add(mSplitter, 1, wxEXPAND | wxALL, 5);
+	SetSizerAndFit(horizontalSizer);
+
+	SetDoubleBuffered(true);
 }
 
 std::string GrammarPanel::GetGrammarText() const
 {
-	std::cout << m_textCtrl->GetScrollWidth() << std::endl;
-	return m_textCtrl->GetValue().ToStdString();
+	return mTextControl->GetValue().ToStdString();
+}
+
+void GrammarPanel::Split()
+{
+	const int cWidth = GetSize().GetWidth();
+	const int cSashPosition = cWidth - int(0.35 * cWidth);
+
+	mSplitter->SplitVertically(
+		mLeftTextControlPanel,
+		mRightNotebookPanel,
+		cSashPosition);
 }

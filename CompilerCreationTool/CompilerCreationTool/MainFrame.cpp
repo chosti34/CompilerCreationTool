@@ -94,6 +94,7 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	Centre();
 	m_panel->GetTablePanel()->AdjustColumnWidths();
 	m_panel->GetEnvironmentPanel()->Split();
+	m_panel->GetGrammarPanel()->Split();
 }
 
 void MainFrame::OnExit(wxCommandEvent& event)

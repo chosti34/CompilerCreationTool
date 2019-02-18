@@ -6,7 +6,8 @@
 namespace
 {
 const wxString TITLE = wxT("CompilerCreationTool");
-const wxSize WINDOW_SIZE = { 1024, 720 };
+const wxSize WINDOW_INITIAL_SIZE = { 1024, 720 };
+const wxSize WINDOW_MIN_SIZE = { 320, 320 };
 }
 
 class App : public wxApp
@@ -14,7 +15,8 @@ class App : public wxApp
 public:
 	bool OnInit() override
 	{
-		MainFrame* frame = new MainFrame(TITLE, WINDOW_SIZE);
+		MainFrame* frame = new MainFrame(TITLE, WINDOW_INITIAL_SIZE);
+		frame->SetMinSize(wxSize(320, 320));
 		frame->Show(true);
 		return true;
 	}

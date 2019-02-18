@@ -6,7 +6,7 @@
 namespace
 {
 const wxString TITLE = wxT("CompilerCreationTool");
-const wxSize WINDOW_SIZE = { 640, 480 };
+const wxSize WINDOW_SIZE = { 1024, 720 };
 }
 
 class App : public wxApp

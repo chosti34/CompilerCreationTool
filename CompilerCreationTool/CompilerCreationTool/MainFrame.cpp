@@ -2,6 +2,7 @@
 #include "MainFrame.h"
 #include "GrammarPanel.h"
 #include "TablePanel.h"
+#include "EnvironmentPanel.h"
 
 #include "../Grammar/Grammar.h"
 #include "../Grammar/GrammarProduction.h"
@@ -92,6 +93,7 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 
 	Centre();
 	m_panel->GetTablePanel()->AdjustColumnWidths();
+	m_panel->GetEnvironmentPanel()->Split();
 }
 
 void MainFrame::OnExit(wxCommandEvent& event)
@@ -157,7 +159,7 @@ void MainFrame::OnBuild(wxCommandEvent& event)
 	}
 }
 
-void MainFrame::OnSize(wxSizeEvent & event)
+void MainFrame::OnSize(wxSizeEvent& event)
 {
 	std::cout << event.GetSize().x << " " << event.GetSize().y << std::endl;
 	event.Skip();

@@ -8,11 +8,11 @@ namespace
 int GetBestColumnWidth(int index, int maxWidth)
 {
 	static const std::map<int, float> percentages = {
-		{ 0, 0.1f },
+		{ 0, 0.2f },
 		{ 1, 0.2f },
-		{ 2, 0.1f },
+		{ 2, 0.2f },
 		{ 3, 0.2f },
-		{ 4, 0.4f }
+		{ 4, 0.2f }
 	};
 
 	auto found = percentages.find(index);
@@ -49,6 +49,7 @@ const wxListView* TablePanel::GetListView() const
 
 void TablePanel::AdjustColumnWidths()
 {
+	std::cout << "asdasd\n";
 	for (int i = 0; i < m_list->GetColumnCount(); ++i)
 	{
 		m_list->SetColumnWidth(i, GetBestColumnWidth(i, m_list->GetSize().GetWidth()));

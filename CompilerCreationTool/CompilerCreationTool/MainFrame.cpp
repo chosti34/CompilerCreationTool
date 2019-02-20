@@ -25,7 +25,9 @@ namespace
 {
 enum Buttons
 {
-	Build = 7
+	Build = 7,
+	Run = 8,
+	Sync = 9
 };
 
 std::string GetStateFlagsRepresentation(const IParserState& state)
@@ -45,6 +47,7 @@ std::string GetStateFlagsRepresentation(const IParserState& state)
 MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	: wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, size)
 	, m_panel(new MainPanel(this))
+	, m_compiler(std::make_unique<Compiler>())
 {
 	wxMenu* file = new wxMenu;
 	file->Append(wxID_EXIT);
@@ -68,6 +71,7 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	wxIcon undoIcon = wxArtProvider::GetIcon(wxART_UNDO, wxART_OTHER, wxSize(24, 24));
 	wxIcon redoIcon = wxArtProvider::GetIcon(wxART_REDO, wxART_OTHER, wxSize(24, 24));
 	wxIcon helpIcon = wxArtProvider::GetIcon(wxART_QUESTION, wxART_OTHER, wxSize(24, 24));
+	wxIcon fileIcon = wxArtProvider::GetIcon(wxART_NORMAL_FILE, wxART_OTHER, wxSize(24, 24));
 
 	toolbar->AddTool(1, wxT("New"), newIcon, wxT("New Document"));
 	toolbar->AddTool(2, wxT("Open"), openIcon, wxT("Open Document"));
@@ -78,8 +82,9 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	toolbar->AddTool(6, wxT("Redo"), redoIcon, wxT("Redo Command"));
 	toolbar->AddSeparator();
 	toolbar->AddTool(Buttons::Build, wxT("Build"), buildIcon, wxT("Build"));
-	toolbar->AddTool(8, wxT("Info"), infoIcon, wxT("Get Information"));
-	toolbar->AddTool(9, wxT("Help"), helpIcon, wxT("Help"));
+	toolbar->AddTool(Buttons::Run, wxT("Run"), fileIcon, wxT("Run"));
+	toolbar->AddTool(9, wxT("Info"), infoIcon, wxT("Get Information"));
+	toolbar->AddTool(10, wxT("Help"), helpIcon, wxT("Help"));
 	toolbar->Realize();
 
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
@@ -117,52 +122,86 @@ void MainFrame::OnBuild(wxCommandEvent& event)
 	// 2. Создать объекты грамматики и парсера
 	// 3. Заполнить таблицу данными парсера
 
-	GrammarPanel* panel = m_panel->GetGrammarPanel();
-	wxListView* list = m_panel->GetTablePanel()->GetListView();
-
 	try
 	{
 		auto grammar = std::make_unique<grammarlib::Grammar>();
 		auto factory = std::make_unique<grammarlib::GrammarProductionFactory>();
 
 		std::string line;
-		std::istringstream strm(panel->GetGrammarText());
+		std::istringstream strm(m_panel->GetGrammarPanel()->GetGrammarText());
 
 		while (getline(strm, line))
 		{
-			auto production = factory->CreateProduction(line);
-			grammar->AddProduction(std::move(production));
+			grammar->AddProduction(factory->CreateProduction(line));
 		}
 
-		m_parser = std::make_unique<Parser>(ParserTable::Create(*grammar));
-		const IParserTable& table = m_parser->GetTable();
+		m_compiler->SetLanguageGrammar(std::move(grammar));
 
-		list->DeleteAllItems();
+		// Заполняем таблицу парсера
+		const IParserTable& table = m_compiler->GetParser().GetTable();
+
+		wxListView* parserListView = m_panel->GetTablePanel()->GetListView();
+		parserListView->DeleteAllItems();
+
 		for (size_t i = 0; i < table.GetStatesCount(); ++i)
 		{
-			long index = list->InsertItem(list->GetItemCount(), std::to_string(i));
-			list->SetItem(index, 1, table.GetState(i).GetName());
-			list->SetItem(index, 2, table.GetState(i).GetNextAddress() ? std::to_string(*table.GetState(i).GetNextAddress()) : "<none>");
-			list->SetItem(index, 3, GetStateFlagsRepresentation(table.GetState(i)));
+			long index = parserListView->InsertItem(parserListView->GetItemCount(), std::to_string(i));
+			parserListView->SetItem(index, 1, table.GetState(i).GetName());
+			parserListView->SetItem(index, 2, table.GetState(i).GetNextAddress() ? std::to_string(*table.GetState(i).GetNextAddress()) : "<none>");
+			parserListView->SetItem(index, 3, GetStateFlagsRepresentation(table.GetState(i)));
 			if (table.GetState(i).GetFlag(StateFlag::Attribute))
 			{
-				list->SetItem(index, 4, "<none>");
+				parserListView->SetItem(index, 4, "<none>");
 			}
 			else
 			{
-				list->SetItem(index, 4, string_utils::JoinStrings(*table.GetState(i).GetAcceptableTerminals()));
+				parserListView->SetItem(index, 4, string_utils::JoinStrings(*table.GetState(i).GetAcceptableTerminals()));
 			}
+		}
+
+		// Заполняем список терминалов
+		const ILexer& lexer = m_compiler->GetLexer();
+		wxListBox* terminalsList = m_panel->GetGrammarPanel()->GetTerminalsListBox();
+		terminalsList->Clear();
+
+		for (size_t i = 0; i < lexer.GetPatternsCount(); ++i)
+		{
+			terminalsList->Insert(lexer.GetPattern(i).GetName(), terminalsList->GetCount());
 		}
 	}
 	catch (const std::exception& ex)
 	{
-		wxMessageBox("Can't build grammar: " + std::string(ex.what()));
+		wxMessageBox(ex.what());
+	}
+}
+
+void MainFrame::OnRun(wxCommandEvent& event)
+{
+	wxStyledTextCtrl* input = m_panel->GetEnvironmentPanel()->GetInputControl();
+	wxString text = input->GetValue();
+
+	IParser<bool>& parser = m_compiler->GetParser();
+
+	try
+	{
+		const bool noErrors = parser.Parse(text.ToStdString());
+		if (noErrors)
+		{
+			wxMessageBox(wxT("Successfully parsed"));
+		}
+		else
+		{
+			wxMessageBox(wxT("Syntax error"));
+		}
+	}
+	catch (const std::exception& ex)
+	{
+		wxMessageBox(ex.what(), wxT("Error"), wxICON_ERROR);
 	}
 }
 
 void MainFrame::OnSize(wxSizeEvent& event)
 {
-	std::cout << event.GetSize().x << " " << event.GetSize().y << std::endl;
 	event.Skip();
 }
 
@@ -171,4 +210,5 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
 	EVT_SIZE(MainFrame::OnSize)
 	EVT_TOOL(Buttons::Build, MainFrame::OnBuild)
+	EVT_TOOL(Buttons::Run, MainFrame::OnRun)
 wxEND_EVENT_TABLE()

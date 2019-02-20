@@ -49,7 +49,6 @@ const wxListView* TablePanel::GetListView() const
 
 void TablePanel::AdjustColumnWidths()
 {
-	std::cout << "asdasd\n";
 	for (int i = 0; i < m_list->GetColumnCount(); ++i)
 	{
 		m_list->SetColumnWidth(i, GetBestColumnWidth(i, m_list->GetSize().GetWidth()));

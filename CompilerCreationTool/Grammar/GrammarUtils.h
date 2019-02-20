@@ -1,11 +1,15 @@
 #pragma once
 #include "IGrammar.h"
-
-#include <set>
 #include <functional>
+#include <set>
 
 namespace grammarlib
 {
+// Получить все терминалы грамматики в виде множества
+std::set<std::string> GatherAllTerminals(const IGrammar& grammar);
+// Получить все атрибуты (или действия) грамматики в виде множества
+std::set<std::string> GatherAllActions(const IGrammar& grammar);
+
 // Получить индекс первой продукции в грамматике с данным нетерминалом в левой части
 size_t GetProductionIndex(const IGrammar& grammar, const std::string& nonterminal);
 // Имеет ли правило с данным индексом альтернативы ниже по списку правил грамматики

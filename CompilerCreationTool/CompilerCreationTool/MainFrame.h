@@ -3,6 +3,8 @@
 #include "MainPanel.h"
 #include "../Parser/IParser.h"
 
+#include "Compiler.h"
+
 class MainFrame : public wxFrame
 {
 public:
@@ -13,10 +15,13 @@ private:
 
 	void OnExit(wxCommandEvent& event);
 	void OnAbout(wxCommandEvent& event);
-	void OnBuild(wxCommandEvent& event);
 	void OnSize(wxSizeEvent& event);
+
+	void OnBuild(wxCommandEvent& event);
+	void OnRun(wxCommandEvent& event);
 
 private:
 	MainPanel* m_panel;
-	std::unique_ptr<IParser<bool>> m_parser;
+	// std::unique_ptr<IParser<bool>> m_parser;
+	std::unique_ptr<Compiler> m_compiler;
 };

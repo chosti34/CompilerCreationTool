@@ -4,16 +4,16 @@
 #include <iostream>
 #include <sstream>
 
-Parser::Parser(std::unique_ptr<IParserTable> && table)
+Parser::Parser(std::unique_ptr<IParserTable> && table, ILexer& lexer)
 	: m_table(std::move(table))
+	, m_lexer(lexer)
 {
 }
 
 bool Parser::Parse(const std::string& text)
 {
-	std::istringstream strm(text);
-	std::string token;
-	strm >> token;
+	m_lexer.SetText(text);
+	Token token = m_lexer.GetNextToken();
 
 	size_t index = 0;
 	std::vector<size_t> addresses;
@@ -24,13 +24,13 @@ bool Parser::Parse(const std::string& text)
 
 		if (state.GetFlag(StateFlag::Attribute))
 		{
-			std::cout << "Action " << state.GetName() << std::endl;
+			// std::cout << "Action " << state.GetName() << std::endl;
 		}
-		else if (!state.AcceptsTerminal(token))
+		else if (!state.AcceptsTerminal(token.name))
 		{
 			if (state.GetFlag(StateFlag::Error))
 			{
-				std::cout << "Unexpected token " << token << std::endl;
+				// std::cout << "Unexpected token " << token << std::endl;
 				return false;
 			}
 			else
@@ -51,7 +51,7 @@ bool Parser::Parse(const std::string& text)
 		}
 		if (state.GetFlag(StateFlag::Shift))
 		{
-			strm >> token;
+			token = m_lexer.GetNextToken();
 		}
 
 		if (auto next = state.GetNextAddress())

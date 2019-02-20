@@ -1,10 +1,50 @@
 #include "stdafx.h"
 #include "GrammarUtils.h"
+
+#include <numeric>
 #include <cassert>
+#include <vector>
 #include <stack>
+#include <map>
 
 namespace grammarlib
 {
+std::set<std::string> GatherAllTerminals(const IGrammar& grammar)
+{
+	std::set<std::string> terminals;
+	for (size_t row = 0; row < grammar.GetProductionsCount(); ++row)
+	{
+		const IGrammarProduction& production = grammar.GetProduction(row);
+		for (size_t col = 0; col < production.GetSymbolsCount(); ++col)
+		{
+			const IGrammarSymbol& symbol = production.GetSymbol(col);
+			if (symbol.GetType() == GrammarSymbolType::Terminal)
+			{
+				terminals.insert(symbol.GetName());
+			}
+		}
+	}
+	return terminals;
+}
+
+std::set<std::string> GatherAllActions(const IGrammar& grammar)
+{
+	std::set<std::string> actions;
+	for (size_t row = 0; row < grammar.GetProductionsCount(); ++row)
+	{
+		const IGrammarProduction& production = grammar.GetProduction(row);
+		for (size_t col = 0; col < production.GetSymbolsCount(); ++col)
+		{
+			const IGrammarSymbol& symbol = production.GetSymbol(col);
+			if (symbol.HasAttribute())
+			{
+				actions.insert(*symbol.GetAttribute());
+			}
+		}
+	}
+	return actions;
+}
+
 size_t GetProductionIndex(const IGrammar& grammar, const std::string& nonterminal)
 {
 	for (size_t index = 0; index < grammar.GetProductionsCount(); ++index)

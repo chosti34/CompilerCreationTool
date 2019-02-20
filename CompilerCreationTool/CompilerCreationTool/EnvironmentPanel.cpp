@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "EnvironmentPanel.h"
-#include <wx/statbox.h>
 #include <wx/statline.h>
 
 EnvironmentPanel::EnvironmentPanel(wxWindow* parent)
@@ -50,6 +49,16 @@ EnvironmentPanel::EnvironmentPanel(wxWindow* parent)
 
 	// To avoid flickering
 	SetDoubleBuffered(true);
+}
+
+wxStyledTextCtrl* EnvironmentPanel::GetInputControl()
+{
+	return m_input;
+}
+
+wxStyledTextCtrl* EnvironmentPanel::GetOutputControl()
+{
+	return m_output;
 }
 
 void EnvironmentPanel::Split()

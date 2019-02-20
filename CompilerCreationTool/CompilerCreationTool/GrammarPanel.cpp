@@ -56,12 +56,10 @@ GrammarPanel::GrammarPanel(wxWindow* parent)
 	wxPanel* terminalsPanel = new wxPanel(notebook, wxID_ANY);
 	wxBoxSizer* terminalsPanelSizer = new wxBoxSizer(wxVERTICAL);
 
-	wxListBox* terminalsList = new wxListBox(
+	m_terminals = new wxListBox(
 		terminalsPanel, wxID_ANY, wxDefaultPosition,
 		wxDefaultSize, wxArrayString(), wxBORDER_SIMPLE);
-	terminalsList->Insert(wxT("SomeTerminalExample1"), 0);
-	terminalsList->Insert(wxT("SomeTerminalExample2"), 1);
-	terminalsPanelSizer->Add(terminalsList, 1, wxEXPAND | wxALL, 5);
+	terminalsPanelSizer->Add(m_terminals, 1, wxEXPAND | wxALL, 5);
 
 	// Buttons for terminals list
 	wxButton* addTerminalButton = new wxButton(terminalsPanel, wxID_ANY, wxT("Add"));
@@ -77,12 +75,10 @@ GrammarPanel::GrammarPanel(wxWindow* parent)
 	wxPanel* actionsPanel = new wxPanel(notebook, wxID_ANY);
 	wxBoxSizer* actionsPanelSizer = new wxBoxSizer(wxVERTICAL);
 
-	wxListBox* actionsList = new wxListBox(
+	m_actions = new wxListBox(
 		actionsPanel, wxID_ANY, wxDefaultPosition,
 		wxDefaultSize, wxArrayString(), wxBORDER_SIMPLE);
-	actionsList->Insert(wxT("SomeActionExample1"), 0);
-	actionsList->Insert(wxT("SomeActionExample2"), 1);
-	actionsPanelSizer->Add(actionsList, 1, wxEXPAND | wxALL, 5);
+	actionsPanelSizer->Add(m_actions, 1, wxEXPAND | wxALL, 5);
 
 	// Buttons for actions list
 	wxButton* addActionButton = new wxButton(actionsPanel, wxID_ANY, wxT("Add"));
@@ -119,4 +115,24 @@ void GrammarPanel::Split()
 		mLeftTextControlPanel,
 		mRightNotebookPanel,
 		cSashPosition);
+}
+
+wxListBox* GrammarPanel::GetTerminalsListBox()
+{
+	return m_terminals;
+}
+
+const wxListBox* GrammarPanel::GetTerminalsListBox() const
+{
+	return m_terminals;
+}
+
+wxListBox* GrammarPanel::GetActionsListBox()
+{
+	return m_actions;
+}
+
+const wxListBox* GrammarPanel::GetActionsListBox() const
+{
+	return m_actions;
 }

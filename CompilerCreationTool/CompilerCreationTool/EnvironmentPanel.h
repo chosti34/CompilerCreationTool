@@ -8,6 +8,10 @@ class EnvironmentPanel : public wxPanel
 {
 public:
 	EnvironmentPanel(wxWindow* parent);
+
+	wxStyledTextCtrl* GetInputControl();
+	wxStyledTextCtrl* GetOutputControl();
+
 	void Split();
 
 private:

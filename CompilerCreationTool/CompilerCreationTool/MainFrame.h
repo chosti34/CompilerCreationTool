@@ -22,6 +22,5 @@ private:
 
 private:
 	MainPanel* m_panel;
-	// std::unique_ptr<IParser<bool>> m_parser;
 	std::unique_ptr<Compiler> m_compiler;
 };

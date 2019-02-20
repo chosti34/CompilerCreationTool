@@ -4,22 +4,15 @@
 #include "TablePanel.h"
 #include "EnvironmentPanel.h"
 
-#include "../Grammar/Grammar.h"
-#include "../Grammar/GrammarProduction.h"
-#include "../Grammar/GrammarProductionFactory.h"
-
+#include "../Grammar/GrammarBuilder.h"
 #include "../Parser/ParserTable.h"
 #include "../Parser/ParserState.h"
 #include "../Parser/Parser.h"
-
 #include "../Utils/string_utils.h"
 
 #include <wx/artprov.h>
 #include <wx/statline.h>
 #include <wx/listctrl.h>
-
-#include <string>
-#include <sstream>
 
 namespace
 {
@@ -30,17 +23,66 @@ enum Buttons
 	Sync = 9
 };
 
-std::string GetStateFlagsRepresentation(const IParserState& state)
+void RefillParserTableView(wxListView& tableView, const IParserTable& parserTable)
 {
-	std::set<std::string> flags;
-	for (const StateFlag& flag : GetAllStateFlags())
-	{
-		if (state.GetFlag(flag))
+	tableView.DeleteAllItems();
+
+	const std::string noFlagsRepresentation = "<none>";
+	const auto getStateFlagsRepresentation = [&](const IParserState& state) {
+		std::set<std::string> flags;
+		for (const StateFlag& flag : GetAllStateFlags())
 		{
-			flags.insert(ToString(flag));
+			if (state.GetFlag(flag))
+			{
+				flags.insert(ToString(flag));
+			}
+		}
+		return flags.empty() ? noFlagsRepresentation : string_utils::JoinStrings(flags);
+	};
+
+	for (size_t i = 0; i < parserTable.GetStatesCount(); ++i)
+	{
+		// Insert row (and specifying first column!)
+		long rowIndex = tableView.InsertItem(
+			tableView.GetItemCount(), std::to_string(i));
+
+		// Fill columns
+		tableView.SetItem(rowIndex, 1, parserTable.GetState(i).GetName());
+		tableView.SetItem(rowIndex, 2, parserTable.GetState(i).GetNextAddress() ?
+			std::to_string(*parserTable.GetState(i).GetNextAddress()) : "<none>");
+		tableView.SetItem(rowIndex, 3, getStateFlagsRepresentation(parserTable.GetState(i)));
+
+		if (parserTable.GetState(i).GetFlag(StateFlag::Attribute))
+		{
+			tableView.SetItem(rowIndex, 4, noFlagsRepresentation);
+		}
+		else
+		{
+			tableView.SetItem(rowIndex, 4,
+				string_utils::JoinStrings(*parserTable.GetState(i).GetAcceptableTerminals()));
 		}
 	}
-	return flags.empty() ? "<none>" : string_utils::JoinStrings(flags);
+}
+
+void RefillTerminalsListbox(wxListBox& listbox, const ILexer& lexer)
+{
+	listbox.Clear();
+	for (size_t i = 0; i < lexer.GetPatternsCount(); ++i)
+	{
+		listbox.Insert(lexer.GetPattern(i).GetName(), listbox.GetCount());
+	}
+}
+
+void DoExceptionSafely(std::function<void()> && action)
+{
+	try
+	{
+		action();
+	}
+	catch (const std::exception& ex)
+	{
+		wxMessageBox(ex.what());
+	}
 }
 }
 
@@ -118,73 +160,33 @@ void MainFrame::OnAbout(wxCommandEvent& event)
 
 void MainFrame::OnBuild(wxCommandEvent& event)
 {
-	// 1. Достать текст из панели грамматики
-	// 2. Создать объекты грамматики и парсера
-	// 3. Заполнить таблицу данными парсера
+	DoExceptionSafely([this]() {
+		auto builder = std::make_unique<grammarlib::GrammarBuilder>();
 
-	try
-	{
-		auto grammar = std::make_unique<grammarlib::Grammar>();
-		auto factory = std::make_unique<grammarlib::GrammarProductionFactory>();
+		m_compiler->SetLanguageGrammar(
+			builder->CreateGrammar(m_panel->GetGrammarPanel()->GetGrammarText()));
 
-		std::string line;
-		std::istringstream strm(m_panel->GetGrammarPanel()->GetGrammarText());
+		RefillParserTableView(
+			*m_panel->GetTablePanel()->GetListView(),
+			m_compiler->GetParser().GetTable()
+		);
 
-		while (getline(strm, line))
-		{
-			grammar->AddProduction(factory->CreateProduction(line));
-		}
-
-		m_compiler->SetLanguageGrammar(std::move(grammar));
-
-		// Заполняем таблицу парсера
-		const IParserTable& table = m_compiler->GetParser().GetTable();
-
-		wxListView* parserListView = m_panel->GetTablePanel()->GetListView();
-		parserListView->DeleteAllItems();
-
-		for (size_t i = 0; i < table.GetStatesCount(); ++i)
-		{
-			long index = parserListView->InsertItem(parserListView->GetItemCount(), std::to_string(i));
-			parserListView->SetItem(index, 1, table.GetState(i).GetName());
-			parserListView->SetItem(index, 2, table.GetState(i).GetNextAddress() ? std::to_string(*table.GetState(i).GetNextAddress()) : "<none>");
-			parserListView->SetItem(index, 3, GetStateFlagsRepresentation(table.GetState(i)));
-			if (table.GetState(i).GetFlag(StateFlag::Attribute))
-			{
-				parserListView->SetItem(index, 4, "<none>");
-			}
-			else
-			{
-				parserListView->SetItem(index, 4, string_utils::JoinStrings(*table.GetState(i).GetAcceptableTerminals()));
-			}
-		}
-
-		// Заполняем список терминалов
-		const ILexer& lexer = m_compiler->GetLexer();
-		wxListBox* terminalsList = m_panel->GetGrammarPanel()->GetTerminalsListBox();
-		terminalsList->Clear();
-
-		for (size_t i = 0; i < lexer.GetPatternsCount(); ++i)
-		{
-			terminalsList->Insert(lexer.GetPattern(i).GetName(), terminalsList->GetCount());
-		}
-	}
-	catch (const std::exception& ex)
-	{
-		wxMessageBox(ex.what());
-	}
+		RefillTerminalsListbox(
+			*m_panel->GetGrammarPanel()->GetTerminalsListBox(),
+			m_compiler->GetLexer()
+		);
+	});
 }
 
 void MainFrame::OnRun(wxCommandEvent& event)
 {
-	wxStyledTextCtrl* input = m_panel->GetEnvironmentPanel()->GetInputControl();
-	wxString text = input->GetValue();
+	DoExceptionSafely([this]() {
+		wxStyledTextCtrl* input = m_panel->GetEnvironmentPanel()->GetInputControl();
+		wxString text = input->GetValue();
 
-	IParser<bool>& parser = m_compiler->GetParser();
-
-	try
-	{
+		IParser<bool>& parser = m_compiler->GetParser();
 		const bool noErrors = parser.Parse(text.ToStdString());
+
 		if (noErrors)
 		{
 			wxMessageBox(wxT("Successfully parsed"));
@@ -193,11 +195,7 @@ void MainFrame::OnRun(wxCommandEvent& event)
 		{
 			wxMessageBox(wxT("Syntax error"));
 		}
-	}
-	catch (const std::exception& ex)
-	{
-		wxMessageBox(ex.what(), wxT("Error"), wxICON_ERROR);
-	}
+	});
 }
 
 void MainFrame::OnSize(wxSizeEvent& event)

@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="GrammarBuilder.h" />
     <ClInclude Include="GrammarSymbolType.h" />
     <ClInclude Include="IGrammar.h" />
     <ClInclude Include="GrammarSymbol.h" />
@@ -161,6 +162,7 @@
     <ClInclude Include="GrammarUtils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GrammarBuilder.cpp" />
     <ClCompile Include="GrammarSymbol.cpp" />
     <ClCompile Include="Grammar.cpp" />
     <ClCompile Include="GrammarProduction.cpp" />

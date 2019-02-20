@@ -24,8 +24,6 @@ std::unique_ptr<ILexer> CreateDefaultLexer(const grammarlib::IGrammar& grammar)
 void Compiler::SetLanguageGrammar(std::unique_ptr<grammarlib::IGrammar> && grammar)
 {
 	m_grammar = std::move(grammar);
-	m_grammar->Normalize();
-
 	m_lexer = CreateDefaultLexer(*m_grammar);
 	m_parser = std::make_unique<Parser>(ParserTable::Create(*m_grammar), *m_lexer);
 }

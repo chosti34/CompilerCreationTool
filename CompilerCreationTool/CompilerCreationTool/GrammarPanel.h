@@ -20,10 +20,18 @@ public:
 	const wxListBox* GetActionsListBox() const;
 
 private:
+	void OnTerminalButtonUp(wxCommandEvent&);
+	void OnTerminalButtonDown(wxCommandEvent&);
+	void OnTerminalButtonEdit(wxCommandEvent&);
+
+private:
 	wxStyledTextCtrl* mTextControl;
 	wxSplitterWindow* mSplitter;
 	wxPanel* mLeftTextControlPanel;
 	wxPanel* mRightNotebookPanel;
-	wxListBox* m_terminals;
-	wxListBox* m_actions;
+	wxListBox* mTerminalsListbox;
+	wxListBox* mActionsListbox;
+	wxButton* mUpTerminalButton;
+	wxButton* mDownTerminalButton;
+	wxButton* mEditTerminalButton;
 };

@@ -5,6 +5,7 @@
 #include <wx/textctrl.h>
 #include <wx/statbox.h>
 #include <wx/notebook.h>
+#include <wx/artprov.h>
 
 namespace
 {
@@ -33,7 +34,7 @@ GrammarPanel::GrammarPanel(wxWindow* parent)
 	mSplitter = new wxSplitterWindow(
 		this, wxID_ANY, wxDefaultPosition,
 		wxDefaultSize, wxSP_LIVE_UPDATE);
-	mSplitter->SetMinimumPaneSize(150);
+	mSplitter->SetMinimumPaneSize(200);
 
 	mLeftTextControlPanel = new wxPanel(mSplitter, wxID_ANY);
 	mTextControl = new wxStyledTextCtrl(
@@ -56,18 +57,36 @@ GrammarPanel::GrammarPanel(wxWindow* parent)
 	wxPanel* terminalsPanel = new wxPanel(notebook, wxID_ANY);
 	wxBoxSizer* terminalsPanelSizer = new wxBoxSizer(wxVERTICAL);
 
-	m_terminals = new wxListBox(
+	mTerminalsListbox = new wxListBox(
 		terminalsPanel, wxID_ANY, wxDefaultPosition,
-		wxDefaultSize, wxArrayString(), wxBORDER_SIMPLE);
-	terminalsPanelSizer->Add(m_terminals, 1, wxEXPAND | wxALL, 5);
+		wxDefaultSize, wxArrayString());
+	terminalsPanelSizer->Add(mTerminalsListbox, 1, wxEXPAND | wxALL, 5);
 
 	// Buttons for terminals list
-	wxButton* addTerminalButton = new wxButton(terminalsPanel, wxID_ANY, wxT("Add"));
-	wxButton* deleteTerminalButton = new wxButton(terminalsPanel, wxID_ANY, wxT("Delete"));
+	mUpTerminalButton = new wxButton(terminalsPanel, wxID_ANY);
+	mDownTerminalButton = new wxButton(terminalsPanel, wxID_ANY);
+	mEditTerminalButton = new wxButton(terminalsPanel, wxID_ANY);
+
+	mUpTerminalButton->Bind(wxEVT_BUTTON, &GrammarPanel::OnTerminalButtonUp, this);
+	mDownTerminalButton->Bind(wxEVT_BUTTON, &GrammarPanel::OnTerminalButtonDown, this);
+	mEditTerminalButton->Bind(wxEVT_BUTTON, &GrammarPanel::OnTerminalButtonEdit, this);
+
+	wxBitmap upBitmap = wxArtProvider::GetBitmap(wxART_GO_UP);
+	mUpTerminalButton->SetBitmap(upBitmap);
+	mUpTerminalButton->SetMaxSize(wxSize(48, 48));
+
+	wxBitmap downBitmap = wxArtProvider::GetBitmap(wxART_GO_DOWN);
+	mDownTerminalButton->SetBitmap(downBitmap);
+	mDownTerminalButton->SetMaxSize(wxSize(48, 48));
+
+	wxBitmap printBitmap = wxArtProvider::GetBitmap(wxART_PRINT);
+	mEditTerminalButton->SetBitmap(printBitmap);
+	mEditTerminalButton->SetMaxSize(wxSize(48, 48));
 
 	wxBoxSizer* terminalButtonsSizer = new wxBoxSizer(wxHORIZONTAL);
-	terminalButtonsSizer->Add(addTerminalButton, 0);
-	terminalButtonsSizer->Add(deleteTerminalButton, 0, wxLEFT, 5);
+	terminalButtonsSizer->Add(mUpTerminalButton, 0);
+	terminalButtonsSizer->Add(mDownTerminalButton, 0, wxLEFT, 5);
+	terminalButtonsSizer->Add(mEditTerminalButton, 0, wxLEFT, 5);
 
 	terminalsPanelSizer->Add(terminalButtonsSizer, 0, wxALIGN_RIGHT | wxALL, 5);
 	terminalsPanel->SetSizer(terminalsPanelSizer);
@@ -75,10 +94,10 @@ GrammarPanel::GrammarPanel(wxWindow* parent)
 	wxPanel* actionsPanel = new wxPanel(notebook, wxID_ANY);
 	wxBoxSizer* actionsPanelSizer = new wxBoxSizer(wxVERTICAL);
 
-	m_actions = new wxListBox(
+	mActionsListbox = new wxListBox(
 		actionsPanel, wxID_ANY, wxDefaultPosition,
 		wxDefaultSize, wxArrayString(), wxBORDER_SIMPLE);
-	actionsPanelSizer->Add(m_actions, 1, wxEXPAND | wxALL, 5);
+	actionsPanelSizer->Add(mActionsListbox, 1, wxEXPAND | wxALL, 5);
 
 	// Buttons for actions list
 	wxButton* addActionButton = new wxButton(actionsPanel, wxID_ANY, wxT("Add"));
@@ -119,20 +138,42 @@ void GrammarPanel::Split()
 
 wxListBox* GrammarPanel::GetTerminalsListBox()
 {
-	return m_terminals;
+	return mTerminalsListbox;
 }
 
 const wxListBox* GrammarPanel::GetTerminalsListBox() const
 {
-	return m_terminals;
+	return mTerminalsListbox;
 }
 
 wxListBox* GrammarPanel::GetActionsListBox()
 {
-	return m_actions;
+	return mActionsListbox;
 }
 
 const wxListBox* GrammarPanel::GetActionsListBox() const
 {
-	return m_actions;
+	return mActionsListbox;
+}
+
+void GrammarPanel::OnTerminalButtonUp(wxCommandEvent&)
+{
+	int selection = mTerminalsListbox->GetSelection();
+	if (selection != wxNOT_FOUND)
+	{
+		
+	}
+	std::cout << "Terminal button up: " << selection << std::endl;
+}
+
+void GrammarPanel::OnTerminalButtonDown(wxCommandEvent&)
+{
+	int selection = mTerminalsListbox->GetSelection();
+	std::cout << "Terminal button down" << std::endl;
+}
+
+void GrammarPanel::OnTerminalButtonEdit(wxCommandEvent&)
+{
+	int selection = mTerminalsListbox->GetSelection();
+	std::cout << "Terminal button edit" << std::endl;
 }

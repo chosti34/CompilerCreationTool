@@ -6,10 +6,17 @@
 #include <wx/listbox.h>
 #include <string>
 
+#include <boost/signals2.hpp>
+
 class GrammarPanel : public wxPanel
 {
 public:
 	GrammarPanel(wxWindow* parent);
+
+	boost::signals2::scoped_connection RegisterOnTerminalPositionChangedCallback(
+		boost::signals2::signal<void(int, int)>::slot_type callback
+	);
+
 	std::string GetGrammarText() const;
 	void Split();
 
@@ -34,4 +41,6 @@ private:
 	wxButton* mUpTerminalButton;
 	wxButton* mDownTerminalButton;
 	wxButton* mEditTerminalButton;
+
+	boost::signals2::signal<void(int, int)> m_onTerminalPositionChangedSignal;
 };

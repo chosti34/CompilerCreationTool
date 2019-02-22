@@ -142,6 +142,10 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	m_panel->GetTablePanel()->AdjustColumnWidths();
 	m_panel->GetEnvironmentPanel()->Split();
 	m_panel->GetGrammarPanel()->Split();
+
+	m_connections.push_back(m_panel->GetGrammarPanel()->RegisterOnTerminalPositionChangedCallback([this](int oldPos, int newPos) {
+		m_compiler->GetLexer().SwapPatterns(oldPos, newPos);
+	}));
 }
 
 void MainFrame::OnExit(wxCommandEvent& event)

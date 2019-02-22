@@ -120,6 +120,13 @@ GrammarPanel::GrammarPanel(wxWindow* parent)
 	SetDoubleBuffered(true);
 }
 
+boost::signals2::scoped_connection GrammarPanel::RegisterOnTerminalPositionChangedCallback(
+	boost::signals2::signal<void(int, int)>::slot_type callback
+)
+{
+	return m_onTerminalPositionChangedSignal.connect(callback);
+}
+
 std::string GrammarPanel::GetGrammarText() const
 {
 	return mTextControl->GetValue().ToStdString();
@@ -158,18 +165,32 @@ const wxListBox* GrammarPanel::GetActionsListBox() const
 
 void GrammarPanel::OnTerminalButtonUp(wxCommandEvent&)
 {
-	int selection = mTerminalsListbox->GetSelection();
-	if (selection != wxNOT_FOUND)
+	const int selection = mTerminalsListbox->GetSelection();
+	const int upperIndex = selection - 1;
+
+	if (selection != wxNOT_FOUND && upperIndex >= 0)
 	{
-		
+		m_onTerminalPositionChangedSignal(selection, upperIndex);
+		const wxString swapValue = mTerminalsListbox->GetString(selection);
+		mTerminalsListbox->SetString(selection, mTerminalsListbox->GetString(upperIndex));
+		mTerminalsListbox->SetString(upperIndex, swapValue);
+		mTerminalsListbox->SetSelection(upperIndex);
 	}
-	std::cout << "Terminal button up: " << selection << std::endl;
 }
 
 void GrammarPanel::OnTerminalButtonDown(wxCommandEvent&)
 {
-	int selection = mTerminalsListbox->GetSelection();
-	std::cout << "Terminal button down" << std::endl;
+	const int selection = mTerminalsListbox->GetSelection();
+	const unsigned lowerIndex = unsigned(selection) + 1;
+
+	if (selection != wxNOT_FOUND && lowerIndex < mTerminalsListbox->GetCount())
+	{
+		m_onTerminalPositionChangedSignal(selection, lowerIndex);
+		const wxString swapValue = mTerminalsListbox->GetString(selection);
+		mTerminalsListbox->SetString(selection, mTerminalsListbox->GetString(lowerIndex));
+		mTerminalsListbox->SetString(lowerIndex, swapValue);
+		mTerminalsListbox->SetSelection(lowerIndex);
+	}
 }
 
 void GrammarPanel::OnTerminalButtonEdit(wxCommandEvent&)

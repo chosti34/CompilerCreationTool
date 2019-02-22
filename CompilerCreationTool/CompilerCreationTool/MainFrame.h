@@ -4,6 +4,7 @@
 #include "../Parser/IParser.h"
 
 #include "Compiler.h"
+#include <boost/signals2.hpp>
 
 class MainFrame : public wxFrame
 {
@@ -23,4 +24,6 @@ private:
 private:
 	MainPanel* m_panel;
 	std::unique_ptr<Compiler> m_compiler;
+
+	std::vector<boost::signals2::scoped_connection> m_connections;
 };

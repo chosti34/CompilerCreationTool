@@ -151,23 +151,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Compiler.h" />
-    <ClInclude Include="fwd.h" />
-    <ClInclude Include="GrammarPanel.h" />
+    <ClInclude Include="Language.h" />
+    <ClInclude Include="GrammarDeclarationView.h" />
+    <ClInclude Include="LanguageController.h" />
     <ClInclude Include="MainFrame.h" />
     <ClInclude Include="MainPanel.h" />
-    <ClInclude Include="EnvironmentPanel.h" />
-    <ClInclude Include="TablePanel.h" />
+    <ClInclude Include="CodeEditorView.h" />
+    <ClInclude Include="ParserStatesView.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Signal.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Compiler.cpp" />
-    <ClCompile Include="GrammarPanel.cpp" />
+    <ClCompile Include="Language.cpp" />
+    <ClCompile Include="GrammarDeclarationView.cpp" />
+    <ClCompile Include="LanguageController.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainFrame.cpp" />
     <ClCompile Include="MainPanel.cpp" />
-    <ClCompile Include="EnvironmentPanel.cpp" />
-    <ClCompile Include="TablePanel.cpp" />
+    <ClCompile Include="CodeEditorView.cpp" />
+    <ClCompile Include="ParserStatesView.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

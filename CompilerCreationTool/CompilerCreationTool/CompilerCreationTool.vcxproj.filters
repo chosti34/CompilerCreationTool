@@ -24,19 +24,22 @@
     <ClInclude Include="MainPanel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GrammarPanel.h">
+    <ClInclude Include="GrammarDeclarationView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TablePanel.h">
+    <ClInclude Include="ParserStatesView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="EnvironmentPanel.h">
+    <ClInclude Include="CodeEditorView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="fwd.h">
+    <ClInclude Include="Language.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Compiler.h">
+    <ClInclude Include="Signal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LanguageController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -53,16 +56,19 @@
     <ClCompile Include="MainPanel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GrammarPanel.cpp">
+    <ClCompile Include="GrammarDeclarationView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TablePanel.cpp">
+    <ClCompile Include="ParserStatesView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="EnvironmentPanel.cpp">
+    <ClCompile Include="CodeEditorView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Compiler.cpp">
+    <ClCompile Include="Language.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LanguageController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

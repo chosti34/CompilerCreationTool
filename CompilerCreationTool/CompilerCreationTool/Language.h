@@ -3,7 +3,7 @@
 #include "../Parser/IParser.h"
 #include "../Grammar/IGrammar.h"
 
-class Compiler
+class Language
 {
 public:
 	void SetLanguageGrammar(std::unique_ptr<grammarlib::IGrammar> && grammar);

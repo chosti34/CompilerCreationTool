@@ -1,19 +1,21 @@
 #pragma once
-#include "fwd.h"
-#include <wx/panel.h>
+#include "CodeEditorView.h"
+#include "ParserStatesView.h"
+#include "GrammarDeclarationView.h"
+#include <wx/notebook.h>
 
 class MainPanel : public wxPanel
 {
 public:
 	MainPanel(wxFrame* parent);
 
-	GrammarPanel* GetGrammarPanel();
-	TablePanel* GetTablePanel();
-	EnvironmentPanel* GetEnvironmentPanel();
+	CodeEditorView* GetCodeEditorView();
+	ParserStatesView* GetParsesStatesView();
+	GrammarDeclarationView* GetGrammarDeclarationView();
 
 private:
 	wxNotebook* m_notebook;
-	GrammarPanel* m_grammarPanel;
-	TablePanel* m_tablePanel;
-	EnvironmentPanel* m_environmentPanel;
+	CodeEditorView* m_editorView;
+	ParserStatesView* m_statesView;
+	GrammarDeclarationView* m_declarationView;
 };

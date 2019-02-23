@@ -1,8 +1,8 @@
 #include "pch.h"
-#include "EnvironmentPanel.h"
+#include "CodeEditorView.h"
 #include <wx/statline.h>
 
-EnvironmentPanel::EnvironmentPanel(wxWindow* parent)
+CodeEditorView::CodeEditorView(wxWindow* parent)
 	: wxPanel(parent, wxID_ANY)
 {
 	m_splitter = new wxSplitterWindow(
@@ -11,6 +11,7 @@ EnvironmentPanel::EnvironmentPanel(wxWindow* parent)
 		wxDefaultPosition,
 		wxDefaultSize,
 		wxSP_LIVE_UPDATE | wxSP_3D);
+	m_splitter->SetMinimumPaneSize(20);
 
 	m_left = new wxPanel(m_splitter, wxID_ANY);
 	m_right = new wxPanel(m_splitter, wxID_ANY);
@@ -51,21 +52,15 @@ EnvironmentPanel::EnvironmentPanel(wxWindow* parent)
 	SetDoubleBuffered(true);
 }
 
-wxStyledTextCtrl* EnvironmentPanel::GetInputControl()
+void CodeEditorView::SplitPanels(float sashPositionPercentage)
 {
-	return m_input;
+	assert(sashPositionPercentage <= 1.f);
+	const int cWidth = m_splitter->GetSize().GetWidth();
+
+	m_splitter->SplitVertically(m_left, m_right, sashPositionPercentage * cWidth);
 }
 
-wxStyledTextCtrl* EnvironmentPanel::GetOutputControl()
+wxString CodeEditorView::GetUserInput()
 {
-	return m_output;
+	return m_input->GetValue();
 }
-
-void EnvironmentPanel::Split()
-{
-	m_splitter->SplitVertically(m_left, m_right);
-	m_splitter->SetMinimumPaneSize(20);
-}
-
-wxBEGIN_EVENT_TABLE(EnvironmentPanel, wxPanel)
-wxEND_EVENT_TABLE()

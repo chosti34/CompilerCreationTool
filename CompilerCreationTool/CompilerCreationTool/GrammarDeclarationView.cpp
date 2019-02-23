@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "GrammarPanel.h"
+#include "GrammarDeclarationView.h"
 
 #include <wx/window.h>
 #include <wx/textctrl.h>
@@ -28,7 +28,7 @@ void ConfigureStyledTextControl(wxStyledTextCtrl& ctrl)
 }
 }
 
-GrammarPanel::GrammarPanel(wxWindow* parent)
+GrammarDeclarationView::GrammarDeclarationView(wxWindow* parent)
 	: wxPanel(parent, wxID_ANY)
 {
 	mSplitter = new wxSplitterWindow(
@@ -67,9 +67,9 @@ GrammarPanel::GrammarPanel(wxWindow* parent)
 	mDownTerminalButton = new wxButton(terminalsPanel, wxID_ANY);
 	mEditTerminalButton = new wxButton(terminalsPanel, wxID_ANY);
 
-	mUpTerminalButton->Bind(wxEVT_BUTTON, &GrammarPanel::OnTerminalButtonUp, this);
-	mDownTerminalButton->Bind(wxEVT_BUTTON, &GrammarPanel::OnTerminalButtonDown, this);
-	mEditTerminalButton->Bind(wxEVT_BUTTON, &GrammarPanel::OnTerminalButtonEdit, this);
+	mUpTerminalButton->Bind(wxEVT_BUTTON, &GrammarDeclarationView::OnTerminalButtonUp, this);
+	mDownTerminalButton->Bind(wxEVT_BUTTON, &GrammarDeclarationView::OnTerminalButtonDown, this);
+	mEditTerminalButton->Bind(wxEVT_BUTTON, &GrammarDeclarationView::OnTerminalButtonEdit, this);
 
 	wxBitmap upBitmap = wxArtProvider::GetBitmap(wxART_GO_UP);
 	mUpTerminalButton->SetBitmap(upBitmap);
@@ -120,57 +120,50 @@ GrammarPanel::GrammarPanel(wxWindow* parent)
 	SetDoubleBuffered(true);
 }
 
-boost::signals2::scoped_connection GrammarPanel::RegisterOnTerminalPositionChangedCallback(
-	boost::signals2::signal<void(int, int)>::slot_type callback
-)
+SignalScopedConnection GrammarDeclarationView::DoOnTerminalPositionChange(
+	PositionChangeSignal::slot_type slot)
 {
-	return m_onTerminalPositionChangedSignal.connect(callback);
+	return m_terminalPositionChangeSignal.connect(slot);
 }
 
-std::string GrammarPanel::GetGrammarText() const
+wxString GrammarDeclarationView::GetDeclaration() const
 {
-	return mTextControl->GetValue().ToStdString();
+	return mTextControl->GetValue();
 }
 
-void GrammarPanel::Split()
+void GrammarDeclarationView::SplitPanels(float sashPositionPercentage)
 {
+	assert(sashPositionPercentage <= 1.f);
+
 	const int cWidth = GetSize().GetWidth();
-	const int cSashPosition = cWidth - int(0.35 * cWidth);
+	const int cSashPosition = int(sashPositionPercentage * cWidth);
 
 	mSplitter->SplitVertically(
 		mLeftTextControlPanel,
 		mRightNotebookPanel,
-		cSashPosition);
+		cSashPosition
+	);
 }
 
-wxListBox* GrammarPanel::GetTerminalsListBox()
+void GrammarDeclarationView::SetLexerTerminals(const ILexer& lexer)
 {
-	return mTerminalsListbox;
+	mTerminalsListbox->Clear();
+	for (size_t i = 0; i < lexer.GetPatternsCount(); ++i)
+	{
+		const std::string& name = lexer.GetPattern(i).GetName();
+		const unsigned backInsertionIndex = mTerminalsListbox->GetCount();
+		mTerminalsListbox->Insert(name, backInsertionIndex);
+	}
 }
 
-const wxListBox* GrammarPanel::GetTerminalsListBox() const
-{
-	return mTerminalsListbox;
-}
-
-wxListBox* GrammarPanel::GetActionsListBox()
-{
-	return mActionsListbox;
-}
-
-const wxListBox* GrammarPanel::GetActionsListBox() const
-{
-	return mActionsListbox;
-}
-
-void GrammarPanel::OnTerminalButtonUp(wxCommandEvent&)
+void GrammarDeclarationView::OnTerminalButtonUp(wxCommandEvent&)
 {
 	const int selection = mTerminalsListbox->GetSelection();
 	const int upperIndex = selection - 1;
 
 	if (selection != wxNOT_FOUND && upperIndex >= 0)
 	{
-		m_onTerminalPositionChangedSignal(selection, upperIndex);
+		m_terminalPositionChangeSignal(selection, upperIndex);
 		const wxString swapValue = mTerminalsListbox->GetString(selection);
 		mTerminalsListbox->SetString(selection, mTerminalsListbox->GetString(upperIndex));
 		mTerminalsListbox->SetString(upperIndex, swapValue);
@@ -178,14 +171,14 @@ void GrammarPanel::OnTerminalButtonUp(wxCommandEvent&)
 	}
 }
 
-void GrammarPanel::OnTerminalButtonDown(wxCommandEvent&)
+void GrammarDeclarationView::OnTerminalButtonDown(wxCommandEvent&)
 {
 	const int selection = mTerminalsListbox->GetSelection();
 	const unsigned lowerIndex = unsigned(selection) + 1;
 
 	if (selection != wxNOT_FOUND && lowerIndex < mTerminalsListbox->GetCount())
 	{
-		m_onTerminalPositionChangedSignal(selection, lowerIndex);
+		m_terminalPositionChangeSignal(selection, lowerIndex);
 		const wxString swapValue = mTerminalsListbox->GetString(selection);
 		mTerminalsListbox->SetString(selection, mTerminalsListbox->GetString(lowerIndex));
 		mTerminalsListbox->SetString(lowerIndex, swapValue);
@@ -193,7 +186,7 @@ void GrammarPanel::OnTerminalButtonDown(wxCommandEvent&)
 	}
 }
 
-void GrammarPanel::OnTerminalButtonEdit(wxCommandEvent&)
+void GrammarDeclarationView::OnTerminalButtonEdit(wxCommandEvent&)
 {
 	int selection = mTerminalsListbox->GetSelection();
 	std::cout << "Terminal button edit" << std::endl;

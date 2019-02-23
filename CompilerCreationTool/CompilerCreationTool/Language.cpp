@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Compiler.h"
+#include "Language.h"
 #include "../Parser/Parser.h"
 #include "../Parser/ParserTable.h"
 #include "../Lexer/Lexer.h"
@@ -21,14 +21,14 @@ std::unique_ptr<ILexer> CreateDefaultLexer(const grammarlib::IGrammar& grammar)
 }
 }
 
-void Compiler::SetLanguageGrammar(std::unique_ptr<grammarlib::IGrammar> && grammar)
+void Language::SetLanguageGrammar(std::unique_ptr<grammarlib::IGrammar> && grammar)
 {
 	m_grammar = std::move(grammar);
 	m_lexer = CreateDefaultLexer(*m_grammar);
 	m_parser = std::make_unique<Parser>(ParserTable::Create(*m_grammar), *m_lexer);
 }
 
-const grammarlib::IGrammar& Compiler::GetLanguageGrammar() const
+const grammarlib::IGrammar& Language::GetLanguageGrammar() const
 {
 	if (!m_grammar)
 	{
@@ -37,7 +37,7 @@ const grammarlib::IGrammar& Compiler::GetLanguageGrammar() const
 	return *m_grammar;
 }
 
-IParser<bool>& Compiler::GetParser()
+IParser<bool>& Language::GetParser()
 {
 	if (!m_parser)
 	{
@@ -46,7 +46,7 @@ IParser<bool>& Compiler::GetParser()
 	return *m_parser;
 }
 
-const IParser<bool>& Compiler::GetParser() const
+const IParser<bool>& Language::GetParser() const
 {
 	if (!m_parser)
 	{
@@ -55,12 +55,12 @@ const IParser<bool>& Compiler::GetParser() const
 	return *m_parser;
 }
 
-ILexer& Compiler::GetLexer()
+ILexer& Language::GetLexer()
 {
 	return *m_lexer;
 }
 
-const ILexer& Compiler::GetLexer() const
+const ILexer& Language::GetLexer() const
 {
 	return *m_lexer;
 }

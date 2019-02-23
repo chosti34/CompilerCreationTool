@@ -1,21 +1,15 @@
 #pragma once
-#include "fwd.h"
 #include <wx/panel.h>
 #include <wx/splitter.h>
 #include <wx/stc/stc.h>
 
-class EnvironmentPanel : public wxPanel
+class CodeEditorView : public wxPanel
 {
 public:
-	EnvironmentPanel(wxWindow* parent);
+	CodeEditorView(wxWindow* parent);
 
-	wxStyledTextCtrl* GetInputControl();
-	wxStyledTextCtrl* GetOutputControl();
-
-	void Split();
-
-private:
-	wxDECLARE_EVENT_TABLE();
+	void SplitPanels(float sashPositionPercentage);
+	wxString GetUserInput();
 
 private:
 	wxSplitterWindow* m_splitter;

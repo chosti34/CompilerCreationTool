@@ -1,15 +1,24 @@
 #pragma once
-#include "fwd.h"
+#include "Signal.h"
 #include "MainPanel.h"
-#include "../Parser/IParser.h"
-
-#include "Compiler.h"
-#include <boost/signals2.hpp>
+#include <wx/frame.h>
+#include <wx/panel.h>
+#include <wx/string.h>
 
 class MainFrame : public wxFrame
 {
 public:
+	using LanguageBuildSignal = Signal<void()>;
+	using ParserRunSignal = Signal<void()>;
+
+public:
 	MainFrame(const wxString& title, const wxSize& size);
+	MainPanel* GetMainPanel();
+
+	SignalScopedConnection DoOnLanguageBuildButtonPress(
+		LanguageBuildSignal::slot_type slot);
+	SignalScopedConnection DoOnParserRunButtonPress(
+		ParserRunSignal::slot_type slot);
 
 private:
 	wxDECLARE_EVENT_TABLE();
@@ -23,7 +32,6 @@ private:
 
 private:
 	MainPanel* m_panel;
-	std::unique_ptr<Compiler> m_compiler;
-
-	std::vector<boost::signals2::scoped_connection> m_connections;
+	LanguageBuildSignal m_languageBuildButtonPressSignal;
+	ParserRunSignal m_parserRunButtonPressSignal;
 };

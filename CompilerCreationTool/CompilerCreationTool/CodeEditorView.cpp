@@ -2,6 +2,46 @@
 #include "CodeEditorView.h"
 #include <wx/statline.h>
 
+namespace
+{
+wxStyledTextCtrl* SetupLeftPanel(wxPanel& panel)
+{
+	wxStaticText* title = new wxStaticText(&panel, wxID_ANY, wxT("Source code"));
+	wxStaticLine* line = new wxStaticLine(&panel, wxID_ANY);
+
+	wxStyledTextCtrl* input = new wxStyledTextCtrl(
+		&panel, wxID_ANY, wxDefaultPosition,
+		wxDefaultSize, wxTE_DONTWRAP);
+
+	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+	sizer->Add(title, 0, wxEXPAND | wxTOP | wxLEFT | wxRIGHT, 5);
+	sizer->Add(line, 0, wxEXPAND | wxALL, 5);
+	sizer->Add(input, 1, wxEXPAND | wxALL, 5);
+	panel.SetSizer(sizer);
+
+	return input;
+}
+
+wxStyledTextCtrl* SetupRightPanel(wxPanel& panel)
+{
+	wxStaticText* rightTitle = new wxStaticText(&panel, wxID_ANY, wxT("Output"));
+	wxStaticLine* rightLine = new wxStaticLine(&panel, wxID_ANY);
+
+	wxStyledTextCtrl* output = new wxStyledTextCtrl(
+		&panel, wxID_ANY, wxDefaultPosition,
+		wxDefaultSize, wxTE_DONTWRAP);
+	output->SetEditable(false);
+
+	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+	sizer->Add(rightTitle, 0, wxEXPAND | wxTOP | wxLEFT | wxRIGHT, 5);
+	sizer->Add(rightLine, 0, wxEXPAND | wxALL, 5);
+	sizer->Add(output, 1, wxEXPAND | wxALL, 5);
+	panel.SetSizer(sizer);
+
+	return output;
+}
+}
+
 CodeEditorView::CodeEditorView(wxWindow* parent)
 	: wxPanel(parent, wxID_ANY)
 {
@@ -14,41 +54,15 @@ CodeEditorView::CodeEditorView(wxWindow* parent)
 	m_splitter->SetMinimumPaneSize(20);
 
 	m_left = new wxPanel(m_splitter, wxID_ANY);
+	m_input = SetupLeftPanel(*m_left);
+
 	m_right = new wxPanel(m_splitter, wxID_ANY);
+	m_output = SetupRightPanel(*m_right);
 
-	// Setting up left panel
-	wxStaticText* leftTitle = new wxStaticText(m_left, wxID_ANY,
-		wxT("Source code"));
-	wxStaticLine* leftLine = new wxStaticLine(m_left, wxID_ANY);
-	m_input = new wxStyledTextCtrl(m_left, wxID_ANY, wxDefaultPosition,
-		wxDefaultSize, wxTE_DONTWRAP);
+	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+	sizer->Add(m_splitter, 1, wxEXPAND);
+	SetSizerAndFit(sizer);
 
-	wxBoxSizer* leftBoxSizer = new wxBoxSizer(wxVERTICAL);
-	leftBoxSizer->Add(leftTitle, 0, wxEXPAND | wxTOP | wxLEFT | wxRIGHT, 5);
-	leftBoxSizer->Add(leftLine, 0, wxEXPAND | wxALL, 5);
-	leftBoxSizer->Add(m_input, 1, wxEXPAND | wxALL, 5);
-	m_left->SetSizer(leftBoxSizer);
-
-	// Setting up right panel
-	wxStaticText* rightTitle = new wxStaticText(m_right, wxID_ANY,
-		wxT("Output"));
-	wxStaticLine* rightLine = new wxStaticLine(m_right, wxID_ANY);
-	m_output = new wxStyledTextCtrl(m_right, wxID_ANY, wxDefaultPosition,
-		wxDefaultSize, wxTE_DONTWRAP);
-	m_output->SetEditable(false);
-
-	wxBoxSizer* rightBoxSizer = new wxBoxSizer(wxVERTICAL);
-	rightBoxSizer->Add(rightTitle, 0, wxEXPAND | wxTOP | wxLEFT | wxRIGHT, 5);
-	rightBoxSizer->Add(rightLine, 0, wxEXPAND | wxALL, 5);
-	rightBoxSizer->Add(m_output, 1, wxEXPAND | wxALL, 5);
-	m_right->SetSizer(rightBoxSizer);
-
-	// Setting up main sizer
-	wxBoxSizer* hSizer = new wxBoxSizer(wxHORIZONTAL);
-	hSizer->Add(m_splitter, 1, wxEXPAND);
-	SetSizerAndFit(hSizer);
-
-	// To avoid flickering
 	SetDoubleBuffered(true);
 }
 
@@ -56,7 +70,6 @@ void CodeEditorView::SplitPanels(float sashPositionPercentage)
 {
 	assert(sashPositionPercentage <= 1.f);
 	const int cWidth = m_splitter->GetSize().GetWidth();
-
 	m_splitter->SplitVertically(m_left, m_right, sashPositionPercentage * cWidth);
 }
 

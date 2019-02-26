@@ -11,6 +11,8 @@ private:
 	void OnLanguageBuildButtonPress();
 	void OnParserRunButtonPress();
 	void OnTerminalPositionChange(int oldPos, int newPos);
+	void OnTerminalEdit(int index, const std::string& newPattern);
+	const TokenPattern& OnGetTerminalPattern(int index);
 
 private:
 	Language* m_language;

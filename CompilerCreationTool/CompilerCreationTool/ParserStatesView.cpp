@@ -19,22 +19,6 @@ std::string GetStateFlagsRepresentation(const IParserState& state)
 	}
 	return flags.empty() ? gcNoItem : string_utils::JoinStrings(flags);
 };
-
-int GetBestColumnWidth(int index, int maxWidth)
-{
-	static const std::map<int, float> percentages = {
-		{ 0, 0.2f },
-		{ 1, 0.2f },
-		{ 2, 0.2f },
-		{ 3, 0.2f },
-		{ 4, 0.2f }
-	};
-
-	auto found = percentages.find(index);
-	assert(found != percentages.end());
-	const float width = maxWidth * found->second;
-	return int(width);
-}
 }
 
 ParserStatesView::ParserStatesView(wxWindow* parent)
@@ -79,6 +63,8 @@ void ParserStatesView::AdjustColumnWidth()
 	const int cWidth = m_list->GetSize().GetWidth();
 	for (int i = 0; i < m_list->GetColumnCount(); ++i)
 	{
-		m_list->SetColumnWidth(i, GetBestColumnWidth(i, cWidth));
+		assert(m_list->GetColumnCount() != 0);
+		const float cCoeff = 1.f / m_list->GetColumnCount();
+		m_list->SetColumnWidth(i, cCoeff * cWidth);
 	}
 }

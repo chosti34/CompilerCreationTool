@@ -17,6 +17,8 @@ LanguageController::LanguageController(Language* language, MainFrame* frame)
 		std::bind(&LanguageController::OnLanguageBuildButtonPress, this)));
 	m_connections.push_back(m_frame->DoOnParserRunButtonPress(
 		std::bind(&LanguageController::OnParserRunButtonPress, this)));
+	m_connections.push_back(m_declarationView->DoOnGetTerminalPattern(
+		std::bind(&LanguageController::OnGetTerminalPattern, this, ph::_1)));
 }
 
 void LanguageController::OnLanguageBuildButtonPress()
@@ -46,4 +48,17 @@ void LanguageController::OnParserRunButtonPress()
 void LanguageController::OnTerminalPositionChange(int oldPos, int newPos)
 {
 	m_language->GetLexer().SwapPatterns(size_t(oldPos), size_t(newPos));
+}
+
+void LanguageController::OnTerminalEdit(int index, const std::string& newOrigin)
+{
+	TokenPattern oldPattern = m_language->GetLexer().GetPattern(index);
+	m_language->GetLexer().EditPattern(size_t(index), TokenPattern(
+		oldPattern.GetName(), newOrigin, oldPattern.IsEnding()
+	));
+}
+
+const TokenPattern& LanguageController::OnGetTerminalPattern(int index)
+{
+	return m_language->GetLexer().GetPattern(size_t(index));
 }

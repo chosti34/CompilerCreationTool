@@ -11,14 +11,13 @@ private:
 	void OnLanguageBuildButtonPress();
 	void OnParserRunButtonPress();
 	void OnTerminalPositionChange(int oldPos, int newPos);
-	void OnTerminalEdit(int index, const std::string& newPattern);
-	const TokenPattern& OnGetTerminalPattern(int index);
+	void OnTerminalEdit(int index);
 
 private:
 	Language* m_language;
 	MainFrame* m_frame;
-	CodeEditorView* m_editorView;
-	ParserStatesView* m_statesView;
-	GrammarDeclarationView* m_declarationView;
+	EditorView* m_editorView;
+	StatesView* m_statesView;
+	DeclarationView* m_declarationView;
 	std::vector<SignalScopedConnection> m_connections;
 };

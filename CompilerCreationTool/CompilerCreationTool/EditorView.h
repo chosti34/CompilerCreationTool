@@ -3,10 +3,10 @@
 #include <wx/splitter.h>
 #include <wx/stc/stc.h>
 
-class CodeEditorView : public wxPanel
+class EditorView : public wxPanel
 {
 public:
-	CodeEditorView(wxWindow* parent);
+	EditorView(wxWindow* parent);
 
 	void SplitPanels(float sashPositionPercentage);
 	wxString GetUserInput();

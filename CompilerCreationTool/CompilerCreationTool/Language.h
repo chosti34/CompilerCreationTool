@@ -6,8 +6,10 @@
 class Language
 {
 public:
-	void SetLanguageGrammar(std::unique_ptr<grammarlib::IGrammar> && grammar);
-	const grammarlib::IGrammar& GetLanguageGrammar() const;
+	bool IsInitialized()const;
+
+	void SetGrammar(std::unique_ptr<grammarlib::IGrammar> && grammar);
+	const grammarlib::IGrammar& GetGrammar() const;
 
 	IParser<bool>& GetParser();
 	const IParser<bool>& GetParser() const;
@@ -16,7 +18,7 @@ public:
 	const ILexer& GetLexer() const;
 
 private:
-	std::unique_ptr<ILexer> m_lexer;
-	std::unique_ptr<IParser<bool>> m_parser;
-	std::unique_ptr<grammarlib::IGrammar> m_grammar;
+	std::unique_ptr<ILexer> m_lexer = nullptr;
+	std::unique_ptr<IParser<bool>> m_parser = nullptr;
+	std::unique_ptr<grammarlib::IGrammar> m_grammar = nullptr;
 };

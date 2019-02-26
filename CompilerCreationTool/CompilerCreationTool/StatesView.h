@@ -3,10 +3,10 @@
 #include <wx/listctrl.h>
 #include <wx/panel.h>
 
-class ParserStatesView : public wxPanel
+class StatesView : public wxPanel
 {
 public:
-	ParserStatesView(wxWindow* parent);
+	StatesView(wxWindow* parent);
 
 	void SetParserTable(const IParserTable& table);
 	void AdjustColumnWidth();

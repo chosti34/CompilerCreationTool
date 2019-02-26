@@ -152,30 +152,32 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Language.h" />
-    <ClInclude Include="GrammarDeclarationView.h" />
+    <ClInclude Include="DeclarationView.h" />
     <ClInclude Include="LanguageController.h" />
     <ClInclude Include="MainFrame.h" />
     <ClInclude Include="MainPanel.h" />
-    <ClInclude Include="CodeEditorView.h" />
-    <ClInclude Include="ParserStatesView.h" />
+    <ClInclude Include="EditorView.h" />
+    <ClInclude Include="StatesView.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Signal.h" />
+    <ClInclude Include="TerminalEditDialog.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Language.cpp" />
-    <ClCompile Include="GrammarDeclarationView.cpp" />
+    <ClCompile Include="DeclarationView.cpp" />
     <ClCompile Include="LanguageController.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainFrame.cpp" />
     <ClCompile Include="MainPanel.cpp" />
-    <ClCompile Include="CodeEditorView.cpp" />
-    <ClCompile Include="ParserStatesView.cpp" />
+    <ClCompile Include="EditorView.cpp" />
+    <ClCompile Include="StatesView.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TerminalEditDialog.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Grammar\Grammar.vcxproj">

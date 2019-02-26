@@ -12,7 +12,7 @@ public:
 	void SetText(const std::string& text) override;
 
 	void AppendPattern(const TokenPattern& pattern) override;
-	void EditPattern(size_t index, const TokenPattern& newValue) override;
+	void SetPattern(size_t index, const TokenPattern& newValue) override;
 	void SwapPatterns(size_t lhs, size_t rhs) override;
 
 	const TokenPattern& GetPattern(size_t index) const override;

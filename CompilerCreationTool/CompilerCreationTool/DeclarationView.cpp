@@ -1,5 +1,6 @@
 #include "pch.h"
-#include "GrammarDeclarationView.h"
+#include "DeclarationView.h"
+#include "TerminalEditDialog.h"
 
 #include <wx/window.h>
 #include <wx/textctrl.h>
@@ -38,7 +39,7 @@ wxButton* CreateButton(wxPanel* panel, const wxArtID& artId)
 }
 }
 
-GrammarDeclarationView::GrammarDeclarationView(wxWindow* parent)
+DeclarationView::DeclarationView(wxWindow* parent)
 	: wxPanel(parent, wxID_ANY)
 {
 	m_splitter = new wxSplitterWindow(
@@ -50,16 +51,16 @@ GrammarDeclarationView::GrammarDeclarationView(wxWindow* parent)
 	CreateRightPanelControls();
 
 	m_upTerminalButton->Bind(wxEVT_BUTTON,
-		&GrammarDeclarationView::OnTerminalButtonUp, this);
+		&DeclarationView::OnTerminalButtonUp, this);
 	m_downTerminalButton->Bind(wxEVT_BUTTON,
-		&GrammarDeclarationView::OnTerminalButtonDown, this);
+		&DeclarationView::OnTerminalButtonDown, this);
 	m_editTerminalButton->Bind(wxEVT_BUTTON,
-		&GrammarDeclarationView::OnTerminalButtonEdit, this);
+		&DeclarationView::OnTerminalButtonEdit, this);
 
 	m_terminalsListbox->Bind(wxEVT_LEFT_DOWN,
-		&GrammarDeclarationView::OnTerminalsListboxMouseDown, this);
+		&DeclarationView::OnTerminalsListboxMouseDown, this);
 	m_terminalsListbox->Bind(wxEVT_LISTBOX_DCLICK,
-		&GrammarDeclarationView::OnTerminalsListboxDoubleClick, this);
+		&DeclarationView::OnTerminalsListboxDoubleClick, this);
 
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
 	sizer->Add(m_splitter, 1, wxEXPAND | wxALL, 5);
@@ -68,7 +69,7 @@ GrammarDeclarationView::GrammarDeclarationView(wxWindow* parent)
 	SetDoubleBuffered(true);
 }
 
-void GrammarDeclarationView::CreateLeftPanelControls()
+void DeclarationView::CreateLeftPanelControls()
 {
 	m_left = new wxPanel(m_splitter, wxID_ANY);
 
@@ -82,7 +83,7 @@ void GrammarDeclarationView::CreateLeftPanelControls()
 	m_left->SetSizer(sizer);
 }
 
-void GrammarDeclarationView::CreateRightPanelControls()
+void DeclarationView::CreateRightPanelControls()
 {
 	m_right = new wxPanel(m_splitter, wxID_ANY);
 	wxNotebook* notebook = new wxNotebook(m_right, wxID_ANY);
@@ -98,7 +99,7 @@ void GrammarDeclarationView::CreateRightPanelControls()
 	notebook->AddPage(actionsPanel, wxT("Actions"));
 }
 
-wxPanel* GrammarDeclarationView::CreateTerminalsPanel(wxNotebook* notebook)
+wxPanel* DeclarationView::CreateTerminalsPanel(wxNotebook* notebook)
 {
 	wxPanel* panel = new wxPanel(notebook, wxID_ANY);
 	wxBoxSizer* pSizer = new wxBoxSizer(wxVERTICAL);
@@ -124,7 +125,7 @@ wxPanel* GrammarDeclarationView::CreateTerminalsPanel(wxNotebook* notebook)
 	return panel;
 }
 
-wxPanel* GrammarDeclarationView::CreateActionsPanel(wxNotebook* notebook)
+wxPanel* DeclarationView::CreateActionsPanel(wxNotebook* notebook)
 {
 	wxPanel* panel = new wxPanel(notebook, wxID_ANY);
 	wxBoxSizer* pSizer = new wxBoxSizer(wxVERTICAL);
@@ -150,12 +151,12 @@ wxPanel* GrammarDeclarationView::CreateActionsPanel(wxNotebook* notebook)
 	return panel;
 }
 
-wxString GrammarDeclarationView::GetDeclaration() const
+wxString DeclarationView::GetDeclaration() const
 {
 	return m_input->GetValue();
 }
 
-void GrammarDeclarationView::SplitPanels(float sashPositionPercentage)
+void DeclarationView::SplitPanels(float sashPositionPercentage)
 {
 	assert(sashPositionPercentage <= 1.f);
 	const int cWidth = GetSize().GetWidth();
@@ -168,7 +169,7 @@ void GrammarDeclarationView::SplitPanels(float sashPositionPercentage)
 	);
 }
 
-void GrammarDeclarationView::SetLexerTerminals(const ILexer& lexer)
+void DeclarationView::SetLexerTerminals(const ILexer& lexer)
 {
 	m_terminalsListbox->Clear();
 	for (size_t i = 0; i < lexer.GetPatternsCount(); ++i)
@@ -179,25 +180,19 @@ void GrammarDeclarationView::SetLexerTerminals(const ILexer& lexer)
 	}
 }
 
-SignalScopedConnection GrammarDeclarationView::DoOnTerminalPositionChange(
+SignalScopedConnection DeclarationView::DoOnTerminalPositionChange(
 	PositionChangeSignal::slot_type slot)
 {
 	return m_terminalPositionChangeSignal.connect(slot);
 }
 
-SignalScopedConnection GrammarDeclarationView::DoOnTerminalEdit(
+SignalScopedConnection DeclarationView::DoOnTerminalEdit(
 	TerminalEditSignal::slot_type slot)
 {
 	return m_terminalEditSignal.connect(slot);
 }
 
-SignalScopedConnection GrammarDeclarationView::DoOnGetTerminalPattern(
-	GetTerminalPatternSignal::slot_type slot)
-{
-	return m_getTerminalPatternSignal.connect(slot);
-}
-
-void GrammarDeclarationView::OnTerminalButtonUp(wxCommandEvent&)
+void DeclarationView::OnTerminalButtonUp(wxCommandEvent&)
 {
 	const int selection = m_terminalsListbox->GetSelection();
 	const int upperIndex = selection - 1;
@@ -212,7 +207,7 @@ void GrammarDeclarationView::OnTerminalButtonUp(wxCommandEvent&)
 	}
 }
 
-void GrammarDeclarationView::OnTerminalButtonDown(wxCommandEvent&)
+void DeclarationView::OnTerminalButtonDown(wxCommandEvent&)
 {
 	const int selection = m_terminalsListbox->GetSelection();
 	const unsigned lowerIndex = unsigned(selection) + 1;
@@ -227,73 +222,24 @@ void GrammarDeclarationView::OnTerminalButtonDown(wxCommandEvent&)
 	}
 }
 
-void GrammarDeclarationView::OnTerminalButtonEdit(wxCommandEvent&)
+void DeclarationView::OnTerminalButtonEdit(wxCommandEvent&)
 {
 	const int selection = m_terminalsListbox->GetSelection();
-	const auto pattern = m_getTerminalPatternSignal(selection);
-	assert(pattern);
-
 	if (selection != wxNOT_FOUND)
 	{
-		if (pattern->IsEnding())
-		{
-			wxMessageBox(
-				"You can't edit grammar's ending terminal.\n"
-				"Please, choose another one.",
-				"Information about terminal",
-				wxOK | wxICON_INFORMATION);
-			return;
-		}
-
-		wxTextEntryDialog dialog(
-			this,
-			wxT("Write terminal's regex..."),
-			wxT("Edit Terminal"),
-			pattern->GetOrigin()
-		);
-
-		if (dialog.ShowModal() == wxID_OK)
-		{
-			wxString newOrigin = dialog.GetValue();
-			m_terminalEditSignal(selection, newOrigin);
-		}
+		m_terminalEditSignal(selection);
 	}
 }
 
-void GrammarDeclarationView::OnTerminalsListboxDoubleClick(wxCommandEvent& event)
+void DeclarationView::OnTerminalsListboxDoubleClick(wxCommandEvent& event)
 {
 	const int selection = event.GetInt();
 	assert(m_terminalsListbox->GetSelection() == selection);
 	assert(selection != wxNOT_FOUND);
-
-	const auto pattern = m_getTerminalPatternSignal(selection);
-	assert(pattern);
-
-	if (pattern->IsEnding())
-	{
-		wxMessageBox(
-			"You can't edit grammar's ending terminal.\n"
-			"Please, choose another one.",
-			"Information about terminal",
-			wxOK | wxICON_INFORMATION);
-		return;
-	}
-
-	wxTextEntryDialog dialog(
-		this,
-		wxT("Write terminal's regex..."),
-		wxT("Edit Terminal"),
-		pattern->GetOrigin()
-	);
-
-	if (dialog.ShowModal() == wxID_OK)
-	{
-		wxString newOrigin = dialog.GetValue();
-		m_terminalEditSignal(selection, newOrigin);
-	}
+	m_terminalEditSignal(selection);
 }
 
-void GrammarDeclarationView::OnTerminalsListboxMouseDown(wxMouseEvent& event)
+void DeclarationView::OnTerminalsListboxMouseDown(wxMouseEvent& event)
 {
 	// Если выбран хотя бы один элемент, а также пользователь кликнул
 	//  по пустой части списка, тогда полностью снимаем все выделения

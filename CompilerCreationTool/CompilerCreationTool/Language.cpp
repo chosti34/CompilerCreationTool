@@ -21,46 +21,44 @@ std::unique_ptr<ILexer> CreateDefaultLexer(const grammarlib::IGrammar& grammar)
 }
 }
 
-void Language::SetLanguageGrammar(std::unique_ptr<grammarlib::IGrammar> && grammar)
+bool Language::IsInitialized() const
+{
+	return m_grammar && m_lexer && m_parser;
+}
+
+void Language::SetGrammar(std::unique_ptr<grammarlib::IGrammar> && grammar)
 {
 	m_grammar = std::move(grammar);
 	m_lexer = CreateDefaultLexer(*m_grammar);
 	m_parser = std::make_unique<Parser>(ParserTable::Create(*m_grammar), *m_lexer);
 }
 
-const grammarlib::IGrammar& Language::GetLanguageGrammar() const
+const grammarlib::IGrammar& Language::GetGrammar() const
 {
-	if (!m_grammar)
-	{
-		throw std::logic_error("trying to get grammar before setting it");
-	}
+	assert(m_grammar);
 	return *m_grammar;
 }
 
 IParser<bool>& Language::GetParser()
 {
-	if (!m_parser)
-	{
-		throw std::logic_error("trying to get parser before setting grammar");
-	}
+	assert(m_parser);
 	return *m_parser;
 }
 
 const IParser<bool>& Language::GetParser() const
 {
-	if (!m_parser)
-	{
-		throw std::logic_error("trying to get parser before setting grammar");
-	}
+	assert(m_parser);
 	return *m_parser;
 }
 
 ILexer& Language::GetLexer()
 {
+	assert(m_lexer);
 	return *m_lexer;
 }
 
 const ILexer& Language::GetLexer() const
 {
+	assert(m_lexer);
 	return *m_lexer;
 }

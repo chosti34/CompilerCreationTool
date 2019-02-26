@@ -33,6 +33,11 @@ Token Lexer::GetNextToken()
 		for (size_t i = 0; i < mPatterns.size(); ++i)
 		{
 			const TokenPattern& pattern = mPatterns[i];
+			if (pattern.IsEnding())
+			{
+				continue;
+			}
+
 			if (SearchAndSaveMatch(pattern.GetRegex(), mMatchResults, mText, mPosition))
 			{
 				const std::string value = mMatchResults.str();
@@ -72,7 +77,7 @@ void Lexer::SwapPatterns(size_t lhs, size_t rhs)
 	std::iter_swap(mPatterns.begin() + lhs, mPatterns.begin() + rhs);
 }
 
-void Lexer::EditPattern(size_t index, const TokenPattern& newValue)
+void Lexer::SetPattern(size_t index, const TokenPattern& newValue)
 {
 	if (index >= mPatterns.size())
 	{

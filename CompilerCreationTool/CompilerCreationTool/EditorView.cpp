@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "CodeEditorView.h"
+#include "EditorView.h"
 #include <wx/statline.h>
 
 namespace
@@ -42,7 +42,7 @@ wxStyledTextCtrl* SetupRightPanel(wxPanel& panel)
 }
 }
 
-CodeEditorView::CodeEditorView(wxWindow* parent)
+EditorView::EditorView(wxWindow* parent)
 	: wxPanel(parent, wxID_ANY)
 {
 	m_splitter = new wxSplitterWindow(
@@ -66,14 +66,14 @@ CodeEditorView::CodeEditorView(wxWindow* parent)
 	SetDoubleBuffered(true);
 }
 
-void CodeEditorView::SplitPanels(float sashPositionPercentage)
+void EditorView::SplitPanels(float sashPositionPercentage)
 {
 	assert(sashPositionPercentage <= 1.f);
 	const int cWidth = m_splitter->GetSize().GetWidth();
 	m_splitter->SplitVertically(m_left, m_right, sashPositionPercentage * cWidth);
 }
 
-wxString CodeEditorView::GetUserInput()
+wxString EditorView::GetUserInput()
 {
 	return m_input->GetValue();
 }

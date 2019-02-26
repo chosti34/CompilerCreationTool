@@ -7,22 +7,20 @@
 #include <wx/splitter.h>
 #include <wx/notebook.h>
 
-class GrammarDeclarationView : public wxPanel
+class DeclarationView : public wxPanel
 {
 public:
-	explicit GrammarDeclarationView(wxWindow* parent);
+	explicit DeclarationView(wxWindow* parent);
 
 	wxString GetDeclaration() const;
 	void SetLexerTerminals(const ILexer& lexer);
 	void SplitPanels(float sashPositionPercentage);
 
 	using PositionChangeSignal = Signal<void(int, int)>;
-	using TerminalEditSignal = Signal<void(int, const std::string&)>;
-	using GetTerminalPatternSignal = Signal<const TokenPattern&(int)>;
+	using TerminalEditSignal = Signal<void(int)>;
 
 	SignalScopedConnection DoOnTerminalPositionChange(PositionChangeSignal::slot_type slot);
 	SignalScopedConnection DoOnTerminalEdit(TerminalEditSignal::slot_type slot);
-	SignalScopedConnection DoOnGetTerminalPattern(GetTerminalPatternSignal::slot_type slot);
 
 private:
 	void CreateLeftPanelControls();
@@ -52,5 +50,4 @@ private:
 	wxButton* m_editActionButton;
 	PositionChangeSignal m_terminalPositionChangeSignal;
 	TerminalEditSignal m_terminalEditSignal;
-	GetTerminalPatternSignal m_getTerminalPatternSignal;
 };

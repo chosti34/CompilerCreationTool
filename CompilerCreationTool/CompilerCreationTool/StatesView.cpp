@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "ParserStatesView.h"
+#include "StatesView.h"
 #include "../Utils/string_utils.h"
 #include <map>
 
@@ -21,7 +21,7 @@ std::string GetStateFlagsRepresentation(const IParserState& state)
 };
 }
 
-ParserStatesView::ParserStatesView(wxWindow* parent)
+StatesView::StatesView(wxWindow* parent)
 	: wxPanel(parent, wxID_ANY)
 {
 	m_list = new wxListView(this, wxID_ANY);
@@ -37,7 +37,7 @@ ParserStatesView::ParserStatesView(wxWindow* parent)
 	SetSizerAndFit(sizer);
 }
 
-void ParserStatesView::SetParserTable(const IParserTable& table)
+void StatesView::SetParserTable(const IParserTable& table)
 {
 	m_list->DeleteAllItems();
 
@@ -58,7 +58,7 @@ void ParserStatesView::SetParserTable(const IParserTable& table)
 	}
 }
 
-void ParserStatesView::AdjustColumnWidth()
+void StatesView::AdjustColumnWidth()
 {
 	const int cWidth = m_list->GetSize().GetWidth();
 	for (int i = 0; i < m_list->GetColumnCount(); ++i)

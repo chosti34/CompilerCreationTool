@@ -1,6 +1,7 @@
 #pragma once
 #include "Signal.h"
 #include "../Lexer/ILexer.h"
+#include "../Parser/IParser.h"
 #include <wx/panel.h>
 #include <wx/listbox.h>
 #include <wx/stc/stc.h>
@@ -14,6 +15,7 @@ public:
 
 	wxString GetDeclaration() const;
 	void SetLexerTerminals(const ILexer& lexer);
+	void SetParserActions(const IParser<bool>& parser);
 	void SplitPanels(float sashPositionPercentage);
 
 	using PositionChangeSignal = Signal<void(int, int)>;

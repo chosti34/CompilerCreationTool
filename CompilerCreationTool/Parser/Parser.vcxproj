@@ -147,6 +147,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Action.h" />
+    <ClInclude Include="ActionType.h" />
+    <ClInclude Include="IAction.h" />
     <ClInclude Include="IParser.h" />
     <ClInclude Include="IParserState.h" />
     <ClInclude Include="IParserTable.h" />
@@ -158,6 +161,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Action.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="ParserState.cpp" />
     <ClCompile Include="ParserTable.cpp" />

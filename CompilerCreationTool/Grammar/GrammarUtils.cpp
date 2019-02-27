@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "GrammarUtils.h"
 
+#include <algorithm>
 #include <numeric>
 #include <cassert>
 #include <vector>
@@ -9,36 +10,43 @@
 
 namespace grammarlib
 {
-std::set<std::string> GatherAllTerminals(const IGrammar& grammar)
+template <typename T>
+bool HasValue(const std::vector<T> &container, const T& value)
 {
-	std::set<std::string> terminals;
+	return std::find(container.begin(), container.end(), value) != container.end();
+}
+
+std::vector<std::string> GatherAllTerminals(const IGrammar& grammar)
+{
+	std::vector<std::string> terminals;
 	for (size_t row = 0; row < grammar.GetProductionsCount(); ++row)
 	{
 		const IGrammarProduction& production = grammar.GetProduction(row);
 		for (size_t col = 0; col < production.GetSymbolsCount(); ++col)
 		{
 			const IGrammarSymbol& symbol = production.GetSymbol(col);
-			if (symbol.GetType() == GrammarSymbolType::Terminal)
+			if (symbol.GetType() == GrammarSymbolType::Terminal &&
+				!HasValue(terminals, symbol.GetName()))
 			{
-				terminals.insert(symbol.GetName());
+				terminals.push_back(symbol.GetName());
 			}
 		}
 	}
 	return terminals;
 }
 
-std::set<std::string> GatherAllActions(const IGrammar& grammar)
+std::vector<std::string> GatherAllActions(const IGrammar& grammar)
 {
-	std::set<std::string> actions;
+	std::vector<std::string> actions;
 	for (size_t row = 0; row < grammar.GetProductionsCount(); ++row)
 	{
 		const IGrammarProduction& production = grammar.GetProduction(row);
 		for (size_t col = 0; col < production.GetSymbolsCount(); ++col)
 		{
 			const IGrammarSymbol& symbol = production.GetSymbol(col);
-			if (symbol.HasAttribute())
+			if (symbol.HasAttribute() && !HasValue(actions, *symbol.GetAttribute()))
 			{
-				actions.insert(*symbol.GetAttribute());
+				actions.push_back(*symbol.GetAttribute());
 			}
 		}
 	}

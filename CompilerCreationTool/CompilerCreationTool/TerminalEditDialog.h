@@ -5,7 +5,7 @@
 class TerminalEditDialog : public wxDialog
 {
 public:
-	TerminalEditDialog(const TokenPattern& pattern);
+	TerminalEditDialog(wxWindow* parent, const TokenPattern& pattern);
 
 	wxComboBox* GetComboBox();
 	wxTextCtrl* GetTextCtrl();

@@ -1,8 +1,11 @@
 #include "stdafx.h"
 #include "Parser.h"
 #include "ParserState.h"
-#include <iostream>
+#include "Action.h"
+
 #include <sstream>
+#include <iostream>
+#include <algorithm>
 
 Parser::Parser(std::unique_ptr<IParserTable> && table, ILexer& lexer)
 	: m_table(std::move(table))
@@ -73,4 +76,35 @@ bool Parser::Parse(const std::string& text)
 const IParserTable& Parser::GetTable() const
 {
 	return *m_table;
+}
+
+void Parser::SetActionNames(const std::vector<std::string> &actions)
+{
+	for (const std::string& name : actions)
+	{
+		m_actions.emplace_back(std::make_unique<Action>(name, ActionType::None));
+	}
+}
+
+void Parser::SetAction(size_t index, std::unique_ptr<IAction> && action)
+{
+	if (index >= m_actions.size())
+	{
+		throw std::out_of_range("index must be less than actions count");
+	}
+	m_actions[index] = std::move(action);
+}
+
+const IAction& Parser::GetAction(size_t index) const
+{
+	if (index >= m_actions.size())
+	{
+		throw std::out_of_range("index must be less than actions count");
+	}
+	return *m_actions[index];
+}
+
+size_t Parser::GetActionsCount() const
+{
+	return m_actions.size();
 }

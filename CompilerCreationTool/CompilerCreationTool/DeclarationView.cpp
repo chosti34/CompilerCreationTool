@@ -180,6 +180,17 @@ void DeclarationView::SetLexerTerminals(const ILexer& lexer)
 	}
 }
 
+void DeclarationView::SetParserActions(const IParser<bool>& parser)
+{
+	m_actionsListbox->Clear();
+	for (size_t i = 0; i < parser.GetActionsCount(); ++i)
+	{
+		const std::string& name = parser.GetAction(i).GetName();
+		const unsigned backInsertionIndex = m_actionsListbox->GetCount();
+		m_actionsListbox->Insert(name, backInsertionIndex);
+	}
+}
+
 SignalScopedConnection DeclarationView::DoOnTerminalPositionChange(
 	PositionChangeSignal::slot_type slot)
 {

@@ -27,6 +27,7 @@ void LanguageController::OnLanguageBuildButtonPress()
 	auto builder = std::make_unique<grammarlib::GrammarBuilder>();
 	m_language->SetGrammar(builder->CreateGrammar(m_declarationView->GetDeclaration()));
 	m_declarationView->SetLexerTerminals(m_language->GetLexer());
+	m_declarationView->SetParserActions(m_language->GetParser());
 	m_statesView->SetParserTable(m_language->GetParser().GetTable());
 }
 
@@ -73,7 +74,7 @@ void LanguageController::OnTerminalEdit(int index)
 		return;
 	}
 
-	TerminalEditDialog* editDialog = new TerminalEditDialog(pattern);
+	TerminalEditDialog* editDialog = new TerminalEditDialog(m_frame, pattern);
 	if (editDialog->ShowModal() == wxID_OK)
 	{
 		wxComboBox* combo = editDialog->GetComboBox();

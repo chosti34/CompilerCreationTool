@@ -2,8 +2,8 @@
 #include "TerminalEditDialog.h"
 #include <wx/statline.h>
 
-TerminalEditDialog::TerminalEditDialog(const TokenPattern& pattern)
-	: wxDialog(nullptr, wxID_ANY, wxT("Edit Terminal"),
+TerminalEditDialog::TerminalEditDialog(wxWindow* parent, const TokenPattern& pattern)
+	: wxDialog(parent, wxID_ANY, wxT("Edit Terminal"),
 		wxDefaultPosition, wxSize(250, 230), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 	, m_pattern(pattern)
 {
@@ -66,6 +66,8 @@ TerminalEditDialog::TerminalEditDialog(const TokenPattern& pattern)
 
 	sizer->Add(hSizer, 0, wxALIGN_RIGHT | wxALL, 5);
 	panel->SetSizerAndFit(sizer);
+
+	CentreOnParent();
 }
 
 wxComboBox* TerminalEditDialog::GetComboBox()

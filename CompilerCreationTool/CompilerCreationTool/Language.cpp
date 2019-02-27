@@ -28,9 +28,19 @@ bool Language::IsInitialized() const
 
 void Language::SetGrammar(std::unique_ptr<grammarlib::IGrammar> && grammar)
 {
-	m_grammar = std::move(grammar);
-	m_lexer = CreateDefaultLexer(*m_grammar);
-	m_parser = std::make_unique<Parser>(ParserTable::Create(*m_grammar), *m_lexer);
+	if (grammar != nullptr)
+	{
+		m_grammar = std::move(grammar);
+		m_lexer = CreateDefaultLexer(*m_grammar);
+		m_parser = std::make_unique<Parser>(ParserTable::Create(*m_grammar), *m_lexer);
+		m_parser->SetActionNames(GatherAllActions(*m_grammar));
+	}
+	else
+	{
+		m_grammar = nullptr;
+		m_lexer = nullptr;
+		m_parser = nullptr;
+	}
 }
 
 const grammarlib::IGrammar& Language::GetGrammar() const

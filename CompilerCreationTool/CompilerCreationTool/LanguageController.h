@@ -10,8 +10,12 @@ public:
 private:
 	void OnLanguageBuildButtonPress();
 	void OnParserRunButtonPress();
+
 	void OnTerminalPositionChange(int oldPos, int newPos);
 	void OnTerminalEdit(int index);
+
+	void OnActionPositionChange(int oldPos, int newPos);
+	void OnActionEdit(int index);
 
 private:
 	Language* m_language;

@@ -62,6 +62,13 @@ DeclarationView::DeclarationView(wxWindow* parent)
 	m_terminalsListbox->Bind(wxEVT_LISTBOX_DCLICK,
 		&DeclarationView::OnTerminalsListboxDoubleClick, this);
 
+	m_upActionButton->Bind(wxEVT_BUTTON, &DeclarationView::OnActionButtonUp, this);
+	m_downActionButton->Bind(wxEVT_BUTTON, &DeclarationView::OnActionButtonDown, this);
+	m_editActionButton->Bind(wxEVT_BUTTON, &DeclarationView::OnActionButtonEdit, this);
+
+	m_actionsListbox->Bind(wxEVT_LEFT_DOWN, &DeclarationView::OnActionsListboxMouseDown, this);
+	m_actionsListbox->Bind(wxEVT_LISTBOX_DCLICK, &DeclarationView::OnActionsListboxDoubleClick, this);
+
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
 	sizer->Add(m_splitter, 1, wxEXPAND | wxALL, 5);
 	SetSizerAndFit(sizer);
@@ -198,9 +205,21 @@ SignalScopedConnection DeclarationView::DoOnTerminalPositionChange(
 }
 
 SignalScopedConnection DeclarationView::DoOnTerminalEdit(
-	TerminalEditSignal::slot_type slot)
+	ItemEditSignal::slot_type slot)
 {
 	return m_terminalEditSignal.connect(slot);
+}
+
+SignalScopedConnection DeclarationView::DoOnActionPositionChange(
+	PositionChangeSignal::slot_type slot)
+{
+	return m_actionPositionChangeSignal.connect(slot);
+}
+
+SignalScopedConnection DeclarationView::DoOnActionEdit(
+	ItemEditSignal::slot_type slot)
+{
+	return m_actionEditSignal.connect(slot);
 }
 
 void DeclarationView::OnTerminalButtonUp(wxCommandEvent&)
@@ -259,6 +278,66 @@ void DeclarationView::OnTerminalsListboxMouseDown(wxMouseEvent& event)
 		m_terminalsListbox->HitTest(event.GetPosition()) == wxNOT_FOUND)
 	{
 		m_terminalsListbox->Deselect(wxNOT_FOUND);
+	}
+	event.Skip(true);
+}
+
+void DeclarationView::OnActionButtonUp(wxCommandEvent& event)
+{
+	const int selection = m_actionsListbox->GetSelection();
+	const int upperIndex = selection - 1;
+
+	if (selection != wxNOT_FOUND && upperIndex >= 0)
+	{
+		m_actionPositionChangeSignal(selection, upperIndex);
+		const wxString swapValue = m_actionsListbox->GetString(selection);
+		m_actionsListbox->SetString(selection, m_actionsListbox->GetString(upperIndex));
+		m_actionsListbox->SetString(upperIndex, swapValue);
+		m_actionsListbox->SetSelection(upperIndex);
+	}
+}
+
+void DeclarationView::OnActionButtonDown(wxCommandEvent& event)
+{
+	const int selection = m_actionsListbox->GetSelection();
+	const unsigned lowerIndex = unsigned(selection) + 1;
+
+	if (selection != wxNOT_FOUND && lowerIndex < m_actionsListbox->GetCount())
+	{
+		m_actionPositionChangeSignal(selection, lowerIndex);
+		const wxString swapValue = m_actionsListbox->GetString(selection);
+		m_actionsListbox->SetString(selection, m_actionsListbox->GetString(lowerIndex));
+		m_actionsListbox->SetString(lowerIndex, swapValue);
+		m_actionsListbox->SetSelection(lowerIndex);
+	}
+}
+
+void DeclarationView::OnActionButtonEdit(wxCommandEvent& event)
+{
+	const int selection = m_actionsListbox->GetSelection();
+	if (selection != wxNOT_FOUND)
+	{
+		m_actionEditSignal(selection);
+	}
+}
+
+void DeclarationView::OnActionsListboxDoubleClick(wxCommandEvent& event)
+{
+	const int selection = event.GetInt();
+	assert(m_actionsListbox->GetSelection() == selection);
+	assert(selection != wxNOT_FOUND);
+	m_actionEditSignal(selection);
+}
+
+void DeclarationView::OnActionsListboxMouseDown(wxMouseEvent& event)
+{
+	// Если выбран хотя бы один элемент, а также пользователь кликнул
+	//  по пустой части списка, тогда полностью снимаем все выделения
+	wxArrayInt selections;
+	if (m_actionsListbox->GetSelections(selections) != 0 &&
+		m_actionsListbox->HitTest(event.GetPosition()) == wxNOT_FOUND)
+	{
+		m_actionsListbox->Deselect(wxNOT_FOUND);
 	}
 	event.Skip(true);
 }

@@ -162,6 +162,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Action.cpp" />
+    <ClCompile Include="ActionType.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="ParserState.cpp" />
     <ClCompile Include="ParserTable.cpp" />

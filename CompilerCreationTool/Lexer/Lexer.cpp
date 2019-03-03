@@ -50,7 +50,6 @@ Token Lexer::GetNextToken()
 		throw std::invalid_argument("lexer can't parse token");
 	}
 
-	// Find token with ending flag
 	for (const TokenPattern& pattern : mPatterns)
 	{
 		if (pattern.IsEnding())
@@ -87,6 +86,15 @@ void Lexer::SetPattern(size_t index, const TokenPattern& newValue)
 }
 
 const TokenPattern& Lexer::GetPattern(size_t index) const
+{
+	if (index >= mPatterns.size())
+	{
+		throw std::out_of_range("index must be less than patterns count");
+	}
+	return mPatterns[index];
+}
+
+TokenPattern& Lexer::GetPattern(size_t index)
 {
 	if (index >= mPatterns.size())
 	{

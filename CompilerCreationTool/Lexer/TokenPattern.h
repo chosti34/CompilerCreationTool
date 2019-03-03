@@ -5,25 +5,22 @@
 class TokenPattern
 {
 public:
-	TokenPattern(
-		const std::string& name,
-		const std::string& origin,
-		bool isEnding = false,
-		int predefinedIndex = -1
-	);
+	TokenPattern(const std::string& name, const std::string& origin, bool isEnding = false);
 
+	void SetName(const std::string& name);
 	const std::string& GetName() const;
+
+	bool SetOrigin(const std::string& origin);
 	const std::string& GetOrigin() const;
+
 	const std::regex& GetRegex() const;
 	bool IsEnding() const;
-	int GetPredefinedIndex() const;
 
 private:
-	int m_predefinedIndex;
-	bool m_isEnding;
 	std::string m_name;
 	std::string m_origin;
 	std::regex m_regex;
+	bool m_isEnding;
 };
 
-std::vector<TokenPattern> const& GetPredefinedPatterns();
+const std::vector<TokenPattern> &GetPredefinedPatterns();

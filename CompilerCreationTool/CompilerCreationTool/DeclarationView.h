@@ -19,23 +19,33 @@ public:
 	void SplitPanels(float sashPositionPercentage);
 
 	using PositionChangeSignal = Signal<void(int, int)>;
-	using TerminalEditSignal = Signal<void(int)>;
+	using ItemEditSignal = Signal<void(int)>;
 
 	SignalScopedConnection DoOnTerminalPositionChange(PositionChangeSignal::slot_type slot);
-	SignalScopedConnection DoOnTerminalEdit(TerminalEditSignal::slot_type slot);
+	SignalScopedConnection DoOnTerminalEdit(ItemEditSignal::slot_type slot);
+
+	SignalScopedConnection DoOnActionPositionChange(PositionChangeSignal::slot_type slot);
+	SignalScopedConnection DoOnActionEdit(ItemEditSignal::slot_type slot);
 
 private:
 	void CreateLeftPanelControls();
 	void CreateRightPanelControls();
-	wxPanel* CreateTerminalsPanel(wxNotebook*);
-	wxPanel* CreateActionsPanel(wxNotebook*);
+	wxPanel* CreateTerminalsPanel(wxNotebook* notebook);
+	wxPanel* CreateActionsPanel(wxNotebook* notebook);
 
-	void OnTerminalButtonUp(wxCommandEvent&);
-	void OnTerminalButtonDown(wxCommandEvent&);
-	void OnTerminalButtonEdit(wxCommandEvent&);
+	void OnTerminalButtonUp(wxCommandEvent& event);
+	void OnTerminalButtonDown(wxCommandEvent& event);
+	void OnTerminalButtonEdit(wxCommandEvent& event);
 
-	void OnTerminalsListboxDoubleClick(wxCommandEvent&);
-	void OnTerminalsListboxMouseDown(wxMouseEvent&);
+	void OnTerminalsListboxDoubleClick(wxCommandEvent& event);
+	void OnTerminalsListboxMouseDown(wxMouseEvent& event);
+
+	void OnActionButtonUp(wxCommandEvent& event);
+	void OnActionButtonDown(wxCommandEvent& event);
+	void OnActionButtonEdit(wxCommandEvent& event);
+
+	void OnActionsListboxDoubleClick(wxCommandEvent& event);
+	void OnActionsListboxMouseDown(wxMouseEvent& event);
 
 private:
 	wxSplitterWindow* m_splitter;
@@ -50,6 +60,9 @@ private:
 	wxButton* m_upActionButton;
 	wxButton* m_downActionButton;
 	wxButton* m_editActionButton;
+
 	PositionChangeSignal m_terminalPositionChangeSignal;
-	TerminalEditSignal m_terminalEditSignal;
+	ItemEditSignal m_terminalEditSignal;
+	PositionChangeSignal m_actionPositionChangeSignal;
+	ItemEditSignal m_actionEditSignal;
 };

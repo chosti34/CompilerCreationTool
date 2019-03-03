@@ -1,33 +1,57 @@
 #include "stdafx.h"
 #include "TokenPattern.h"
+#include <unordered_map>
+#include <cassert>
 #include <vector>
 
 namespace
 {
 const std::vector<TokenPattern> gcPredefinedPatterns = {
-	TokenPattern("Identifier", "id", false, 0),
-	TokenPattern("Integer", "123", false, 1),
-	TokenPattern("Float", "0\\.1", false, 2)
+	{ "Identifier", "id" },
+	{ "Integer", "[1-9][0-9]*" },
+	{ "Float", "[1-9]\\.[0-9]+" }
 };
+
+bool RegexAllowsEmptyString(const std::regex& regex)
+{
+	return std::regex_match("", regex);
+}
 }
 
 TokenPattern::TokenPattern(
 	const std::string& name,
 	const std::string& origin,
-	bool isEnding,
-	int predefinedIndex
+	bool isEnding
 )
 	: m_name(name)
 	, m_origin(origin)
-	, m_isEnding(isEnding)
 	, m_regex(origin)
-	, m_predefinedIndex(predefinedIndex)
+	, m_isEnding(isEnding)
 {
+	// Пользователь не может создать TokenPattern в runtime, поэтому используется assert
+	assert(!RegexAllowsEmptyString(m_regex));
+}
+
+void TokenPattern::SetName(const std::string& name)
+{
+	m_name = name;
 }
 
 const std::string& TokenPattern::GetName() const
 {
 	return m_name;
+}
+
+bool TokenPattern::SetOrigin(const std::string& origin)
+{
+	std::regex newRegex(origin);
+	if (!RegexAllowsEmptyString(newRegex))
+	{
+		m_regex = std::move(newRegex);
+		m_origin = origin;
+		return true;
+	}
+	return false;
 }
 
 const std::string& TokenPattern::GetOrigin() const
@@ -45,12 +69,7 @@ bool TokenPattern::IsEnding() const
 	return m_isEnding;
 }
 
-int TokenPattern::GetPredefinedIndex() const
-{
-	return m_predefinedIndex;
-}
-
-std::vector<TokenPattern> const& GetPredefinedPatterns()
+const std::vector<TokenPattern> &GetPredefinedPatterns()
 {
 	return gcPredefinedPatterns;
 }

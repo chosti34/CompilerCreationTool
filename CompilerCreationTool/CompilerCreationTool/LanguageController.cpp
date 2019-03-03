@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "LanguageController.h"
 #include "TerminalEditDialog.h"
+#include "ActionEditDialog.h"
 #include "../Grammar/GrammarBuilder.h"
 #include <functional>
 
@@ -12,10 +13,17 @@ LanguageController::LanguageController(Language* language, MainFrame* frame)
 	, m_declarationView(m_frame->GetMainPanel()->GetGrammarDeclarationView())
 {
 	namespace ph = std::placeholders;
+
 	m_connections.push_back(m_declarationView->DoOnTerminalPositionChange(
 		bind(&LanguageController::OnTerminalPositionChange, this, ph::_1, ph::_2)));
 	m_connections.push_back(m_declarationView->DoOnTerminalEdit(
 		bind(&LanguageController::OnTerminalEdit, this, ph::_1)));
+
+	m_connections.push_back(m_declarationView->DoOnActionPositionChange(
+		bind(&LanguageController::OnActionPositionChange, this, ph::_1, ph::_2)));
+	m_connections.push_back(m_declarationView->DoOnActionEdit(
+		bind(&LanguageController::OnActionEdit, this, ph::_1)));
+
 	m_connections.push_back(m_frame->DoOnLanguageBuildButtonPress(
 		std::bind(&LanguageController::OnLanguageBuildButtonPress, this)));
 	m_connections.push_back(m_frame->DoOnParserRunButtonPress(
@@ -63,7 +71,7 @@ void LanguageController::OnTerminalPositionChange(int oldPos, int newPos)
 
 void LanguageController::OnTerminalEdit(int index)
 {
-	const auto pattern = m_language->GetLexer().GetPattern(index);
+	TokenPattern& pattern = m_language->GetLexer().GetPattern(index);
 	if (pattern.IsEnding())
 	{
 		wxMessageBox(
@@ -74,28 +82,30 @@ void LanguageController::OnTerminalEdit(int index)
 		return;
 	}
 
-	TerminalEditDialog* editDialog = new TerminalEditDialog(m_frame, pattern);
-	if (editDialog->ShowModal() == wxID_OK)
-	{
-		wxComboBox* combo = editDialog->GetComboBox();
-		wxTextCtrl* input = editDialog->GetTextCtrl();
+	TerminalEditDialog dialog(m_frame, pattern);
+	dialog.ShowModal();
+}
 
-		if (combo->IsEnabled())
+void LanguageController::OnActionPositionChange(int oldPos, int newPos)
+{
+	assert(m_language->IsInitialized());
+	m_language->GetParser().SwapActions(size_t(oldPos), size_t(newPos));
+}
+
+void LanguageController::OnActionEdit(int index)
+{
+	assert(m_language->IsInitialized());
+	assert(index < m_language->GetParser().GetActionsCount());
+
+	IAction& action = m_language->GetParser().GetAction(index);
+	ActionEditDialog dialog(m_frame, action);
+
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		const ActionType newActionType = dialog.GetActionTypeSelection();
+		if (action.GetType() != newActionType)
 		{
-			const auto& predefined = GetPredefinedPatterns()[combo->GetSelection()];
-			m_language->GetLexer().SetPattern(
-				size_t(index),
-				TokenPattern(pattern.GetName(), predefined.GetOrigin(),
-					predefined.IsEnding(), predefined.GetPredefinedIndex())
-			);
-		}
-		else if (input->IsEnabled())
-		{
-			m_language->GetLexer().SetPattern(
-				size_t(index),
-				TokenPattern(pattern.GetName(), input->GetValue(),
-					pattern.IsEnding(), pattern.GetPredefinedIndex()));
+			action.SetType(newActionType);
 		}
 	}
-	editDialog->Destroy();
 }

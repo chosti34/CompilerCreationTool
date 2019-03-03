@@ -2,10 +2,36 @@
 #include "Parser.h"
 #include "ParserState.h"
 #include "Action.h"
+#include "../Utils/string_utils.h"
 
+#include <map>
 #include <sstream>
 #include <iostream>
 #include <algorithm>
+
+namespace
+{
+void NoAction()
+{
+	std::cout << "No action" << std::endl;
+}
+
+void PrintHello()
+{
+	std::cout << "Hello, ";
+}
+
+void PrintWorld()
+{
+	std::cout << "World" << std::endl;
+}
+
+const std::map<ActionType, std::function<void()>> gcFunctionsMap = {
+	{ ActionType::None, NoAction },
+	{ ActionType::PrintHello, PrintHello },
+	{ ActionType::PrintWorld, PrintWorld }
+};
+}
 
 Parser::Parser(std::unique_ptr<IParserTable> && table, ILexer& lexer)
 	: m_table(std::move(table))
@@ -27,13 +53,15 @@ bool Parser::Parse(const std::string& text)
 
 		if (state.GetFlag(StateFlag::Attribute))
 		{
-			// std::cout << "Action " << state.GetName() << std::endl;
+			auto index = GetActionIndex(state.GetName());
+			assert(index);
+			auto& fn = gcFunctionsMap.at(m_actions[*index]->GetType());
+			fn();
 		}
 		else if (!state.AcceptsTerminal(token.name))
 		{
 			if (state.GetFlag(StateFlag::Error))
 			{
-				// std::cout << "Unexpected token " << token << std::endl;
 				return false;
 			}
 			else
@@ -70,7 +98,7 @@ bool Parser::Parse(const std::string& text)
 	}
 
 	assert(false);
-	return false;
+	throw std::logic_error("unreachable code in parse function");
 }
 
 const IParserTable& Parser::GetTable() const
@@ -95,7 +123,21 @@ void Parser::SetAction(size_t index, std::unique_ptr<IAction> && action)
 	m_actions[index] = std::move(action);
 }
 
+void Parser::SwapActions(size_t oldPos, size_t newPos)
+{
+	std::iter_swap(m_actions.begin() + oldPos, m_actions.begin() + newPos);
+}
+
 const IAction& Parser::GetAction(size_t index) const
+{
+	if (index >= m_actions.size())
+	{
+		throw std::out_of_range("index must be less than actions count");
+	}
+	return *m_actions[index];
+}
+
+IAction & Parser::GetAction(size_t index)
 {
 	if (index >= m_actions.size())
 	{
@@ -107,4 +149,17 @@ const IAction& Parser::GetAction(size_t index) const
 size_t Parser::GetActionsCount() const
 {
 	return m_actions.size();
+}
+
+boost::optional<size_t> Parser::GetActionIndex(const std::string& name)
+{
+	for (size_t i = 0; i < m_actions.size(); ++i)
+	{
+		const auto& pAction = m_actions[i];
+		if (pAction->GetName() == name)
+		{
+			return boost::make_optional(i);
+		}
+	}
+	return boost::none;
 }

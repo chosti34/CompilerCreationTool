@@ -5,17 +5,14 @@
 class TerminalEditDialog : public wxDialog
 {
 public:
-	TerminalEditDialog(wxWindow* parent, const TokenPattern& pattern);
-
-	wxComboBox* GetComboBox();
-	wxTextCtrl* GetTextCtrl();
+	TerminalEditDialog(wxWindow* parent, TokenPattern& pattern);
 
 private:
-	void OnWriteOwnRegexRadioButtonClick(wxCommandEvent&);
-	void OnChoosePredefinedRegexRadioButtonClick(wxCommandEvent&);
+	void OnOk(wxCommandEvent& event);
+	void OnListboxSelection(wxCommandEvent& event);
 
 private:
-	wxComboBox* m_combo;
-	wxTextCtrl* m_input;
-	const TokenPattern& m_pattern;
+	wxTextCtrl* m_textCtrl;
+	wxListBox* m_listbox;
+	TokenPattern& m_pattern;
 };

@@ -16,6 +16,7 @@ public:
 	void SwapPatterns(size_t lhs, size_t rhs) override;
 
 	const TokenPattern& GetPattern(size_t index) const override;
+	TokenPattern& GetPattern(size_t index) override;
 	size_t GetPatternsCount() const override;
 
 private:

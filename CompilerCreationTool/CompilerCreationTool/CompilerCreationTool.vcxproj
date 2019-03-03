@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ActionEditDialog.h" />
     <ClInclude Include="Language.h" />
     <ClInclude Include="DeclarationView.h" />
     <ClInclude Include="LanguageController.h" />
@@ -163,6 +164,7 @@
     <ClInclude Include="TerminalEditDialog.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ActionEditDialog.cpp" />
     <ClCompile Include="Language.cpp" />
     <ClCompile Include="DeclarationView.cpp" />
     <ClCompile Include="LanguageController.cpp" />

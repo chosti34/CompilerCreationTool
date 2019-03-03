@@ -15,5 +15,6 @@ public:
 	virtual void SwapPatterns(size_t lhs, size_t rhs) = 0;
 
 	virtual const TokenPattern& GetPattern(size_t index) const = 0;
+	virtual TokenPattern& GetPattern(size_t index) = 0;
 	virtual size_t GetPatternsCount() const = 0;
 };

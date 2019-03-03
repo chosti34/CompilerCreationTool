@@ -13,8 +13,13 @@ public:
 
 	void SetActionNames(const std::vector<std::string> &actions) override;
 	void SetAction(size_t index, std::unique_ptr<IAction> && action) override;
-	virtual const IAction& GetAction(size_t index) const override;
-	virtual size_t GetActionsCount() const override;
+	void SwapActions(size_t oldPos, size_t newPos) override;
+	const IAction& GetAction(size_t index) const override;
+	IAction& GetAction(size_t index) override;
+	size_t GetActionsCount() const override;
+
+private:
+	boost::optional<size_t> GetActionIndex(const std::string& name);
 
 private:
 	std::vector<std::unique_ptr<IAction>> m_actions;

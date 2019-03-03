@@ -2,92 +2,77 @@
 #include "TerminalEditDialog.h"
 #include <wx/statline.h>
 
-TerminalEditDialog::TerminalEditDialog(wxWindow* parent, const TokenPattern& pattern)
-	: wxDialog(parent, wxID_ANY, wxT("Edit Terminal"),
-		wxDefaultPosition, wxSize(250, 230), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
+namespace
+{
+const wxSize DIALOG_SIZE = { 250, 250 };
+}
+
+TerminalEditDialog::TerminalEditDialog(wxWindow* parent, TokenPattern& pattern)
+	: wxDialog(parent, wxID_ANY, wxT("Configure Terminal"),
+		wxDefaultPosition, DIALOG_SIZE, wxDEFAULT_DIALOG_STYLE)
 	, m_pattern(pattern)
 {
 	wxPanel* panel = new wxPanel(this);
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
-	wxRadioButton* customRegexButton = new wxRadioButton(
-		panel, wxID_ANY, "Write your regular expression:");
-	m_input = new wxTextCtrl(panel, wxID_ANY,
-		wxEmptyString, wxDefaultPosition, wxDefaultSize);
-	wxStaticLine* line1 = new wxStaticLine(panel);
+	wxStaticBox* box = new wxStaticBox(panel, wxID_ANY, wxT("Write regex"));
+	wxStaticBoxSizer* staticBoxSizer = new wxStaticBoxSizer(box, wxVERTICAL);
 
-	sizer->Add(customRegexButton, 0, wxEXPAND | wxALL, 5);
-	sizer->Add(m_input, 0, wxEXPAND | wxALL, 5);
-	sizer->Add(line1, 0, wxEXPAND | wxALL, 5);
+	m_textCtrl = new wxTextCtrl(box, wxID_ANY, pattern.GetOrigin());
+	wxStaticLine* line = new wxStaticLine(box, wxID_ANY);
+	m_listbox = new wxListBox(box, wxID_ANY, wxDefaultPosition,
+		wxDefaultSize, wxArrayString{}, wxLB_SINGLE | wxLB_ALWAYS_SB);
 
-	customRegexButton->Bind(wxEVT_RADIOBUTTON,
-		&TerminalEditDialog::OnWriteOwnRegexRadioButtonClick, this);
-
-	wxRadioButton* predefinedRegexButton = new wxRadioButton(
-		panel, wxID_ANY, "Choose predefined regular expression:");
-	m_combo = new wxComboBox(panel, wxID_ANY, wxT("Choose regex..."),
-		wxDefaultPosition, wxDefaultSize, wxArrayString(), wxCB_READONLY);
-	wxStaticLine* line2 = new wxStaticLine(panel);
-
-	predefinedRegexButton->Bind(wxEVT_RADIOBUTTON,
-		&TerminalEditDialog::OnChoosePredefinedRegexRadioButtonClick, this);
-
-	for (const TokenPattern& defaultPattern : GetPredefinedPatterns())
+	for (const TokenPattern& pattern : GetPredefinedPatterns())
 	{
-		m_combo->AppendString(defaultPattern.GetName());
-	}
-	m_combo->SetSelection(0);
-
-	if (pattern.GetPredefinedIndex() != -1)
-	{
-		predefinedRegexButton->SetValue(true);
-		m_input->Enable(false);
-		m_combo->Enable(true);
-		m_combo->SetSelection(pattern.GetPredefinedIndex());
-	}
-	else
-	{
-		customRegexButton->SetValue(true);
-		m_input->Enable(true);
-		m_combo->Enable(false);
-		m_input->SetValue(pattern.GetOrigin());
+		m_listbox->AppendString(pattern.GetName());
 	}
 
-	sizer->Add(predefinedRegexButton, 0, wxEXPAND | wxALL, 5);
-	sizer->Add(m_combo, 0, wxEXPAND | wxALL, 5);
-	sizer->Add(line2, 0, wxEXPAND | wxALL, 5);
+	staticBoxSizer->Add(m_textCtrl, 0, wxEXPAND | wxALL, 5);
+	staticBoxSizer->Add(line, 0, wxEXPAND | wxALL, 5);
+	staticBoxSizer->Add(m_listbox, 1, wxEXPAND | wxALL, 5);
+	sizer->Add(staticBoxSizer, 1, wxEXPAND | wxALL, 5);
 
 	wxButton* okButton = new wxButton(panel, wxID_OK, wxT("Ok"));
 	wxButton* closeButton = new wxButton(panel, wxID_CANCEL, wxT("Cancel"));
+
+	okButton->Bind(wxEVT_BUTTON, &TerminalEditDialog::OnOk, this);
+	m_listbox->Bind(wxEVT_LISTBOX, &TerminalEditDialog::OnListboxSelection, this);
 
 	wxBoxSizer* hSizer = new wxBoxSizer(wxHORIZONTAL);
 	hSizer->Add(okButton, 0, wxEXPAND);
 	hSizer->Add(closeButton, 0, wxEXPAND | wxLEFT, 5);
 
-	sizer->Add(hSizer, 0, wxALIGN_RIGHT | wxALL, 5);
+	sizer->Add(hSizer, 0, wxALIGN_RIGHT | wxLEFT | wxRIGHT | wxBOTTOM, 5);
 	panel->SetSizerAndFit(sizer);
-
 	CentreOnParent();
+
+	SetDoubleBuffered(true);
 }
 
-wxComboBox* TerminalEditDialog::GetComboBox()
+void TerminalEditDialog::OnOk(wxCommandEvent& event)
 {
-	return m_combo;
+	const std::string origin = m_textCtrl->GetValue();
+	if (!m_pattern.SetOrigin(origin))
+	{
+		wxMessageBox(
+			wxT("Token pattern's regular expression must not allow empty strings!"),
+			wxT("Warning"),
+			wxICON_WARNING
+		);
+		return;
+	}
+	event.Skip();
 }
 
-wxTextCtrl* TerminalEditDialog::GetTextCtrl()
+void TerminalEditDialog::OnListboxSelection(wxCommandEvent& event)
 {
-	return m_input;
-}
+	const int selection = event.GetSelection();
+	assert(selection != wxNOT_FOUND);
+	assert(unsigned(selection) < m_listbox->GetCount());
 
-void TerminalEditDialog::OnWriteOwnRegexRadioButtonClick(wxCommandEvent&)
-{
-	m_input->Enable(true);
-	m_combo->Enable(false);
-}
+	const std::vector<TokenPattern>& predefinedPatterns = GetPredefinedPatterns();
+	const TokenPattern& selected = predefinedPatterns[selection];
 
-void TerminalEditDialog::OnChoosePredefinedRegexRadioButtonClick(wxCommandEvent&)
-{
-	m_input->Enable(false);
-	m_combo->Enable(true);
+	m_textCtrl->SetValue(selected.GetOrigin());
 }

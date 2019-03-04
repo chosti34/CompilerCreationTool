@@ -6,9 +6,9 @@
 
 namespace grammarlib
 {
-// Получить все терминалы грамматики в виде массива с неповторяющимися элементами
-std::vector<std::string> GatherAllTerminals(const IGrammar& grammar);
-// Получить все атрибуты (или действия) грамматики в виде множества
+// Получить имена символов грамматики, которые удовлетворяют предикату, в виде массива с неповторяющимися элементами
+std::vector<std::string> GatherSymbols(const IGrammar& grammar, std::function<bool(const IGrammarSymbol&)> && predicate);
+// Получить все атрибуты (или действия) грамматики в виде массива с неповторяющимися элементами
 std::vector<std::string> GatherAllActions(const IGrammar& grammar);
 
 // Получить индекс первой продукции в грамматике с данным нетерминалом в левой части

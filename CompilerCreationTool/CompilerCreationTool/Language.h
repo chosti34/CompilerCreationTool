@@ -6,7 +6,7 @@
 class Language
 {
 public:
-	bool IsInitialized()const;
+	bool IsInitialized() const;
 
 	void SetGrammar(std::unique_ptr<grammarlib::IGrammar> && grammar);
 	const grammarlib::IGrammar& GetGrammar() const;

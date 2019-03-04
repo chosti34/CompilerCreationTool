@@ -11,8 +11,12 @@ namespace
 //  каждое регулярное выражение токена есть название терминала
 std::unique_ptr<ILexer> CreateDefaultLexer(const grammarlib::IGrammar& grammar)
 {
+	auto isTerminal = [](const grammarlib::IGrammarSymbol& symbol) {
+		return symbol.GetType() == GrammarSymbolType::Terminal;
+	};
+
 	auto lexer = std::make_unique<Lexer>();
-	for (const std::string& terminal : grammarlib::GatherAllTerminals(grammar))
+	for (const std::string& terminal : grammarlib::GatherSymbols(grammar, isTerminal))
 	{
 		TokenPattern pattern(terminal, terminal, terminal == grammar.GetEndTerminal());
 		lexer->AppendPattern(pattern);

@@ -16,23 +16,22 @@ bool HasValue(const std::vector<T> &container, const T& value)
 	return std::find(container.begin(), container.end(), value) != container.end();
 }
 
-std::vector<std::string> GatherAllTerminals(const IGrammar& grammar)
+std::vector<std::string> GatherSymbols(const IGrammar& grammar, std::function<bool(const IGrammarSymbol&)> && predicate)
 {
-	std::vector<std::string> terminals;
+	std::vector<std::string> symbols;
 	for (size_t row = 0; row < grammar.GetProductionsCount(); ++row)
 	{
 		const IGrammarProduction& production = grammar.GetProduction(row);
 		for (size_t col = 0; col < production.GetSymbolsCount(); ++col)
 		{
 			const IGrammarSymbol& symbol = production.GetSymbol(col);
-			if (symbol.GetType() == GrammarSymbolType::Terminal &&
-				!HasValue(terminals, symbol.GetName()))
+			if (predicate(symbol) && !HasValue(symbols, symbol.GetName()))
 			{
-				terminals.push_back(symbol.GetName());
+				symbols.push_back(symbol.GetName());
 			}
 		}
 	}
-	return terminals;
+	return symbols;
 }
 
 std::vector<std::string> GatherAllActions(const IGrammar& grammar)

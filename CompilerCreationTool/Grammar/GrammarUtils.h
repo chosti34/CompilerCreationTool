@@ -6,6 +6,9 @@
 
 namespace grammarlib
 {
+bool HasLeftRecursion(const IGrammar& grammar, const std::string& nonterminal);
+unsigned CountProductions(const IGrammar& grammar, std::function<bool(const IGrammarProduction&)> && predicate);
+
 // ѕолучить имена символов грамматики, которые удовлетвор€ют предикату, в виде массива с неповтор€ющимис€ элементами
 std::vector<std::string> GatherSymbols(const IGrammar& grammar, std::function<bool(const IGrammarSymbol&)> && predicate);
 // ѕолучить все атрибуты (или действи€) грамматики в виде массива с неповтор€ющимис€ элементами

@@ -155,6 +155,8 @@
     <ClInclude Include="Language.h" />
     <ClInclude Include="DeclarationView.h" />
     <ClInclude Include="LanguageController.h" />
+    <ClInclude Include="LanguageInformation.h" />
+    <ClInclude Include="LanguageInformationDialog.h" />
     <ClInclude Include="MainFrame.h" />
     <ClInclude Include="MainPanel.h" />
     <ClInclude Include="EditorView.h" />
@@ -168,6 +170,8 @@
     <ClCompile Include="Language.cpp" />
     <ClCompile Include="DeclarationView.cpp" />
     <ClCompile Include="LanguageController.cpp" />
+    <ClCompile Include="LanguageInformation.cpp" />
+    <ClCompile Include="LanguageInformationDialog.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainFrame.cpp" />
     <ClCompile Include="MainPanel.cpp" />

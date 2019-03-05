@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "GrammarUtils.h"
-
 #include <algorithm>
 #include <numeric>
 #include <cassert>
@@ -14,6 +13,52 @@ template <typename T>
 bool HasValue(const std::vector<T> &container, const T& value)
 {
 	return std::find(container.begin(), container.end(), value) != container.end();
+}
+
+bool HasLeftRecursion(const IGrammar& grammar, const std::string& nonterminal)
+{
+	std::stack<std::string> stack;
+	stack.push(nonterminal);
+
+	while (!stack.empty())
+	{
+		const std::string current = std::move(stack.top());
+		stack.pop();
+
+		for (int index : GatherProductionIndices(grammar, current))
+		{
+			const IGrammarProduction& production = grammar.GetProduction(index);
+			const IGrammarSymbol& symbol = production.GetFrontSymbol();
+
+			if (symbol.GetType() == GrammarSymbolType::Nonterminal)
+			{
+				if (symbol.GetName() == nonterminal)
+				{
+					return true;
+				}
+				else
+				{
+					stack.push(symbol.GetName());
+				}
+			}
+		}
+	}
+
+	return false;
+}
+
+unsigned CountProductions(const IGrammar& grammar, std::function<bool(const IGrammarProduction&)> && predicate)
+{
+	unsigned count = 0;
+	for (size_t row = 0; row < grammar.GetProductionsCount(); ++row)
+	{
+		const IGrammarProduction& production = grammar.GetProduction(row);
+		if (predicate(production))
+		{
+			++count;
+		}
+	}
+	return count;
 }
 
 std::vector<std::string> GatherSymbols(const IGrammar& grammar, std::function<bool(const IGrammarSymbol&)> && predicate)

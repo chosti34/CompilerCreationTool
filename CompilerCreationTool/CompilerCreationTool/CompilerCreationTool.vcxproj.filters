@@ -48,6 +48,12 @@
     <ClInclude Include="ActionEditDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LanguageInformationDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LanguageInformation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -81,6 +87,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ActionEditDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LanguageInformationDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LanguageInformation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

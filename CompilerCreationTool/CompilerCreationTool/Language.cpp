@@ -4,19 +4,22 @@
 #include "../Parser/ParserTable.h"
 #include "../Lexer/Lexer.h"
 #include "../Grammar/GrammarUtils.h"
+#include "LanguageInformation.h"
+
+using namespace grammarlib;
 
 namespace
 {
 // Инициализируем лексер и заполняем "шаблоны для разбора токенов" по умолчанию:
 //  каждое регулярное выражение токена есть название терминала
-std::unique_ptr<ILexer> CreateDefaultLexer(const grammarlib::IGrammar& grammar)
+std::unique_ptr<ILexer> CreateDefaultLexer(const IGrammar& grammar)
 {
-	auto isTerminal = [](const grammarlib::IGrammarSymbol& symbol) {
+	auto isTerminal = [](const IGrammarSymbol& symbol) {
 		return symbol.GetType() == GrammarSymbolType::Terminal;
 	};
 
 	auto lexer = std::make_unique<Lexer>();
-	for (const std::string& terminal : grammarlib::GatherSymbols(grammar, isTerminal))
+	for (const std::string& terminal : GatherSymbols(grammar, isTerminal))
 	{
 		TokenPattern pattern(terminal, terminal, terminal == grammar.GetEndTerminal());
 		lexer->AppendPattern(pattern);
@@ -27,7 +30,7 @@ std::unique_ptr<ILexer> CreateDefaultLexer(const grammarlib::IGrammar& grammar)
 
 bool Language::IsInitialized() const
 {
-	return m_grammar && m_lexer && m_parser;
+	return m_grammar && m_lexer && m_parser && m_information;
 }
 
 void Language::SetGrammar(std::unique_ptr<grammarlib::IGrammar> && grammar)
@@ -38,12 +41,14 @@ void Language::SetGrammar(std::unique_ptr<grammarlib::IGrammar> && grammar)
 		m_lexer = CreateDefaultLexer(*m_grammar);
 		m_parser = std::make_unique<Parser>(ParserTable::Create(*m_grammar), *m_lexer);
 		m_parser->SetActionNames(GatherAllActions(*m_grammar));
+		m_information = std::make_unique<LanguageInformation>(*m_lexer, *m_parser, *m_grammar);
 	}
 	else
 	{
 		m_grammar = nullptr;
 		m_lexer = nullptr;
 		m_parser = nullptr;
+		m_information = nullptr;
 	}
 }
 
@@ -75,4 +80,10 @@ const ILexer& Language::GetLexer() const
 {
 	assert(m_lexer);
 	return *m_lexer;
+}
+
+const LanguageInformation& Language::GetInfo() const
+{
+	assert(m_information);
+	return *m_information;
 }

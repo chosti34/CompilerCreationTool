@@ -21,4 +21,6 @@ std::string JoinStrings(
 	}
 	return result + suffix;
 }
+
+std::string TrimTrailingZerosAndPeriod(double value);
 }

@@ -17,6 +17,8 @@ private:
 	void OnActionPositionChange(int oldPos, int newPos);
 	void OnActionEdit(int index);
 
+	void ShowLanguageInfoDialog();
+
 private:
 	Language* m_language;
 	MainFrame* m_frame;

@@ -2,6 +2,7 @@
 #include "LanguageController.h"
 #include "TerminalEditDialog.h"
 #include "ActionEditDialog.h"
+#include "LanguageInformationDialog.h"
 #include "../Grammar/GrammarBuilder.h"
 #include <functional>
 
@@ -28,6 +29,8 @@ LanguageController::LanguageController(Language* language, MainFrame* frame)
 		std::bind(&LanguageController::OnLanguageBuildButtonPress, this)));
 	m_connections.push_back(m_frame->DoOnParserRunButtonPress(
 		std::bind(&LanguageController::OnParserRunButtonPress, this)));
+	m_connections.push_back(m_frame->DoOnInfoQuery(
+		std::bind(&LanguageController::ShowLanguageInfoDialog, this)));
 }
 
 void LanguageController::OnLanguageBuildButtonPress()
@@ -108,4 +111,20 @@ void LanguageController::OnActionEdit(int index)
 			action.SetType(newActionType);
 		}
 	}
+}
+
+void LanguageController::ShowLanguageInfoDialog()
+{
+	if (!m_language->IsInitialized())
+	{
+		wxMessageBox(
+			wxT("Language is not initialized yet"),
+			wxT("Can't show info"),
+			wxICON_WARNING
+		);
+		return;
+	}
+
+	LanguageInformationDialog dialog(m_frame, m_language->GetInfo());
+	dialog.ShowModal();
 }

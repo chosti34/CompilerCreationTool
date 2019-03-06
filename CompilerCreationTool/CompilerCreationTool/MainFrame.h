@@ -10,6 +10,7 @@ class MainFrame : public wxFrame
 public:
 	using LanguageBuildSignal = Signal<void()>;
 	using ParserRunSignal = Signal<void()>;
+	using InfoQuerySignal = Signal<void()>;
 
 public:
 	MainFrame(const wxString& title, const wxSize& size);
@@ -19,6 +20,7 @@ public:
 		LanguageBuildSignal::slot_type slot);
 	SignalScopedConnection DoOnParserRunButtonPress(
 		ParserRunSignal::slot_type slot);
+	SignalScopedConnection DoOnInfoQuery(InfoQuerySignal::slot_type slot);
 
 private:
 	wxDECLARE_EVENT_TABLE();
@@ -29,9 +31,11 @@ private:
 
 	void OnBuild(wxCommandEvent& event);
 	void OnRun(wxCommandEvent& event);
+	void OnInfo(wxCommandEvent& event);
 
 private:
 	MainPanel* m_panel;
 	LanguageBuildSignal m_languageBuildButtonPressSignal;
 	ParserRunSignal m_parserRunButtonPressSignal;
+	InfoQuerySignal m_infoQuerySignal;
 };

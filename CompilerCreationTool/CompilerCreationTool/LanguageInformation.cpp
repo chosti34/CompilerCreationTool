@@ -36,9 +36,12 @@ bool HasAcceptableSetsCrossing(
 LanguageInformation::LanguageInformation(
 	const ILexer& lexer,
 	const IParser<bool>& parser,
-	const grammarlib::IGrammar& grammar
+	const grammarlib::IGrammar& grammar,
+	const std::chrono::duration<double>& buildTime
 )
 {
+	m_buildTime = buildTime;
+
 	m_actionsCount = parser.GetActionsCount();
 	m_terminalsCount = lexer.GetPatternsCount();
 	m_productionsCount = grammar.GetProductionsCount();
@@ -47,9 +50,7 @@ LanguageInformation::LanguageInformation(
 		return production.GetSymbolsCount() == 1 && production.EndsWith(GrammarSymbolType::Epsilon);
 	});
 
-	const std::vector<std::string> nonterminals = GatherSymbols(grammar, [](const IGrammarSymbol& symbol) {
-		return symbol.GetType() == GrammarSymbolType::Nonterminal;
-	});
+	const std::vector<std::string> nonterminals = GatherAllNonterminals(grammar);
 
 	// Заполняем нетерминалы с пересекающимся направляющими множествами
 	for (const std::string& nonterminal : nonterminals)
@@ -68,6 +69,11 @@ LanguageInformation::LanguageInformation(
 			m_leftRecursiveNonterminals.emplace(nonterminal);
 		}
 	}
+}
+
+std::chrono::duration<double> const& LanguageInformation::GetBuildTime() const
+{
+	return m_buildTime;
 }
 
 unsigned LanguageInformation::GetActionsCount() const
@@ -90,12 +96,12 @@ unsigned LanguageInformation::GetEmptyProductionsCount() const
 	return m_emptyProductionsCount;
 }
 
-std::unordered_set<std::string> const& LanguageInformation::GetLeftRecursiveNonterminals()
+std::unordered_set<std::string> const& LanguageInformation::GetLeftRecursiveNonterminals() const
 {
 	return m_leftRecursiveNonterminals;
 }
 
-std::unordered_set<std::string> const& LanguageInformation::GetAcceptablesCrossingNonterminals()
+std::unordered_set<std::string> const& LanguageInformation::GetAcceptablesCrossingNonterminals() const
 {
 	return m_acceptablesCrossingNonterminals;
 }

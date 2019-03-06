@@ -97,6 +97,23 @@ std::vector<std::string> GatherAllActions(const IGrammar& grammar)
 	return actions;
 }
 
+std::vector<std::string> GatherAllNonterminals(const IGrammar& grammar)
+{
+	std::vector<std::string> nonterminals;
+	nonterminals.reserve(grammar.GetProductionsCount());
+
+	for (size_t row = 0; row < grammar.GetProductionsCount(); ++row)
+	{
+		const IGrammarProduction& production = grammar.GetProduction(row);
+		if (!HasValue(nonterminals, production.GetLeftPart()))
+		{
+			nonterminals.push_back(production.GetLeftPart());
+		}
+	}
+
+	return nonterminals;
+}
+
 size_t GetProductionIndex(const IGrammar& grammar, const std::string& nonterminal)
 {
 	for (size_t index = 0; index < grammar.GetProductionsCount(); ++index)

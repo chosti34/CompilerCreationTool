@@ -108,6 +108,12 @@ SignalScopedConnection MainFrame::DoOnParserRunButtonPress(
 	return m_parserRunButtonPressSignal.connect(slot);
 }
 
+SignalScopedConnection MainFrame::DoOnInfoQuery(
+	InfoQuerySignal::slot_type slot)
+{
+	return m_infoQuerySignal.connect(slot);
+}
+
 void MainFrame::OnExit(wxCommandEvent& event)
 {
 	Close(true);
@@ -146,6 +152,18 @@ void MainFrame::OnRun(wxCommandEvent& event)
 	}
 }
 
+void MainFrame::OnInfo(wxCommandEvent& event)
+{
+	try
+	{
+		m_infoQuerySignal();
+	}
+	catch (const std::exception& ex)
+	{
+		wxMessageBox(ex.what());
+	}
+}
+
 void MainFrame::OnSize(wxSizeEvent& event)
 {
 	event.Skip();
@@ -157,4 +175,5 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_SIZE(MainFrame::OnSize)
 	EVT_TOOL(ButtonID::Build, MainFrame::OnBuild)
 	EVT_TOOL(ButtonID::Run, MainFrame::OnRun)
+	EVT_TOOL(ButtonID::Info, MainFrame::OnInfo)
 wxEND_EVENT_TABLE()

@@ -6,13 +6,17 @@
 
 namespace grammarlib
 {
+// Возвращает true, если нетерминал леворекурсивен явно или неявно, иначе возвращает false
 bool HasLeftRecursion(const IGrammar& grammar, const std::string& nonterminal);
+// Посчитывает количество правил в грамматике, которые удовлетворяют предикату
 unsigned CountProductions(const IGrammar& grammar, std::function<bool(const IGrammarProduction&)> && predicate);
 
 // Получить имена символов грамматики, которые удовлетворяют предикату, в виде массива с неповторяющимися элементами
 std::vector<std::string> GatherSymbols(const IGrammar& grammar, std::function<bool(const IGrammarSymbol&)> && predicate);
 // Получить все атрибуты (или действия) грамматики в виде массива с неповторяющимися элементами
 std::vector<std::string> GatherAllActions(const IGrammar& grammar);
+// Получить все нетерминалы грамматики в виде массива с неповторяющимися элементами
+std::vector<std::string> GatherAllNonterminals(const IGrammar& grammar);
 
 // Получить индекс первой продукции в грамматике с данным нетерминалом в левой части
 size_t GetProductionIndex(const IGrammar& grammar, const std::string& nonterminal);

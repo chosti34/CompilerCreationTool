@@ -11,6 +11,8 @@ public:
 	void SplitPanels(float sashPositionPercentage);
 	wxString GetUserInput();
 
+	void LogOutput(const std::string& message);
+
 private:
 	wxSplitterWindow* m_splitter;
 	wxStyledTextCtrl* m_input;

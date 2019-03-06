@@ -11,8 +11,6 @@ enum ButtonID
 	Open,
 	Save,
 	SaveAs,
-	Undo,
-	Redo,
 	Build,
 	Run,
 	Info,
@@ -42,12 +40,12 @@ void AddTools(wxToolBar& toolbar)
 	wxIcon saveIcon = wxArtProvider::GetIcon(wxART_FILE_SAVE, wxART_OTHER, iconSize);
 	wxIcon saveAsIcon = wxArtProvider::GetIcon(wxART_FILE_SAVE_AS, wxART_OTHER, iconSize);
 	wxIcon infoIcon = wxArtProvider::GetIcon(wxART_INFORMATION, wxART_OTHER, iconSize);
-	wxIcon buildIcon = wxArtProvider::GetIcon(wxART_EXECUTABLE_FILE, wxART_OTHER, iconSize);
+	wxIcon buildIcon = wxArtProvider::GetIcon(wxART_COPY, wxART_OTHER, iconSize);
+	wxIcon runIcon = wxArtProvider::GetIcon(wxART_PASTE, wxART_OTHER, iconSize);
 	wxIcon openIcon = wxArtProvider::GetIcon(wxART_FILE_OPEN, wxART_OTHER, iconSize);
 	wxIcon undoIcon = wxArtProvider::GetIcon(wxART_UNDO, wxART_OTHER, iconSize);
 	wxIcon redoIcon = wxArtProvider::GetIcon(wxART_REDO, wxART_OTHER, iconSize);
 	wxIcon helpIcon = wxArtProvider::GetIcon(wxART_QUESTION, wxART_OTHER, iconSize);
-	wxIcon fileIcon = wxArtProvider::GetIcon(wxART_NORMAL_FILE, wxART_OTHER, iconSize);
 
 	toolbar.AddTool(ButtonID::New, wxT("New"), newIcon, wxT("New Document"));
 	toolbar.AddTool(ButtonID::Open, wxT("Open"), openIcon, wxT("Open Document"));
@@ -55,12 +53,8 @@ void AddTools(wxToolBar& toolbar)
 	toolbar.AddTool(ButtonID::SaveAs, wxT("Save As"), saveAsIcon, wxT("Save Document As"));
 	toolbar.AddSeparator();
 
-	toolbar.AddTool(ButtonID::Undo, wxT("Undo"), undoIcon, wxT("Undo Command"));
-	toolbar.AddTool(ButtonID::Redo, wxT("Redo"), redoIcon, wxT("Redo Command"));
-	toolbar.AddSeparator();
-
 	toolbar.AddTool(ButtonID::Build, wxT("Build"), buildIcon, wxT("Build"));
-	toolbar.AddTool(ButtonID::Run, wxT("Run"), fileIcon, wxT("Run"));
+	toolbar.AddTool(ButtonID::Run, wxT("Run"), runIcon, wxT("Run"));
 	toolbar.AddTool(ButtonID::Info, wxT("Info"), infoIcon, wxT("Get Information"));
 	toolbar.AddTool(ButtonID::Help, wxT("Help"), helpIcon, wxT("Help"));
 }
@@ -136,7 +130,7 @@ void MainFrame::OnBuild(wxCommandEvent& event)
 	}
 	catch (const std::exception& ex)
 	{
-		wxMessageBox(ex.what());
+		wxMessageBox(ex.what(), "Language Building Error", wxICON_WARNING);
 	}
 }
 
@@ -148,7 +142,7 @@ void MainFrame::OnRun(wxCommandEvent& event)
 	}
 	catch (const std::exception& ex)
 	{
-		wxMessageBox(ex.what());
+		wxMessageBox(ex.what(), "Parsing Error", wxICON_WARNING);
 	}
 }
 

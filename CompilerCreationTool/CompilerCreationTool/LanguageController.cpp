@@ -59,11 +59,11 @@ void LanguageController::OnParserRunButtonPress()
 
 	if (noErrors)
 	{
-		wxMessageBox(wxT("Successfully parsed"));
+		m_editorView->LogOutput("Successfully parsed!\n");
 	}
 	else
 	{
-		wxMessageBox(wxT("Syntax error"));
+		m_editorView->LogOutput("Syntax error...\n");
 	}
 }
 
@@ -77,11 +77,11 @@ void LanguageController::OnTerminalEdit(int index)
 	TokenPattern& pattern = m_language->GetLexer().GetPattern(index);
 	if (pattern.IsEnding())
 	{
-		wxMessageBox(
-			"You can't edit grammar's ending terminal.\n"
-			"Please, choose another one.",
-			"Information about terminal",
-			wxOK | wxICON_INFORMATION);
+		using namespace std::string_literals;
+		const wxString cTitle = wxT("Information About Terminal");
+		const wxString cMessage = "'"s + pattern.GetName() +
+			"' is grammar's ending terminal - you cannot edit it."s;
+		wxMessageBox(cMessage, cTitle, wxOK | wxICON_WARNING);
 		return;
 	}
 

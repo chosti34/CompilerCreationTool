@@ -5,7 +5,7 @@
 class ActionEditDialog : public wxDialog
 {
 public:
-	explicit ActionEditDialog(wxWindow* parent, const IAction& action);
+	ActionEditDialog(wxWindow* parent, const IAction& action);
 	ActionType GetActionTypeSelection() const;
 
 private:

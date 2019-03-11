@@ -40,8 +40,8 @@ void AddTools(wxToolBar& toolbar)
 	wxIcon saveIcon = wxArtProvider::GetIcon(wxART_FILE_SAVE, wxART_OTHER, iconSize);
 	wxIcon saveAsIcon = wxArtProvider::GetIcon(wxART_FILE_SAVE_AS, wxART_OTHER, iconSize);
 	wxIcon infoIcon = wxArtProvider::GetIcon(wxART_INFORMATION, wxART_OTHER, iconSize);
-	wxIcon buildIcon = wxArtProvider::GetIcon(wxART_COPY, wxART_OTHER, iconSize);
-	wxIcon runIcon = wxArtProvider::GetIcon(wxART_PASTE, wxART_OTHER, iconSize);
+	wxIcon buildIcon = wxArtProvider::GetIcon(wxART_PASTE, wxART_OTHER, iconSize);
+	wxIcon runIcon = wxArtProvider::GetIcon(wxART_COPY, wxART_OTHER, iconSize);
 	wxIcon openIcon = wxArtProvider::GetIcon(wxART_FILE_OPEN, wxART_OTHER, iconSize);
 	wxIcon undoIcon = wxArtProvider::GetIcon(wxART_UNDO, wxART_OTHER, iconSize);
 	wxIcon redoIcon = wxArtProvider::GetIcon(wxART_REDO, wxART_OTHER, iconSize);
@@ -56,6 +56,8 @@ void AddTools(wxToolBar& toolbar)
 	toolbar.AddTool(ButtonID::Build, wxT("Build"), buildIcon, wxT("Build"));
 	toolbar.AddTool(ButtonID::Run, wxT("Run"), runIcon, wxT("Run"));
 	toolbar.AddTool(ButtonID::Info, wxT("Info"), infoIcon, wxT("Get Information"));
+	toolbar.AddSeparator();
+
 	toolbar.AddTool(ButtonID::Help, wxT("Help"), helpIcon, wxT("Help"));
 }
 }
@@ -66,9 +68,12 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	m_panel = new MainPanel(this);
 	SetMenuBar(CreateMenuBar());
 
-	wxToolBar* toolbar = CreateToolBar(wxTB_FLAT);
-	AddTools(*toolbar);
-	toolbar->Realize();
+	mToolbar = CreateToolBar(wxTB_FLAT);
+	AddTools(*mToolbar);
+	mToolbar->Realize();
+
+	mToolbar->EnableTool(ButtonID::Run, false);
+	mToolbar->EnableTool(ButtonID::Info, false);
 
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 	wxStaticLine* line = new wxStaticLine(this, wxID_ANY);
@@ -108,12 +113,7 @@ SignalScopedConnection MainFrame::DoOnInfoQuery(
 	return m_infoQuerySignal.connect(slot);
 }
 
-void MainFrame::OnExit(wxCommandEvent& event)
-{
-	Close(true);
-}
-
-void MainFrame::OnAbout(wxCommandEvent& event)
+void MainFrame::ShowAboutMessageBox()
 {
 	wxMessageBox(
 		"Tool for building compiler.",
@@ -122,11 +122,23 @@ void MainFrame::OnAbout(wxCommandEvent& event)
 	);
 }
 
+void MainFrame::OnExit(wxCommandEvent& event)
+{
+	Close(true);
+}
+
+void MainFrame::OnAbout(wxCommandEvent& event)
+{
+	ShowAboutMessageBox();
+}
+
 void MainFrame::OnBuild(wxCommandEvent& event)
 {
 	try
 	{
 		m_languageBuildButtonPressSignal();
+		mToolbar->EnableTool(ButtonID::Run, true);
+		mToolbar->EnableTool(ButtonID::Info, true);
 	}
 	catch (const std::exception& ex)
 	{
@@ -139,6 +151,8 @@ void MainFrame::OnRun(wxCommandEvent& event)
 	try
 	{
 		m_parserRunButtonPressSignal();
+		mToolbar->EnableTool(ButtonID::Run, true);
+		mToolbar->EnableTool(ButtonID::Info, true);
 	}
 	catch (const std::exception& ex)
 	{
@@ -158,6 +172,12 @@ void MainFrame::OnInfo(wxCommandEvent& event)
 	}
 }
 
+void MainFrame::OnHelp(wxCommandEvent& event)
+{
+	(void)event;
+	ShowAboutMessageBox();
+}
+
 void MainFrame::OnSize(wxSizeEvent& event)
 {
 	event.Skip();
@@ -170,4 +190,5 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_TOOL(ButtonID::Build, MainFrame::OnBuild)
 	EVT_TOOL(ButtonID::Run, MainFrame::OnRun)
 	EVT_TOOL(ButtonID::Info, MainFrame::OnInfo)
+	EVT_TOOL(ButtonID::Help, MainFrame::OnHelp)
 wxEND_EVENT_TABLE()

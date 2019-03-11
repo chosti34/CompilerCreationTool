@@ -5,6 +5,8 @@
 #include <sstream>
 #include <cctype>
 
+using namespace grammarlib;
+
 namespace
 {
 bool ConsistsOfWhitespaces(const std::string& line)
@@ -15,7 +17,7 @@ bool ConsistsOfWhitespaces(const std::string& line)
 
 namespace grammarlib
 {
-std::unique_ptr<IGrammar> grammarlib::GrammarBuilder::CreateGrammar(const std::string& text)
+std::unique_ptr<IGrammar> GrammarBuilder::CreateGrammar(const std::string& text)
 {
 	auto grammar = std::make_unique<Grammar>();
 	auto factory = std::make_unique<GrammarProductionFactory>();
@@ -33,10 +35,10 @@ std::unique_ptr<IGrammar> grammarlib::GrammarBuilder::CreateGrammar(const std::s
 
 	if (grammar->IsEmpty())
 	{
-		throw std::invalid_argument("grammar text doesn't contain any production rules");
+		throw std::invalid_argument("no grammar's productions provided");
 	}
 
-	grammar->Normalize();
+	grammar->NormalizeIndices();
 	return grammar;
 }
 }

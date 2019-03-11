@@ -3,6 +3,21 @@
 
 using namespace grammarlib;
 
+namespace
+{
+void ValidateRightPart(const std::vector<std::unique_ptr<IGrammarSymbol>>& right)
+{
+	if (right.empty())
+	{
+		throw std::runtime_error("production's right part can't be empty");
+	}
+	if (right.front()->GetType() == GrammarSymbolType::Epsilon && right.size() != 1)
+	{
+		throw std::runtime_error("epsilon production can't contain any additional symbols");
+	}
+}
+}
+
 GrammarProduction::GrammarProduction(
 	const std::string& left,
 	std::vector<std::unique_ptr<IGrammarSymbol>> && right
@@ -10,10 +25,7 @@ GrammarProduction::GrammarProduction(
 	: m_left(left)
 	, m_right(std::move(right))
 {
-	if (m_right.empty())
-	{
-		throw std::runtime_error("grammar production's right part can't be empty");
-	}
+	ValidateRightPart(m_right);
 }
 
 const std::string& GrammarProduction::GetLeftPart() const

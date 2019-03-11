@@ -21,7 +21,7 @@ bool HasAcceptableSetsCrossing(
 
 		for (const std::string& acceptable : stateAcceptables)
 		{
-			auto inserted = nonterminalAcceptables.emplace(acceptable);
+			const auto inserted = nonterminalAcceptables.emplace(acceptable);
 			if (!inserted.second)
 			{
 				return true;

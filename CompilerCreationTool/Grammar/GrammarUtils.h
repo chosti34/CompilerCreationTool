@@ -7,6 +7,8 @@
 namespace grammarlib
 {
 // ¬озвращает true, если нетерминал леворекурсивен €вно или не€вно, иначе возвращает false
+//  ¬ случае, если указанный нетерминал в одном из своих правил хранит первым символом леворекурсивный нетерминал,
+//  функци€ возвращает false
 bool HasLeftRecursion(const IGrammar& grammar, const std::string& nonterminal);
 // ѕосчитывает количество правил в грамматике, которые удовлетвор€ют предикату
 unsigned CountProductions(const IGrammar& grammar, std::function<bool(const IGrammarProduction&)> && predicate);

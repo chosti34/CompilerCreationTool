@@ -10,7 +10,8 @@ class IGrammar
 public:
 	virtual ~IGrammar() = default;
 
-	virtual void Normalize() = 0;
+	virtual bool IsNormalized() const = 0;
+	virtual void NormalizeIndices() = 0;
 	virtual void AddProduction(std::unique_ptr<IGrammarProduction> && production) = 0;
 
 	virtual const IGrammarProduction& GetProduction(size_t index) const = 0;

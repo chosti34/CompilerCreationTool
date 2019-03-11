@@ -6,19 +6,31 @@
 #include <vector>
 #include <stack>
 #include <map>
+#include <set>
 
 namespace grammarlib
 {
-template <typename T>
-bool HasValue(const std::vector<T> &container, const T& value)
+template <typename TContainer, typename TValue>
+bool HasValue(const TContainer &container, const TValue& value)
 {
 	return std::find(container.begin(), container.end(), value) != container.end();
 }
 
+template <typename T>
+bool HasValue(const std::set<T> &set, const T& value)
+{
+	return set.find(value) != set.end();
+}
+
 bool HasLeftRecursion(const IGrammar& grammar, const std::string& nonterminal)
 {
+	// Нужно отслеживать уже "раскрытые" узлы стека, для этого можно хранить в множестве
+	//  неповторяющихся элементов
+	std::set<std::string> visited;
 	std::stack<std::string> stack;
+
 	stack.push(nonterminal);
+	visited.insert(nonterminal);
 
 	while (!stack.empty())
 	{
@@ -36,9 +48,10 @@ bool HasLeftRecursion(const IGrammar& grammar, const std::string& nonterminal)
 				{
 					return true;
 				}
-				else
+				else if (!HasValue(visited, symbol.GetName()))
 				{
 					stack.push(symbol.GetName());
+					visited.insert(symbol.GetName());
 				}
 			}
 		}

@@ -1,10 +1,11 @@
 #include "pch.h"
 #include "Language.h"
+#include "LanguageInformation.h"
+
+#include "../Lexer/Lexer.h"
 #include "../Parser/Parser.h"
 #include "../Parser/ParserTable.h"
-#include "../Lexer/Lexer.h"
 #include "../Grammar/GrammarUtils.h"
-#include "LanguageInformation.h"
 
 using namespace grammarlib;
 

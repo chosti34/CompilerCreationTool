@@ -150,6 +150,7 @@
     <ClInclude Include="Action.h" />
     <ClInclude Include="ActionType.h" />
     <ClInclude Include="IAction.h" />
+    <ClInclude Include="IParserLogger.h" />
     <ClInclude Include="IParser.h" />
     <ClInclude Include="IParserState.h" />
     <ClInclude Include="IParserTable.h" />

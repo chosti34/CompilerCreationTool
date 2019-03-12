@@ -122,17 +122,17 @@ void MainFrame::ShowAboutMessageBox()
 	);
 }
 
-void MainFrame::OnExit(wxCommandEvent& event)
+void MainFrame::OnExit(wxCommandEvent&)
 {
 	Close(true);
 }
 
-void MainFrame::OnAbout(wxCommandEvent& event)
+void MainFrame::OnAbout(wxCommandEvent&)
 {
 	ShowAboutMessageBox();
 }
 
-void MainFrame::OnBuild(wxCommandEvent& event)
+void MainFrame::OnBuild(wxCommandEvent&)
 {
 	try
 	{
@@ -146,7 +146,7 @@ void MainFrame::OnBuild(wxCommandEvent& event)
 	}
 }
 
-void MainFrame::OnRun(wxCommandEvent& event)
+void MainFrame::OnRun(wxCommandEvent&)
 {
 	try
 	{
@@ -160,7 +160,7 @@ void MainFrame::OnRun(wxCommandEvent& event)
 	}
 }
 
-void MainFrame::OnInfo(wxCommandEvent& event)
+void MainFrame::OnInfo(wxCommandEvent&)
 {
 	try
 	{
@@ -172,9 +172,8 @@ void MainFrame::OnInfo(wxCommandEvent& event)
 	}
 }
 
-void MainFrame::OnHelp(wxCommandEvent& event)
+void MainFrame::OnHelp(wxCommandEvent&)
 {
-	(void)event;
 	ShowAboutMessageBox();
 }
 

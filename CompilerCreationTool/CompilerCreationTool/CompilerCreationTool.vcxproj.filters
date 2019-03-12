@@ -54,6 +54,9 @@
     <ClInclude Include="LanguageInformation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TextCtrlLogger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -93,6 +96,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LanguageInformation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TextCtrlLogger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

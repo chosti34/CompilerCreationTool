@@ -282,7 +282,7 @@ void DeclarationView::OnTerminalsListboxMouseDown(wxMouseEvent& event)
 	event.Skip(true);
 }
 
-void DeclarationView::OnActionButtonUp(wxCommandEvent& event)
+void DeclarationView::OnActionButtonUp(wxCommandEvent&)
 {
 	const int selection = m_actionsListbox->GetSelection();
 	const int upperIndex = selection - 1;
@@ -297,7 +297,7 @@ void DeclarationView::OnActionButtonUp(wxCommandEvent& event)
 	}
 }
 
-void DeclarationView::OnActionButtonDown(wxCommandEvent& event)
+void DeclarationView::OnActionButtonDown(wxCommandEvent&)
 {
 	const int selection = m_actionsListbox->GetSelection();
 	const unsigned lowerIndex = unsigned(selection) + 1;
@@ -312,7 +312,7 @@ void DeclarationView::OnActionButtonDown(wxCommandEvent& event)
 	}
 }
 
-void DeclarationView::OnActionButtonEdit(wxCommandEvent& event)
+void DeclarationView::OnActionButtonEdit(wxCommandEvent&)
 {
 	const int selection = m_actionsListbox->GetSelection();
 	if (selection != wxNOT_FOUND)

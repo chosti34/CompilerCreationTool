@@ -23,9 +23,9 @@ TerminalEditDialog::TerminalEditDialog(wxWindow* parent, TokenPattern& pattern)
 	m_listbox = new wxListBox(box, wxID_ANY, wxDefaultPosition,
 		wxDefaultSize, wxArrayString{}, wxLB_SINGLE | wxLB_ALWAYS_SB);
 
-	for (const TokenPattern& pattern : GetPredefinedPatterns())
+	for (const TokenPattern& predefinedPattern : GetPredefinedPatterns())
 	{
-		m_listbox->AppendString(pattern.GetName());
+		m_listbox->AppendString(predefinedPattern.GetName());
 	}
 
 	staticBoxSizer->Add(m_textCtrl, 0, wxEXPAND | wxALL, 5);

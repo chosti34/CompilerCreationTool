@@ -78,9 +78,7 @@ wxString EditorView::GetUserInput()
 	return m_input->GetValue();
 }
 
-void EditorView::LogOutput(const std::string& message)
+wxStyledTextCtrl* EditorView::GetOutputStyledTextCtrl()
 {
-	m_output->SetEditable(true);
-	m_output->AppendText(message);
-	m_output->SetEditable(false);
+	return m_output;
 }

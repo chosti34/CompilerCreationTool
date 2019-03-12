@@ -6,12 +6,12 @@
 class EditorView : public wxPanel
 {
 public:
-	EditorView(wxWindow* parent);
+	explicit EditorView(wxWindow* parent);
 
 	void SplitPanels(float sashPositionPercentage);
 	wxString GetUserInput();
 
-	void LogOutput(const std::string& message);
+	wxStyledTextCtrl* GetOutputStyledTextCtrl();
 
 private:
 	wxSplitterWindow* m_splitter;

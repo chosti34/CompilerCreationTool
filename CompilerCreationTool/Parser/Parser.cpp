@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Parser.h"
-#include "ParserState.h"
 #include "Action.h"
+#include "ParserState.h"
 #include "../Utils/string_utils.h"
 
 #include <map>
@@ -11,25 +11,38 @@
 
 namespace
 {
-void NoAction()
+void Log(IParserLogger* logger, const std::string& message)
 {
-	std::cout << "No action" << std::endl;
+	if (logger)
+	{
+		logger->Log(message);
+	}
 }
 
-void PrintHello()
+class ParserActionPerformer
 {
-	std::cout << "Hello, ";
-}
+public:
+	ParserActionPerformer(IParserLogger* logger)
+		: mLogger(logger)
+	{
+	}
 
-void PrintWorld()
-{
-	std::cout << "World" << std::endl;
-}
+	void DoNoAction()
+	{
+	}
 
-const std::map<ActionType, std::function<void()>> gcFunctionsMap = {
-	{ ActionType::None, NoAction },
-	{ ActionType::PrintHello, PrintHello },
-	{ ActionType::PrintWorld, PrintWorld }
+	void DoPrintHello()
+	{
+		Log(mLogger, "Hello\n");
+	}
+
+	void DoPrintWorld()
+	{
+		Log(mLogger, "World\n");
+	}
+
+private:
+	IParserLogger* mLogger;
 };
 }
 
@@ -41,11 +54,19 @@ Parser::Parser(std::unique_ptr<IParserTable> && table, ILexer& lexer)
 
 bool Parser::Parse(const std::string& text)
 {
-	m_lexer.SetText(text);
-	Token token = m_lexer.GetNextToken();
+	ParserActionPerformer performer(mLogger.get());
+	const std::map<ActionType, std::function<void()>> cFunctionMap = {
+		{ ActionType::None, std::bind(&ParserActionPerformer::DoNoAction, &performer ) },
+		{ ActionType::PrintHello, std::bind(&ParserActionPerformer::DoPrintHello, &performer) },
+		{ ActionType::PrintWorld, std::bind(&ParserActionPerformer::DoPrintWorld, &performer) }
+	};
 
 	size_t index = 0;
 	std::vector<size_t> addresses;
+
+	m_lexer.SetText(text);
+	Token token = m_lexer.GetNextToken();
+	Log(mLogger.get(), "[#" + std::to_string(index) + "] " + "Token '" + token.name + "' read by lexer\n");
 
 	while (true)
 	{
@@ -53,15 +74,19 @@ bool Parser::Parse(const std::string& text)
 
 		if (state.GetFlag(StateFlag::Attribute))
 		{
-			auto index = GetActionIndex(state.GetName());
-			assert(index);
-			auto& fn = gcFunctionsMap.at(m_actions[*index]->GetType());
-			fn();
+			auto found = FindActionIndexByName(state.GetName());
+			assert(found.is_initialized());
+			auto& func = cFunctionMap.at(m_actions[*found]->GetType());
+			Log(mLogger.get(), "[#" + std::to_string(index) + "]" + "Performing action '" + state.GetName() + "'...\n");
+			func();
 		}
 		else if (!state.AcceptsTerminal(token.name))
 		{
 			if (state.GetFlag(StateFlag::Error))
 			{
+				Log(mLogger.get(), "[#" + std::to_string(index) + "] " + "Parser doesn't accept token '" + token.name + "'\n");
+				Log(mLogger.get(), "List of acceptable tokens: " +
+					string_utils::JoinStrings(*state.GetAcceptableTerminals(), ", ", "[", "]") + "\n");
 				return false;
 			}
 			else
@@ -83,6 +108,7 @@ bool Parser::Parse(const std::string& text)
 		if (state.GetFlag(StateFlag::Shift))
 		{
 			token = m_lexer.GetNextToken();
+			Log(mLogger.get(), "[#" + std::to_string(index) + "] " + "Token '" + token.name + "' read by lexer\n");
 		}
 
 		if (auto next = state.GetNextAddress())
@@ -137,7 +163,7 @@ const IAction& Parser::GetAction(size_t index) const
 	return *m_actions[index];
 }
 
-IAction & Parser::GetAction(size_t index)
+IAction& Parser::GetAction(size_t index)
 {
 	if (index >= m_actions.size())
 	{
@@ -151,7 +177,22 @@ size_t Parser::GetActionsCount() const
 	return m_actions.size();
 }
 
-boost::optional<size_t> Parser::GetActionIndex(const std::string& name)
+void Parser::SetLogger(std::unique_ptr<IParserLogger> && logger)
+{
+	mLogger = std::move(logger);
+}
+
+const IParserLogger* Parser::GetLogger() const
+{
+	return mLogger.get();
+}
+
+IParserLogger* Parser::GetLogger()
+{
+	return mLogger.get();
+}
+
+boost::optional<size_t> Parser::FindActionIndexByName(const std::string& name)
 {
 	for (size_t i = 0; i < m_actions.size(); ++i)
 	{

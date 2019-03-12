@@ -2,6 +2,7 @@
 #include "LanguageController.h"
 #include "TerminalEditDialog.h"
 #include "ActionEditDialog.h"
+#include "TextCtrlLogger.h"
 #include "LanguageInformationDialog.h"
 #include "../Grammar/GrammarBuilder.h"
 #include <functional>
@@ -37,6 +38,7 @@ void LanguageController::OnLanguageBuildButtonPress()
 {
 	auto builder = std::make_unique<grammarlib::GrammarBuilder>();
 	m_language->SetGrammar(builder->CreateGrammar(m_declarationView->GetDeclaration()));
+	m_language->GetParser().SetLogger(std::make_unique<TextCtrlLogger>(m_editorView->GetOutputStyledTextCtrl()));
 	m_declarationView->SetLexerTerminals(m_language->GetLexer());
 	m_declarationView->SetParserActions(m_language->GetParser());
 	m_statesView->SetParserTable(m_language->GetParser().GetTable());
@@ -44,26 +46,23 @@ void LanguageController::OnLanguageBuildButtonPress()
 
 void LanguageController::OnParserRunButtonPress()
 {
-	if (!m_language->IsInitialized())
-	{
-		wxMessageBox(
-			"Declare language before trying to parse text.",
-			"Error!",
-			wxICON_WARNING
-		);
-		return;
-	}
-
+	assert(m_language->IsInitialized());
 	IParser<bool>& parser = m_language->GetParser();
+
+	IParserLogger* logger = parser.GetLogger();
+	assert(logger);
+
+	logger->Clear();
+	logger->Log("[Parsing started]\n");
 	const bool noErrors = parser.Parse(m_editorView->GetUserInput().ToStdString());
 
 	if (noErrors)
 	{
-		m_editorView->LogOutput("Successfully parsed!\n");
+		logger->Log("[Successfully parsed!]\n");
 	}
 	else
 	{
-		m_editorView->LogOutput("Syntax error...\n");
+		logger->Log("[Failed to parse...]\n");
 	}
 }
 
@@ -115,16 +114,7 @@ void LanguageController::OnActionEdit(int index)
 
 void LanguageController::ShowLanguageInfoDialog()
 {
-	if (!m_language->IsInitialized())
-	{
-		wxMessageBox(
-			wxT("Language is not initialized yet"),
-			wxT("Can't show info"),
-			wxICON_WARNING
-		);
-		return;
-	}
-
+	assert(m_language->IsInitialized());
 	LanguageInformationDialog dialog(m_frame, m_language->GetInfo());
 	dialog.ShowModal();
 }

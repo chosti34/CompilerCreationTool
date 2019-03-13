@@ -8,17 +8,12 @@
 #include <sstream>
 #include <iostream>
 #include <algorithm>
+#include <boost/format.hpp>
+
+using namespace std::literals::string_literals;
 
 namespace
 {
-void Log(IParserLogger* logger, const std::string& message)
-{
-	if (logger)
-	{
-		logger->Log(message);
-	}
-}
-
 class ParserActionPerformer
 {
 public:
@@ -33,12 +28,18 @@ public:
 
 	void DoPrintHello()
 	{
-		Log(mLogger, "Hello\n");
+		if (mLogger)
+		{
+			mLogger->Log("Hello\n");
+		}
 	}
 
 	void DoPrintWorld()
 	{
-		Log(mLogger, "World\n");
+		if (mLogger)
+		{
+			mLogger->Log("World\n");
+		}
 	}
 
 private:
@@ -47,8 +48,10 @@ private:
 }
 
 Parser::Parser(std::unique_ptr<IParserTable> && table, ILexer& lexer)
-	: m_table(std::move(table))
-	, m_lexer(lexer)
+	: mTable(std::move(table))
+	, mLexer(lexer)
+	, mActionList()
+	, mLogger(nullptr)
 {
 }
 
@@ -64,33 +67,47 @@ bool Parser::Parse(const std::string& text)
 	size_t index = 0;
 	std::vector<size_t> addresses;
 
-	m_lexer.SetText(text);
-	Token token = m_lexer.GetNextToken();
-	Log(mLogger.get(), "[#" + std::to_string(index) + "] " + "Token '" + token.name + "' read by lexer\n");
+	mLexer.SetText(text);
+	Token token;
+
+	try
+	{
+		token = FetchNextToken(index);
+	}
+	catch (const std::exception& ex)
+	{
+		LogIfNotNull("Lexer error: "s + ex.what(), index);
+		return false;
+	}
 
 	while (true)
 	{
-		const IParserState& state = m_table->GetState(index);
+		const IParserState& state = mTable->GetState(index);
 
 		if (state.GetFlag(StateFlag::Attribute))
 		{
 			auto found = FindActionIndexByName(state.GetName());
 			assert(found.is_initialized());
-			auto& func = cFunctionMap.at(m_actions[*found]->GetType());
-			Log(mLogger.get(), "[#" + std::to_string(index) + "]" + "Performing action '" + state.GetName() + "'...\n");
+			auto& func = cFunctionMap.at(mActionList[*found]->GetType());
+			LogIfNotNull("Performing action '" + state.GetName() + "'", index);
 			func();
 		}
 		else if (!state.AcceptsTerminal(token.name))
 		{
 			if (state.GetFlag(StateFlag::Error))
 			{
-				Log(mLogger.get(), "[#" + std::to_string(index) + "] " + "Parser doesn't accept token '" + token.name + "'\n");
-				Log(mLogger.get(), "List of acceptable tokens: " +
-					string_utils::JoinStrings(*state.GetAcceptableTerminals(), ", ", "[", "]") + "\n");
+				LogIfNotNull("Parser doesn't accept token '" +
+					token.name + "' at error state", index);
+				const std::string acceptables = string_utils::JoinStrings(
+					*state.GetAcceptableTerminals(), ", ", "[", "]");
+				LogIfNotNull("List of acceptable tokens: " + acceptables);
 				return false;
 			}
 			else
 			{
+				LogIfNotNull("Parser doesn't accept token '" +
+					token.name + "', switching to alternative #" +
+					std::to_string(index + 1) + "...", index);
 				++index;
 				continue;
 			}
@@ -107,8 +124,15 @@ bool Parser::Parse(const std::string& text)
 		}
 		if (state.GetFlag(StateFlag::Shift))
 		{
-			token = m_lexer.GetNextToken();
-			Log(mLogger.get(), "[#" + std::to_string(index) + "] " + "Token '" + token.name + "' read by lexer\n");
+			try
+			{
+				token = FetchNextToken(index);
+			}
+			catch (const std::exception& ex)
+			{
+				LogIfNotNull("Lexer error: "s + ex.what(), index);
+				return false;
+			}
 		}
 
 		if (auto next = state.GetNextAddress())
@@ -129,52 +153,52 @@ bool Parser::Parse(const std::string& text)
 
 const IParserTable& Parser::GetTable() const
 {
-	return *m_table;
+	return *mTable;
 }
 
-void Parser::SetActionNames(const std::vector<std::string> &actions)
+void Parser::SetActionNames(const std::vector<std::string>& actions)
 {
 	for (const std::string& name : actions)
 	{
-		m_actions.emplace_back(std::make_unique<Action>(name, ActionType::None));
+		mActionList.emplace_back(std::make_unique<Action>(name, ActionType::None));
 	}
 }
 
 void Parser::SetAction(size_t index, std::unique_ptr<IAction> && action)
 {
-	if (index >= m_actions.size())
+	if (index >= mActionList.size())
 	{
 		throw std::out_of_range("index must be less than actions count");
 	}
-	m_actions[index] = std::move(action);
+	mActionList[index] = std::move(action);
 }
 
 void Parser::SwapActions(size_t oldPos, size_t newPos)
 {
-	std::iter_swap(m_actions.begin() + oldPos, m_actions.begin() + newPos);
+	std::iter_swap(mActionList.begin() + oldPos, mActionList.begin() + newPos);
 }
 
 const IAction& Parser::GetAction(size_t index) const
 {
-	if (index >= m_actions.size())
+	if (index >= mActionList.size())
 	{
 		throw std::out_of_range("index must be less than actions count");
 	}
-	return *m_actions[index];
+	return *mActionList[index];
 }
 
 IAction& Parser::GetAction(size_t index)
 {
-	if (index >= m_actions.size())
+	if (index >= mActionList.size())
 	{
 		throw std::out_of_range("index must be less than actions count");
 	}
-	return *m_actions[index];
+	return *mActionList[index];
 }
 
 size_t Parser::GetActionsCount() const
 {
-	return m_actions.size();
+	return mActionList.size();
 }
 
 void Parser::SetLogger(std::unique_ptr<IParserLogger> && logger)
@@ -192,15 +216,43 @@ IParserLogger* Parser::GetLogger()
 	return mLogger.get();
 }
 
+Token Parser::FetchNextToken(size_t currentStateIndex)
+{
+	const Token token = mLexer.GetNextToken();
+	const auto fmt = boost::format("Token (%1%%2%) read by lexer")
+		% token.name
+		% (token.value != token.name && !token.value.empty() ? (", \"" + token.value + "\"") : "");
+	LogIfNotNull(fmt.str(), currentStateIndex);
+	return token;
+}
+
 boost::optional<size_t> Parser::FindActionIndexByName(const std::string& name)
 {
-	for (size_t i = 0; i < m_actions.size(); ++i)
+	for (size_t i = 0; i < mActionList.size(); ++i)
 	{
-		const auto& pAction = m_actions[i];
+		const auto& pAction = mActionList[i];
 		if (pAction->GetName() == name)
 		{
 			return boost::make_optional(i);
 		}
 	}
 	return boost::none;
+}
+
+void Parser::LogIfNotNull(
+	const std::string& message,
+	boost::optional<size_t> state,
+	bool newline
+)
+{
+	if (!mLogger)
+	{
+		return;
+	}
+
+	mLogger->Log((state ? "[#" + std::to_string(*state) + "] " : "") + message);
+	if (newline)
+	{
+		mLogger->Log("\n");
+	}
 }

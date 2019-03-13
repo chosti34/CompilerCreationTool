@@ -14,7 +14,9 @@ public:
 
 public:
 	MainFrame(const wxString& title, const wxSize& size);
+
 	MainPanel* GetMainPanel();
+	wxStatusBar* GetStatusBar();
 
 	SignalScopedConnection DoOnLanguageBuildButtonPress(LanguageBuildSignal::slot_type slot);
 	SignalScopedConnection DoOnParserRunButtonPress(ParserRunSignal::slot_type slot);
@@ -24,7 +26,6 @@ private:
 	void ShowAboutMessageBox();
 
 	wxDECLARE_EVENT_TABLE();
-
 	void OnExit(wxCommandEvent& event);
 	void OnAbout(wxCommandEvent& event);
 	void OnSize(wxSizeEvent& event);
@@ -38,6 +39,7 @@ private:
 private:
 	MainPanel* m_panel;
 	wxToolBar* mToolbar;
+	wxStatusBar* mStatusBar;
 	LanguageBuildSignal m_languageBuildButtonPressSignal;
 	ParserRunSignal m_parserRunButtonPressSignal;
 	InfoQuerySignal m_infoQuerySignal;

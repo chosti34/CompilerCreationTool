@@ -23,4 +23,4 @@ private:
 	bool m_isEnding;
 };
 
-const std::vector<TokenPattern> &GetPredefinedPatterns();
+const std::vector<TokenPattern>& GetPredefinedPatterns();

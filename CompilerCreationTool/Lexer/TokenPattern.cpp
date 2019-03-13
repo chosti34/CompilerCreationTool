@@ -7,9 +7,9 @@
 namespace
 {
 const std::vector<TokenPattern> gcPredefinedPatterns = {
-	{ "Identifier", "id" },
-	{ "Integer", "[1-9][0-9]*" },
-	{ "Float", "[1-9]\\.[0-9]+" }
+	{ "Identifier", "([A-Za-z_])([A-Za-z0-9])*" },
+	{ "Integer", "0|[1-9][0-9]*" },
+	{ "Float", "(0|[1-9])\\.[0-9]+" }
 };
 
 bool RegexAllowsEmptyString(const std::regex& regex)
@@ -69,7 +69,7 @@ bool TokenPattern::IsEnding() const
 	return m_isEnding;
 }
 
-const std::vector<TokenPattern> &GetPredefinedPatterns()
+const std::vector<TokenPattern>& GetPredefinedPatterns()
 {
 	return gcPredefinedPatterns;
 }

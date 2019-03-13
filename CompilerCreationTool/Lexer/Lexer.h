@@ -21,9 +21,12 @@ public:
 
 private:
 	void SkipWhitespaces();
+	void UpdatePositions(const std::string& str);
 
 private:
 	size_t mPosition;
+	size_t mLine;
+	size_t mColumn;
 	std::string mText;
 	RegexMatchResults mMatchResults;
 	std::vector<TokenPattern> mPatterns;

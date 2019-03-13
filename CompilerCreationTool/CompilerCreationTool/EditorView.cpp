@@ -59,11 +59,19 @@ EditorView::EditorView(wxWindow* parent)
 	m_right = new wxPanel(m_splitter, wxID_ANY);
 	m_output = SetupRightPanel(*m_right);
 
+	m_input->Bind(wxEVT_STC_UPDATEUI, &EditorView::OnOutputStyledTextCtrlUpdateUI, this);
+
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
 	sizer->Add(m_splitter, 1, wxEXPAND);
 	SetSizerAndFit(sizer);
 
 	SetDoubleBuffered(true);
+}
+
+SignalScopedConnection EditorView::DoOnInputTextCtrlCursorUpdate(
+	CursorUpdateSignal::slot_type slot)
+{
+	return mCursorUpdateSignal.connect(slot);
 }
 
 void EditorView::SplitPanels(float sashPositionPercentage)
@@ -76,6 +84,20 @@ void EditorView::SplitPanels(float sashPositionPercentage)
 wxString EditorView::GetUserInput()
 {
 	return m_input->GetValue();
+}
+
+void EditorView::OnOutputStyledTextCtrlUpdateUI(wxStyledTextEvent& event)
+{
+	int linePos = 0;
+	m_input->GetCurLine(&linePos);
+
+	mCursorUpdateSignal(
+		m_input->GetCurrentLine() + 1,
+		m_input->GetColumn(m_input->GetCurrentPos()) + 1,
+		linePos + 1
+	);
+
+	event.Skip(true);
 }
 
 wxStyledTextCtrl* EditorView::GetOutputStyledTextCtrl()

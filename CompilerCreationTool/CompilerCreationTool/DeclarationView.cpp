@@ -57,10 +57,9 @@ DeclarationView::DeclarationView(wxWindow* parent)
 	m_editTerminalButton->Bind(wxEVT_BUTTON,
 		&DeclarationView::OnTerminalButtonEdit, this);
 
-	m_terminalsListbox->Bind(wxEVT_LEFT_DOWN,
-		&DeclarationView::OnTerminalsListboxMouseDown, this);
-	m_terminalsListbox->Bind(wxEVT_LISTBOX_DCLICK,
-		&DeclarationView::OnTerminalsListboxDoubleClick, this);
+	m_terminalsListbox->Bind(wxEVT_LEFT_DOWN, &DeclarationView::OnTerminalsListboxMouseDown, this);
+	m_terminalsListbox->Bind(wxEVT_LISTBOX_DCLICK, &DeclarationView::OnTerminalsListboxDoubleClick, this);
+	m_terminalsListbox->Bind(wxEVT_LISTBOX, &DeclarationView::OnTerminalsListboxSelection, this);
 
 	m_upActionButton->Bind(wxEVT_BUTTON, &DeclarationView::OnActionButtonUp, this);
 	m_downActionButton->Bind(wxEVT_BUTTON, &DeclarationView::OnActionButtonDown, this);
@@ -68,6 +67,9 @@ DeclarationView::DeclarationView(wxWindow* parent)
 
 	m_actionsListbox->Bind(wxEVT_LEFT_DOWN, &DeclarationView::OnActionsListboxMouseDown, this);
 	m_actionsListbox->Bind(wxEVT_LISTBOX_DCLICK, &DeclarationView::OnActionsListboxDoubleClick, this);
+	m_actionsListbox->Bind(wxEVT_LISTBOX, &DeclarationView::OnActionsListboxSelection, this);
+
+	m_input->Bind(wxEVT_STC_UPDATEUI, &DeclarationView::OnTextCtrlCursorUpdate, this);
 
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
 	sizer->Add(m_splitter, 1, wxEXPAND | wxALL, 5);
@@ -176,6 +178,11 @@ void DeclarationView::SplitPanels(float sashPositionPercentage)
 	);
 }
 
+SignalScopedConnection DeclarationView::DoOnTextCtrlCursorUpdate(CursorUpdateSignal::slot_type slot)
+{
+	return mTextCtrlCursorUpdateSignal.connect(slot);
+}
+
 void DeclarationView::SetLexerTerminals(const ILexer& lexer)
 {
 	m_terminalsListbox->Clear();
@@ -210,6 +217,11 @@ SignalScopedConnection DeclarationView::DoOnTerminalEdit(
 	return m_terminalEditSignal.connect(slot);
 }
 
+SignalScopedConnection DeclarationView::DoOnTerminalSelection(SelectionSignal::slot_type slot)
+{
+	return mTerminalSelectionSignal.connect(slot);
+}
+
 SignalScopedConnection DeclarationView::DoOnActionPositionChange(
 	PositionChangeSignal::slot_type slot)
 {
@@ -220,6 +232,11 @@ SignalScopedConnection DeclarationView::DoOnActionEdit(
 	ItemEditSignal::slot_type slot)
 {
 	return m_actionEditSignal.connect(slot);
+}
+
+SignalScopedConnection DeclarationView::DoOnActionSelection(SelectionSignal::slot_type slot)
+{
+	return mActionSelectionSignal.connect(slot);
 }
 
 void DeclarationView::OnTerminalButtonUp(wxCommandEvent&)
@@ -282,6 +299,13 @@ void DeclarationView::OnTerminalsListboxMouseDown(wxMouseEvent& event)
 	event.Skip(true);
 }
 
+void DeclarationView::OnTerminalsListboxSelection(wxCommandEvent& event)
+{
+	assert(m_terminalsListbox->GetSelection() == event.GetSelection());
+	assert(m_terminalsListbox->GetSelection() != wxNOT_FOUND);
+	mTerminalSelectionSignal(event.GetSelection());
+}
+
 void DeclarationView::OnActionButtonUp(wxCommandEvent&)
 {
 	const int selection = m_actionsListbox->GetSelection();
@@ -339,5 +363,26 @@ void DeclarationView::OnActionsListboxMouseDown(wxMouseEvent& event)
 	{
 		m_actionsListbox->Deselect(wxNOT_FOUND);
 	}
+	event.Skip(true);
+}
+
+void DeclarationView::OnActionsListboxSelection(wxCommandEvent& event)
+{
+	assert(m_actionsListbox->GetSelection() == event.GetSelection());
+	assert(m_actionsListbox->GetSelection() != wxNOT_FOUND);
+	mActionSelectionSignal(event.GetSelection());
+}
+
+void DeclarationView::OnTextCtrlCursorUpdate(wxStyledTextEvent& event)
+{
+	int linePos = 0;
+	m_input->GetCurLine(&linePos);
+
+	mTextCtrlCursorUpdateSignal(
+		m_input->GetCurrentLine() + 1,
+		m_input->GetColumn(m_input->GetCurrentPos()) + 1,
+		linePos + 1
+	);
+
 	event.Skip(true);
 }

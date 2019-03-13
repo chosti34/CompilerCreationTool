@@ -32,6 +32,21 @@ wxMenuBar* CreateMenuBar()
 	return menubar;
 }
 
+void CustomizeStatusBar(wxStatusBar& statusbar)
+{
+	statusbar.SetStatusText(wxT("\tWelcome to CompilerCreationTool!"), 0);
+	statusbar.SetStatusText(wxT("Ln 1"), 1);
+	statusbar.SetStatusText(wxT("Col 1"), 2);
+	statusbar.SetStatusText(wxT("Ch 1"), 3);
+	statusbar.SetStatusText(wxT("Select Item..."), 4);
+
+	const int styles[] = { wxSB_FLAT, wxSB_FLAT, wxSB_FLAT, wxSB_FLAT, wxSB_FLAT };
+	statusbar.SetStatusStyles(5, styles);
+
+	const int widths[] = { -5, -1, -1, -2, -1 };
+	statusbar.SetStatusWidths(5, widths);
+}
+
 void AddTools(wxToolBar& toolbar)
 {
 	const wxSize iconSize(24, 24);
@@ -75,24 +90,30 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	mToolbar->EnableTool(ButtonID::Run, false);
 	mToolbar->EnableTool(ButtonID::Info, false);
 
+	mStatusBar = CreateStatusBar(5);
+	CustomizeStatusBar(*mStatusBar);
+
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 	wxStaticLine* line = new wxStaticLine(this, wxID_ANY);
 	sizer->Add(line, 0, wxEXPAND);
 	sizer->Add(m_panel, 1, wxEXPAND);
 
 	SetSizer(sizer);
-	CreateStatusBar();
-	SetStatusText(wxT("Welcome to CompilerCreationTool!"));
-	Centre();
-
+	// Interface adjustments after layouts by sizer
 	m_panel->GetParsesStatesView()->AdjustColumnWidth();
 	m_panel->GetCodeEditorView()->SplitPanels(0.5f);
 	m_panel->GetGrammarDeclarationView()->SplitPanels(0.6f);
+	Centre();
 }
 
 MainPanel* MainFrame::GetMainPanel()
 {
 	return m_panel;
+}
+
+wxStatusBar* MainFrame::GetStatusBar()
+{
+	return mStatusBar;
 }
 
 SignalScopedConnection MainFrame::DoOnLanguageBuildButtonPress(

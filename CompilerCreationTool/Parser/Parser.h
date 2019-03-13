@@ -7,12 +7,17 @@
 class Parser : public IParser<bool>
 {
 public:
+	using ActionPtrList = std::vector<std::unique_ptr<IAction>>;
+	using ParserLoggerPtr = std::unique_ptr<IParserLogger>;
+	using ParserTablePtr = std::unique_ptr<IParserTable>;
+
+public:
 	explicit Parser(std::unique_ptr<IParserTable> && table, ILexer& lexer);
 
 	bool Parse(const std::string& text) override;
 	const IParserTable& GetTable() const override;
 
-	void SetActionNames(const std::vector<std::string> &actions) override;
+	void SetActionNames(const std::vector<std::string>& actions) override;
 	void SetAction(size_t index, std::unique_ptr<IAction> && action) override;
 	void SwapActions(size_t oldPos, size_t newPos) override;
 
@@ -25,11 +30,18 @@ public:
 	IParserLogger* GetLogger() override;
 
 private:
+	Token FetchNextToken(size_t currentStateIndex);
 	boost::optional<size_t> FindActionIndexByName(const std::string& name);
 
+	void LogIfNotNull(
+		const std::string& message,
+		boost::optional<size_t> state = boost::none,
+		bool newline = true
+	);
+
 private:
-	std::vector<std::unique_ptr<IAction>> m_actions;
-	std::unique_ptr<IParserLogger> mLogger;
-	std::unique_ptr<IParserTable> m_table;
-	ILexer& m_lexer;
+	ParserTablePtr mTable;
+	ILexer& mLexer;
+	ActionPtrList mActionList;
+	ParserLoggerPtr mLogger;
 };

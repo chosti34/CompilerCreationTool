@@ -15,12 +15,13 @@ class App : public wxApp
 public:
 	bool OnInit() override
 	{
-		m_frame = new MainFrame(TITLE, WINDOW_INITIAL_SIZE);
+		m_language = std::make_unique<Language>(); // model
+		m_frame = new MainFrame(TITLE, WINDOW_INITIAL_SIZE); // view
+		m_controller = std::make_unique<LanguageController>(m_language.get(), m_frame); // controller
+
 		m_frame->SetMinSize(WINDOW_MIN_SIZE);
 		m_frame->Show(true);
 
-		m_language = std::make_unique<Language>();
-		m_controller = std::make_unique<LanguageController>(m_language.get(), m_frame);
 		return true;
 	}
 

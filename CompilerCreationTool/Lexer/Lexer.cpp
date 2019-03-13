@@ -18,6 +18,11 @@ bool SearchAndSaveMatch(
 		std::regex_constants::match_flag_type::match_continuous;
 	return std::regex_search(text.c_str() + fromPosition, match, regex, flags);
 }
+
+bool IsNewlineCharacter(char ch)
+{
+	return ch == '\n' || ch == '\r' || ch == '\r\n';
+}
 }
 
 Token Lexer::GetNextToken()
@@ -30,9 +35,8 @@ Token Lexer::GetNextToken()
 			continue;
 		}
 
-		for (size_t i = 0; i < mPatterns.size(); ++i)
+		for (const TokenPattern& pattern : mPatterns)
 		{
-			const TokenPattern& pattern = mPatterns[i];
 			if (pattern.IsEnding())
 			{
 				continue;
@@ -42,12 +46,16 @@ Token Lexer::GetNextToken()
 			{
 				const std::string value = mMatchResults.str();
 				Token token = { pattern.GetName(), value };
-				mPosition += value.length();
+				UpdatePositions(value);
 				return token;
 			}
 		}
 
-		throw std::invalid_argument("lexer can't parse token");
+		throw std::invalid_argument(
+			"can't read token at line " +
+			std::to_string(mLine + 1) + ", ch " +
+			std::to_string(mColumn + 1)
+		);
 	}
 
 	for (const TokenPattern& pattern : mPatterns)
@@ -64,6 +72,8 @@ void Lexer::SetText(const std::string& text)
 {
 	mText = text;
 	mPosition = 0;
+	mColumn = 0;
+	mLine = 0;
 }
 
 void Lexer::AppendPattern(const TokenPattern& pattern)
@@ -112,6 +122,26 @@ void Lexer::SkipWhitespaces()
 {
 	while (mPosition < mText.length() && std::isspace(mText[mPosition]))
 	{
+		++mColumn;
+		if (IsNewlineCharacter(mText[mPosition]))
+		{
+			++mLine;
+			mColumn = 0;
+		}
 		++mPosition;
+	}
+}
+
+void Lexer::UpdatePositions(const std::string& str)
+{
+	for (char ch : str)
+	{
+		++mPosition;
+		++mColumn;
+		if (IsNewlineCharacter(ch))
+		{
+			++mLine;
+			mColumn = 0;
+		}
 	}
 }

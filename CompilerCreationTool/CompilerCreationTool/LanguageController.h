@@ -11,7 +11,7 @@ private:
 	void UpdateStatusbarTerminalInfo(int index);
 	void UpdateStatusbarActionInfo(int index);
 
-	// Signal handlers
+	// Signal handlers //
 	void OnLanguageBuildButtonPress();
 	void OnParserRunButtonPress();
 	void OnLanguageInfoButtonPress();
@@ -27,10 +27,12 @@ private:
 	void OnDeclarationTextCtrlCursorUpdate(int line, int col, int ch);
 	void OnEditorTextCtrlCursorUpdate(int line, int col, int ch);
 	void OnCursorUpdate(int line, int col, int ch);
+	//////////////////////////////////////////////////////////////////////////
 
 private:
 	Language* m_language;
 	MainFrame* m_frame;
+	TreeView* mTreeView;
 	EditorView* m_editorView;
 	StatesView* m_statesView;
 	DeclarationView* m_declarationView;

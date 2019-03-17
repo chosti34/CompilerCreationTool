@@ -15,7 +15,7 @@ public:
 		CursorUpdateSignal::slot_type slot);
 
 	void SplitPanels(float sashPositionPercentage);
-	wxStyledTextCtrl* GetOutputStyledTextCtrl();
+	wxTextCtrl* GetOutputTextCtrl();
 	wxString GetUserInput();
 
 private:
@@ -25,7 +25,7 @@ private:
 	CursorUpdateSignal mCursorUpdateSignal;
 	wxSplitterWindow* m_splitter;
 	wxStyledTextCtrl* m_input;
-	wxStyledTextCtrl* m_output;
+	wxTextCtrl* m_output;
 	wxPanel* m_left;
 	wxPanel* m_right;
 };

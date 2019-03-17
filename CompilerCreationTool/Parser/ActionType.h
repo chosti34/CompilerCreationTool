@@ -5,10 +5,14 @@
 enum class ActionType
 {
 	None,
-	PrintHello,
-	PrintWorld
+	CreateIntegerNumberNode,
+	CreateFloatNumberNode,
+	CreateBinaryPlusNode,
+	CreateBinaryMinusNode,
+	CreateBinaryMulNode,
+	CreateBinaryDivNode
 };
 
-const std::vector<ActionType>& GetAllActionTypes();
+const std::vector<ActionType>& GetActionTypesList();
 int GetActionTypeIndex(ActionType type);
 std::string ToString(ActionType type);

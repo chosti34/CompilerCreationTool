@@ -4,7 +4,10 @@
 #include "ActionEditDialog.h"
 #include "TextCtrlLogger.h"
 #include "LanguageInformationDialog.h"
+#include "ASTGraphvizVisualizer.h"
 #include "../Grammar/GrammarBuilder.h"
+#include "../Utils/command_utils.h"
+#include "../Utils/time_utils.h"
 #include <functional>
 
 LanguageController::LanguageController(Language* language, MainFrame* frame)
@@ -13,6 +16,7 @@ LanguageController::LanguageController(Language* language, MainFrame* frame)
 	, m_editorView(m_frame->GetMainPanel()->GetCodeEditorView())
 	, m_statesView(m_frame->GetMainPanel()->GetParsesStatesView())
 	, m_declarationView(m_frame->GetMainPanel()->GetGrammarDeclarationView())
+	, mTreeView(m_frame->GetMainPanel()->GetTreeView())
 {
 	namespace ph = std::placeholders;
 
@@ -61,7 +65,7 @@ void LanguageController::OnLanguageBuildButtonPress()
 {
 	auto builder = std::make_unique<grammarlib::GrammarBuilder>();
 	m_language->SetGrammar(builder->CreateGrammar(m_declarationView->GetDeclaration()));
-	m_language->GetParser().SetLogger(std::make_unique<TextCtrlLogger>(m_editorView->GetOutputStyledTextCtrl()));
+	m_language->GetParser().SetLogger(std::make_unique<TextCtrlLogger>(m_editorView->GetOutputTextCtrl()));
 	m_declarationView->SetLexerTerminals(m_language->GetLexer());
 	m_declarationView->SetParserActions(m_language->GetParser());
 	m_statesView->SetParserTable(m_language->GetParser().GetTable());
@@ -71,15 +75,44 @@ void LanguageController::OnParserRunButtonPress()
 {
 	assert(m_language->IsInitialized());
 
-	IParser<bool>& parser = m_language->GetParser();
+	IParser<ParseResults>& parser = m_language->GetParser();
 	IParserLogger* logger = parser.GetLogger();
-
 	assert(logger);
-	logger->Clear();
-	logger->Log("[Parsing started]\n");
 
-	const bool noErrors = parser.Parse(m_editorView->GetUserInput().ToStdString());
-	logger->Log(noErrors ? "[Successfully parsed!]\n" : "[Failed to parse...]\n");
+	logger->Log("[" + time_utils::GetCurrentTimeAsString() + "] Parsing started...\n");
+	const ParseResults results = parser.Parse(m_editorView->GetUserInput().ToStdString());
+	logger->Log(results.success ? "Successfully parsed!\n" : "Failed to parse...\n");
+
+	if (results.expression)
+	{
+		{
+			// Explicitly close file 'ast.dot'
+			ASTGraphvizVisualizer visualizer("ast.dot");
+			visualizer.Visualize(*results.expression);
+		}
+
+		if (command_utils::RunCommand(L"dot", L"-T png -o ast.png ast.dot"))
+		{
+			wxImage img;
+			img.LoadFile("ast.png");
+
+			if (img.IsOk())
+			{
+				mTreeView->SetImage(img);
+				logger->Log("AST has been drawn!\n");
+			}
+			else
+			{
+				logger->Log("Can't draw AST...\n");
+			}
+		}
+		else
+		{
+			logger->Log("Install Graphviz package to draw AST...\n");
+		}
+	}
+
+	logger->Log("=========================\n");
 }
 
 void LanguageController::OnLanguageInfoButtonPress()

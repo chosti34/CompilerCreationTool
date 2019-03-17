@@ -21,27 +21,15 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="string_utils.h">
+    <ClInclude Include="AST.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="command_utils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="time_utils.h">
+    <ClInclude Include="NodeVisitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="string_utils.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="command_utils.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="time_utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

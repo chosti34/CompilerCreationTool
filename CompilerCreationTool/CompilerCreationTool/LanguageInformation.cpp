@@ -35,7 +35,7 @@ bool HasAcceptableSetsCrossing(
 
 LanguageInformation::LanguageInformation(
 	const ILexer& lexer,
-	const IParser<bool>& parser,
+	const IParser<ParseResults>& parser,
 	const grammarlib::IGrammar& grammar,
 	const std::chrono::duration<double>& buildTime
 )

@@ -1,15 +1,14 @@
 #pragma once
-
 #include "Signal.h"
 #include "../Lexer/ILexer.h"
 #include "../Parser/IParser.h"
+#include "../Parser/ParseResults.h"
 
 #include <wx/panel.h>
 #include <wx/listbox.h>
 #include <wx/stc/stc.h>
 #include <wx/splitter.h>
 #include <wx/notebook.h>
-
 
 class DeclarationView : public wxPanel
 {
@@ -24,7 +23,7 @@ public:
 
 	wxString GetDeclaration() const;
 	void SetLexerTerminals(const ILexer& lexer);
-	void SetParserActions(const IParser<bool>& parser);
+	void SetParserActions(const IParser<ParseResults>& parser);
 	void SplitPanels(float sashPositionPercentage);
 
 	SignalScopedConnection DoOnTextCtrlCursorUpdate(CursorUpdateSignal::slot_type slot);

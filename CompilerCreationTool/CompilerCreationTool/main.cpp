@@ -2,6 +2,7 @@
 #include "Language.h"
 #include "MainFrame.h"
 #include "LanguageController.h"
+#include "../Utils/command_utils.h"
 
 namespace
 {
@@ -15,6 +16,8 @@ class App : public wxApp
 public:
 	bool OnInit() override
 	{
+		wxImage::AddHandler(new wxPNGHandler);
+
 		m_language = std::make_unique<Language>(); // model
 		m_frame = new MainFrame(TITLE, WINDOW_INITIAL_SIZE); // view
 		m_controller = std::make_unique<LanguageController>(m_language.get(), m_frame); // controller

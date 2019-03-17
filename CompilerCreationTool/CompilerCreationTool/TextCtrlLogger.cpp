@@ -2,7 +2,7 @@
 #include "TextCtrlLogger.h"
 #include <cassert>
 
-TextCtrlLogger::TextCtrlLogger(wxStyledTextCtrl* ctrl)
+TextCtrlLogger::TextCtrlLogger(wxTextCtrl* ctrl)
 	: mTextCtrl(ctrl)
 {
 	assert(mTextCtrl);
@@ -18,6 +18,6 @@ void TextCtrlLogger::Log(const std::string& message)
 void TextCtrlLogger::Clear()
 {
 	mTextCtrl->SetEditable(true);
-	mTextCtrl->ClearAll();
+	mTextCtrl->Clear();
 	mTextCtrl->SetEditable(false);
 }

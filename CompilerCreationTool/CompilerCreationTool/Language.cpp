@@ -67,13 +67,13 @@ const grammarlib::IGrammar& Language::GetGrammar() const
 	return *m_grammar;
 }
 
-IParser<bool>& Language::GetParser()
+IParser<ParseResults>& Language::GetParser()
 {
 	assert(m_parser);
 	return *m_parser;
 }
 
-const IParser<bool>& Language::GetParser() const
+const IParser<ParseResults>& Language::GetParser() const
 {
 	assert(m_parser);
 	return *m_parser;

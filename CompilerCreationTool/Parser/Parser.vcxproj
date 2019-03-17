@@ -155,6 +155,7 @@
     <ClInclude Include="IParserState.h" />
     <ClInclude Include="IParserTable.h" />
     <ClInclude Include="Parser.h" />
+    <ClInclude Include="ParseResults.h" />
     <ClInclude Include="ParserState.h" />
     <ClInclude Include="ParserTable.h" />
     <ClInclude Include="StateFlag.h" />

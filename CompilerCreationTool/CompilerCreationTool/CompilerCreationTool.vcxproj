@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ActionEditDialog.h" />
+    <ClInclude Include="ASTGraphvizVisualizer.h" />
     <ClInclude Include="Language.h" />
     <ClInclude Include="DeclarationView.h" />
     <ClInclude Include="LanguageController.h" />
@@ -163,11 +164,15 @@
     <ClInclude Include="StatesView.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Signal.h" />
+    <ClInclude Include="CtrlHelpers.h" />
     <ClInclude Include="TerminalEditDialog.h" />
     <ClInclude Include="TextCtrlLogger.h" />
+    <ClInclude Include="TreeView.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ActionEditDialog.cpp" />
+    <ClCompile Include="ASTGraphvizVisualizer.cpp" />
+    <ClCompile Include="CtrlHelpers.cpp" />
     <ClCompile Include="Language.cpp" />
     <ClCompile Include="DeclarationView.cpp" />
     <ClCompile Include="LanguageController.cpp" />
@@ -186,8 +191,12 @@
     </ClCompile>
     <ClCompile Include="TerminalEditDialog.cpp" />
     <ClCompile Include="TextCtrlLogger.cpp" />
+    <ClCompile Include="TreeView.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AST\AST.vcxproj">
+      <Project>{bce3d120-9e71-4717-b36b-01c26bdc39cc}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Grammar\Grammar.vcxproj">
       <Project>{555eef01-0f20-4390-abf1-05e69d985b70}</Project>
     </ProjectReference>

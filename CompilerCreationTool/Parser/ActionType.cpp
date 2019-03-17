@@ -7,18 +7,26 @@ namespace
 {
 const std::vector<ActionType> gcActionTypes = {
 	ActionType::None,
-	ActionType::PrintHello,
-	ActionType::PrintWorld
+	ActionType::CreateIntegerNumberNode,
+	ActionType::CreateFloatNumberNode,
+	ActionType::CreateBinaryPlusNode,
+	ActionType::CreateBinaryMinusNode,
+	ActionType::CreateBinaryMulNode,
+	ActionType::CreateBinaryDivNode
 };
 
 const std::unordered_map<ActionType, std::string> gcActionStringMap = {
 	{ ActionType::None, "None" },
-	{ ActionType::PrintHello, "PrintHello" },
-	{ ActionType::PrintWorld, "PrintWorld" }
+	{ ActionType::CreateIntegerNumberNode, "CreateIntegerNumberNode" },
+	{ ActionType::CreateFloatNumberNode, "CreateFloatNumberNode" },
+	{ ActionType::CreateBinaryPlusNode, "CreateBinaryPlusNode" },
+	{ ActionType::CreateBinaryMinusNode, "CreateBinaryMinusNode" },
+	{ ActionType::CreateBinaryMulNode, "CreateBinaryMulNode" },
+	{ ActionType::CreateBinaryDivNode, "CreateBinaryDivNode" }
 };
 }
 
-const std::vector<ActionType>& GetAllActionTypes()
+const std::vector<ActionType>& GetActionTypesList()
 {
 	return gcActionTypes;
 }

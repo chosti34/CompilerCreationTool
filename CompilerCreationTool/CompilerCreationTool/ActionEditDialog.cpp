@@ -19,7 +19,7 @@ ActionEditDialog::ActionEditDialog(wxWindow* parent, const IAction& action)
 
 	m_combo = new wxComboBox(box, wxID_ANY);
 
-	for (const ActionType& type : GetAllActionTypes())
+	for (const ActionType& type : GetActionTypesList())
 	{
 		m_combo->AppendString(ToString(type));
 	}
@@ -45,7 +45,7 @@ ActionEditDialog::ActionEditDialog(wxWindow* parent, const IAction& action)
 ActionType ActionEditDialog::GetActionTypeSelection() const
 {
 	const int selection = m_combo->GetSelection();
-	const auto& types = GetAllActionTypes();
+	const auto& types = GetActionTypesList();
 	assert(size_t(selection) < types.size());
 	return types[selection];
 }

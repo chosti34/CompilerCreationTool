@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "EditorView.h"
+#include "CtrlHelpers.h"
 #include <wx/statline.h>
 
 namespace
@@ -12,6 +13,7 @@ wxStyledTextCtrl* SetupLeftPanel(wxPanel& panel)
 	wxStyledTextCtrl* input = new wxStyledTextCtrl(
 		&panel, wxID_ANY, wxDefaultPosition,
 		wxDefaultSize, wxTE_DONTWRAP);
+	SetupStyledTextCtrlMargins(*input);
 
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 	sizer->Add(title, 0, wxEXPAND | wxTOP | wxLEFT | wxRIGHT, 5);
@@ -22,14 +24,15 @@ wxStyledTextCtrl* SetupLeftPanel(wxPanel& panel)
 	return input;
 }
 
-wxStyledTextCtrl* SetupRightPanel(wxPanel& panel)
+wxTextCtrl* SetupRightPanel(wxPanel& panel)
 {
 	wxStaticText* rightTitle = new wxStaticText(&panel, wxID_ANY, wxT("Output"));
 	wxStaticLine* rightLine = new wxStaticLine(&panel, wxID_ANY);
 
-	wxStyledTextCtrl* output = new wxStyledTextCtrl(
-		&panel, wxID_ANY, wxDefaultPosition,
-		wxDefaultSize, wxTE_DONTWRAP);
+	wxTextCtrl* output = new wxTextCtrl(
+		&panel, wxID_ANY, wxEmptyString,
+		wxDefaultPosition, wxDefaultSize,
+		wxTE_DONTWRAP | wxTE_MULTILINE);
 	output->SetEditable(false);
 
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
@@ -100,7 +103,7 @@ void EditorView::OnOutputStyledTextCtrlUpdateUI(wxStyledTextEvent& event)
 	event.Skip(true);
 }
 
-wxStyledTextCtrl* EditorView::GetOutputStyledTextCtrl()
+wxTextCtrl* EditorView::GetOutputTextCtrl()
 {
 	return m_output;
 }

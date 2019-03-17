@@ -1,6 +1,7 @@
 #pragma once
 #include "../Lexer/ILexer.h"
 #include "../Parser/IParser.h"
+#include "../Parser/ParseResults.h"
 #include "../Grammar/IGrammar.h"
 #include <unordered_set>
 #include <chrono>
@@ -10,7 +11,7 @@ class LanguageInformation
 public:
 	LanguageInformation(
 		const ILexer& lexer,
-		const IParser<bool>& parser,
+		const IParser<ParseResults>& parser,
 		const grammarlib::IGrammar& grammar,
 		const std::chrono::duration<double>& buildTime
 	);

@@ -1,10 +1,11 @@
 #pragma once
 #include "IParser.h"
+#include "ParseResults.h"
 #include "IParserTable.h"
 #include "IParserLogger.h"
 #include "../Lexer/ILexer.h"
 
-class Parser : public IParser<bool>
+class Parser : public IParser<ParseResults>
 {
 public:
 	using ActionPtrList = std::vector<std::unique_ptr<IAction>>;
@@ -14,7 +15,7 @@ public:
 public:
 	explicit Parser(std::unique_ptr<IParserTable> && table, ILexer& lexer);
 
-	bool Parse(const std::string& text) override;
+	ParseResults Parse(const std::string& text) override;
 	const IParserTable& GetTable() const override;
 
 	void SetActionNames(const std::vector<std::string>& actions) override;

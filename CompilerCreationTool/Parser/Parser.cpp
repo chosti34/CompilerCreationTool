@@ -14,35 +14,76 @@ using namespace std::literals::string_literals;
 
 namespace
 {
-class ParserActionPerformer
+template <typename T>
+T Pop(std::vector<T> & vect)
+{
+	auto value = std::move(vect.back());
+	vect.pop_back();
+	return std::move(value);
+}
+
+class ActionExecutor
 {
 public:
-	ParserActionPerformer(IParserLogger* logger)
-		: mLogger(logger)
+	ActionExecutor(const Token& token, IParserLogger* logger)
+		: mCurrentToken(token)
+		, mLogger(logger)
 	{
+	}
+
+	std::unique_ptr<IExpressionAST> GetExpressionRoot()
+	{
+		if (mExpressionsStack.size() == 1)
+		{
+			return Pop(mExpressionsStack);
+		}
+		return nullptr;
 	}
 
 	void DoNoAction()
 	{
 	}
 
-	void DoPrintHello()
+	void DoCreateIntegerNode()
 	{
-		if (mLogger)
+		try
 		{
-			mLogger->Log("Hello\n");
+			int value = std::stoi(mCurrentToken.value);
+			mExpressionsStack.push_back(std::make_unique<LiteralExpressionAST>(value));
+		}
+		catch (...)
+		{
+			throw std::runtime_error("failed to create integer node from: '" + mCurrentToken.name + "'");
 		}
 	}
 
-	void DoPrintWorld()
+	void DoCreateFloatNode()
 	{
-		if (mLogger)
+		try
 		{
-			mLogger->Log("World\n");
+			double value = std::stod(mCurrentToken.value);
+			mExpressionsStack.push_back(std::make_unique<LiteralExpressionAST>(value));
 		}
+		catch (...)
+		{
+			throw std::runtime_error("failed to create float node from: '" + mCurrentToken.name + "'");
+		}
+	}
+
+	void DoCreateBinaryNode(BinaryExpressionAST::Operator op)
+	{
+		if (mExpressionsStack.size() < 2)
+		{
+			throw std::runtime_error("expressions stack must contain atleast 2 elements");
+		}
+		auto right = Pop(mExpressionsStack);
+		auto left = Pop(mExpressionsStack);
+		mExpressionsStack.push_back(std::make_unique<BinaryExpressionAST>(std::move(left), std::move(right), op));
 	}
 
 private:
+	const Token& mCurrentToken;
+	std::vector<std::unique_ptr<IExpressionAST>> mExpressionsStack;
 	IParserLogger* mLogger;
 };
 }
@@ -55,20 +96,24 @@ Parser::Parser(std::unique_ptr<IParserTable> && table, ILexer& lexer)
 {
 }
 
-bool Parser::Parse(const std::string& text)
+ParseResults Parser::Parse(const std::string& text)
 {
-	ParserActionPerformer performer(mLogger.get());
-	const std::map<ActionType, std::function<void()>> cFunctionMap = {
-		{ ActionType::None, std::bind(&ParserActionPerformer::DoNoAction, &performer ) },
-		{ ActionType::PrintHello, std::bind(&ParserActionPerformer::DoPrintHello, &performer) },
-		{ ActionType::PrintWorld, std::bind(&ParserActionPerformer::DoPrintWorld, &performer) }
-	};
-
 	size_t index = 0;
 	std::vector<size_t> addresses;
 
 	mLexer.SetText(text);
 	Token token;
+
+	ActionExecutor executor(token, mLogger.get());
+	const std::map<ActionType, std::function<void()>> cActionMap = {
+		{ ActionType::None, std::bind(&ActionExecutor::DoNoAction, &executor) },
+		{ ActionType::CreateIntegerNumberNode, std::bind(&ActionExecutor::DoCreateIntegerNode, &executor) },
+		{ ActionType::CreateFloatNumberNode, std::bind(&ActionExecutor::DoCreateFloatNode, &executor) },
+		{ ActionType::CreateBinaryPlusNode, std::bind(&ActionExecutor::DoCreateBinaryNode, &executor, BinaryExpressionAST::Plus) },
+		{ ActionType::CreateBinaryMinusNode, std::bind(&ActionExecutor::DoCreateBinaryNode, &executor, BinaryExpressionAST::Minus) },
+		{ ActionType::CreateBinaryMulNode, std::bind(&ActionExecutor::DoCreateBinaryNode, &executor, BinaryExpressionAST::Mul) },
+		{ ActionType::CreateBinaryDivNode, std::bind(&ActionExecutor::DoCreateBinaryNode, &executor, BinaryExpressionAST::Div) }
+	};
 
 	try
 	{
@@ -77,7 +122,7 @@ bool Parser::Parse(const std::string& text)
 	catch (const std::exception& ex)
 	{
 		LogIfNotNull("Lexer error: "s + ex.what(), index);
-		return false;
+		return { false, nullptr };
 	}
 
 	while (true)
@@ -88,9 +133,20 @@ bool Parser::Parse(const std::string& text)
 		{
 			auto found = FindActionIndexByName(state.GetName());
 			assert(found.is_initialized());
-			auto& func = cFunctionMap.at(mActionList[*found]->GetType());
+			auto action = cActionMap.find(mActionList[*found]->GetType());
+			assert(action != cActionMap.end());
+
 			LogIfNotNull("Performing action '" + state.GetName() + "'", index);
-			func();
+			auto& func = action->second;
+
+			try
+			{
+				func();
+			}
+			catch (const std::exception& ex)
+			{
+				LogIfNotNull("Action error: "s + ex.what());
+			}
 		}
 		else if (!state.AcceptsTerminal(token.name))
 		{
@@ -101,7 +157,7 @@ bool Parser::Parse(const std::string& text)
 				const std::string acceptables = string_utils::JoinStrings(
 					*state.GetAcceptableTerminals(), ", ", "[", "]");
 				LogIfNotNull("List of acceptable tokens: " + acceptables);
-				return false;
+				return { false, nullptr };
 			}
 			else
 			{
@@ -116,7 +172,7 @@ bool Parser::Parse(const std::string& text)
 		if (state.GetFlag(StateFlag::End))
 		{
 			assert(addresses.empty());
-			return true;
+			return { true, executor.GetExpressionRoot() };
 		}
 		if (state.GetFlag(StateFlag::Push))
 		{
@@ -131,7 +187,7 @@ bool Parser::Parse(const std::string& text)
 			catch (const std::exception& ex)
 			{
 				LogIfNotNull("Lexer error: "s + ex.what(), index);
-				return false;
+				return { false, nullptr };
 			}
 		}
 

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "DeclarationView.h"
 #include "TerminalEditDialog.h"
+#include "CtrlHelpers.h"
 
 #include <wx/window.h>
 #include <wx/textctrl.h>
@@ -10,24 +11,6 @@
 
 namespace
 {
-// Setting up margins and line numbers of styled text control
-void ConfigureStyledTextControl(wxStyledTextCtrl& ctrl)
-{
-	const int cLeftMarginIndex = 0;
-	const int cRightMarginIndex = 1;
-
-	ctrl.SetMarginWidth(cLeftMarginIndex, 15);
-	ctrl.SetMarginType(cLeftMarginIndex, wxSTC_MARGIN_COLOUR);
-	ctrl.SetMarginBackground(cLeftMarginIndex, wxColour(245, 245, 245));
-
-	ctrl.SetMarginWidth(cRightMarginIndex, 20);
-	ctrl.StyleSetForeground(wxSTC_STYLE_LINENUMBER, wxColour(0, 191, 255));
-	ctrl.StyleSetBackground(wxSTC_STYLE_LINENUMBER, wxColour(255, 255, 255));
-	ctrl.SetMarginType(cRightMarginIndex, wxSTC_MARGIN_NUMBER);
-
-	ctrl.SetMarginLeft(10);
-}
-
 wxButton* CreateButton(wxPanel* panel, const wxArtID& artId)
 {
 	wxButton* button = new wxButton(panel, wxID_ANY);
@@ -85,7 +68,7 @@ void DeclarationView::CreateLeftPanelControls()
 	m_input = new wxStyledTextCtrl(
 		m_left, wxID_ANY, wxDefaultPosition,
 		wxDefaultSize, wxTE_DONTWRAP);
-	ConfigureStyledTextControl(*m_input);
+	SetupStyledTextCtrlMargins(*m_input);
 
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 	sizer->Add(m_input, 1, wxEXPAND | wxALL, 5);
@@ -194,7 +177,7 @@ void DeclarationView::SetLexerTerminals(const ILexer& lexer)
 	}
 }
 
-void DeclarationView::SetParserActions(const IParser<bool>& parser)
+void DeclarationView::SetParserActions(const IParser<ParseResults>& parser)
 {
 	m_actionsListbox->Clear();
 	for (size_t i = 0; i < parser.GetActionsCount(); ++i)

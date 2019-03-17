@@ -200,6 +200,7 @@ void MainFrame::OnHelp(wxCommandEvent&)
 
 void MainFrame::OnSize(wxSizeEvent& event)
 {
+	std::cout << event.GetSize().x << " " << event.GetSize().y << std::endl;
 	event.Skip();
 }
 

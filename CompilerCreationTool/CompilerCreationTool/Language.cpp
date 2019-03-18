@@ -29,36 +29,41 @@ std::unique_ptr<ILexer> CreateDefaultLexer(const IGrammar& grammar)
 }
 }
 
+Language::Language()
+{
+	Reset();
+}
+
+void Language::Reset()
+{
+	m_grammar = nullptr;
+	m_lexer = nullptr;
+	m_parser = nullptr;
+	m_info = nullptr;
+}
+
 bool Language::IsInitialized() const
 {
-	return m_grammar && m_lexer && m_parser && m_information;
+	return m_grammar && m_lexer && m_parser && m_info;
 }
 
 void Language::SetGrammar(std::unique_ptr<grammarlib::IGrammar> && grammar)
 {
-	if (grammar != nullptr)
-	{
-		// «амер€ем врем€ выполнени€ инициализации
-		auto beginTime = std::chrono::steady_clock::now();
+	assert(grammar);
 
-		// ¬ыполн€ем инициализацию пользовательского €зыка по грамматике
-		m_grammar = std::move(grammar);
-		m_lexer = CreateDefaultLexer(*m_grammar);
-		m_parser = std::make_unique<Parser>(ParserTable::Create(*m_grammar), *m_lexer);
-		m_parser->SetActionNames(GatherAllActions(*m_grammar));
+	// «амер€ем врем€ выполнени€ инициализации
+	auto beginTime = std::chrono::steady_clock::now();
 
-		auto endTime = std::chrono::steady_clock::now();
-		auto elapsedSeconds = std::chrono::duration<double>(endTime - beginTime);
+	// ¬ыполн€ем инициализацию пользовательского €зыка по грамматике
+	m_grammar = std::move(grammar);
+	m_lexer = CreateDefaultLexer(*m_grammar);
+	m_parser = std::make_unique<Parser>(ParserTable::Create(*m_grammar), *m_lexer);
+	m_parser->SetActionNames(GatherAllActions(*m_grammar));
 
-		m_information = std::make_unique<LanguageInformation>(*m_lexer, *m_parser, *m_grammar, elapsedSeconds);
-	}
-	else
-	{
-		m_grammar = nullptr;
-		m_lexer = nullptr;
-		m_parser = nullptr;
-		m_information = nullptr;
-	}
+	auto endTime = std::chrono::steady_clock::now();
+	auto elapsedSeconds = std::chrono::duration<double>(endTime - beginTime);
+
+	m_info = std::make_unique<LanguageInformation>(*m_lexer, *m_parser, *m_grammar, elapsedSeconds);
 }
 
 const grammarlib::IGrammar& Language::GetGrammar() const
@@ -93,6 +98,6 @@ const ILexer& Language::GetLexer() const
 
 const LanguageInformation& Language::GetInfo() const
 {
-	assert(m_information);
-	return *m_information;
+	assert(m_info);
+	return *m_info;
 }

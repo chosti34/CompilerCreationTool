@@ -83,7 +83,7 @@ void LanguageController::OnParserRunButtonPress()
 	const ParseResults results = parser.Parse(m_editorView->GetUserInput().ToStdString());
 	logger->Log(results.success ? "Successfully parsed!\n" : "Failed to parse...\n");
 
-	if (results.expression)
+	if (results.success && results.expression)
 	{
 		{
 			// Explicitly close file 'ast.dot'
@@ -110,6 +110,10 @@ void LanguageController::OnParserRunButtonPress()
 		{
 			logger->Log("Install Graphviz package to draw AST...\n");
 		}
+	}
+	else
+	{
+		mTreeView->UnsetImage();
 	}
 
 	logger->Log("=========================\n");

@@ -7,7 +7,7 @@
 namespace
 {
 const wxString TITLE = wxT("CompilerCreationTool");
-const wxSize WINDOW_INITIAL_SIZE = { 720, 580 };
+const wxSize WINDOW_INITIAL_SIZE = { 900, 750 };
 const wxSize WINDOW_MIN_SIZE = { 480, 320 };
 }
 

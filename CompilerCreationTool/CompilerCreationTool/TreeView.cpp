@@ -17,6 +17,7 @@ public:
 	{
 		wxScrolledWindow::Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SIMPLE);
 		SetDoubleBuffered(true);
+		Refresh(true);
 	}
 
 	void SetImage(const wxImage& image)
@@ -24,6 +25,12 @@ public:
 		mBitmap = std::make_unique<wxBitmap>(image);
 		SetScrollbars(gcScrollUnits, gcScrollUnits, mBitmap->GetWidth(), mBitmap->GetHeight(), 0, 0, true);
 		SetVirtualSize(mBitmap->GetWidth() + gcImageOffsetHor, mBitmap->GetHeight() + gcImageOffsetVert);
+		Refresh(true);
+	}
+
+	void UnsetImage()
+	{
+		mBitmap = nullptr;
 		Refresh(true);
 	}
 
@@ -38,6 +45,10 @@ private:
 		if (mBitmap)
 		{
 			dc.DrawBitmap(*mBitmap, gcImageOffsetHor, gcImageOffsetVert, true);
+		}
+		else
+		{
+			dc.Clear();
 		}
 	}
 
@@ -57,11 +68,18 @@ TreeView::TreeView(wxWindow* parent)
 	sizer->Add(mScrolledWindow, 1, wxEXPAND | wxALL, 10);
 	SetSizer(sizer);
 	SetDoubleBuffered(true);
+	Refresh(true);
 }
 
 void TreeView::SetImage(const wxImage& image)
 {
 	assert(image.IsOk());
 	mScrolledWindow->SetImage(image);
+	Refresh(true);
+}
+
+void TreeView::UnsetImage()
+{
+	mScrolledWindow->UnsetImage();
 	Refresh(true);
 }

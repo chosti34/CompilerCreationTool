@@ -101,7 +101,7 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	SetSizer(sizer);
 	// Interface adjustments after layouts by sizer
 	m_panel->GetParsesStatesView()->AdjustColumnWidth();
-	m_panel->GetCodeEditorView()->SplitPanels(0.5f);
+	m_panel->GetCodeEditorView()->SplitPanels(0.6f);
 	m_panel->GetGrammarDeclarationView()->SplitPanels(0.6f);
 	Centre();
 }

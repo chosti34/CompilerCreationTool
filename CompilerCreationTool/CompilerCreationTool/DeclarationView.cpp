@@ -38,22 +38,28 @@ DeclarationView::DeclarationView(wxWindow* parent)
 	SetupStyledTextCtrlMargins(*m_input);
 
 	wxStaticBoxSizer* terminalsStaticBoxSizer = new wxStaticBoxSizer(wxVERTICAL, this, "Terminals");
-	wxPanel* terminalsPanel = CreateTerminalsPanel(terminalsStaticBoxSizer->GetStaticBox());
-	terminalsStaticBoxSizer->Add(terminalsPanel, 1, wxEXPAND | wxALL, 5);
+	m_terminalsListbox = new wxListBox(
+		this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+		wxArrayString(), wxBORDER_SIMPLE
+	);
+	terminalsStaticBoxSizer->Add(m_terminalsListbox, 1, wxEXPAND | wxALL, 5);
 
 	wxStaticBoxSizer* actionsStaticBoxSizer = new wxStaticBoxSizer(wxVERTICAL, this, "Actions");
-	wxPanel* actionsPanel = CreateActionsPanel(actionsStaticBoxSizer->GetStaticBox());
-	actionsStaticBoxSizer->Add(actionsPanel, 1, wxEXPAND | wxALL, 5);
+	m_actionsListbox = new wxListBox(
+		this, wxID_ANY, wxDefaultPosition,
+		wxDefaultSize, wxArrayString(), wxBORDER_SIMPLE
+	);
+	actionsStaticBoxSizer->Add(m_actionsListbox, 1, wxEXPAND | wxALL, 5);
 
 	wxStaticBoxSizer* buttonsStaticBoxSizer = new wxStaticBoxSizer(wxVERTICAL, this);
-	wxButton* upButton = CreateButton(buttonsStaticBoxSizer->GetStaticBox(), wxART_GO_UP);
-	wxButton* downButton = CreateButton(buttonsStaticBoxSizer->GetStaticBox(), wxART_GO_DOWN);
-	wxButton* editButton = CreateButton(buttonsStaticBoxSizer->GetStaticBox(), wxART_LIST_VIEW);
+	mUpButton = CreateButton(buttonsStaticBoxSizer->GetStaticBox(), wxART_GO_UP);
+	mDownButton = CreateButton(buttonsStaticBoxSizer->GetStaticBox(), wxART_GO_DOWN);
+	mEditButton = CreateButton(buttonsStaticBoxSizer->GetStaticBox(), wxART_LIST_VIEW);
 
 	wxBoxSizer* buttonsSizer = new wxBoxSizer(wxHORIZONTAL);
-	buttonsSizer->Add(upButton, 0, wxEXPAND | wxALL, 5);
-	buttonsSizer->Add(downButton, 0, wxEXPAND | wxTOP | wxBOTTOM | wxRIGHT, 5);
-	buttonsSizer->Add(editButton, 0, wxEXPAND | wxTOP | wxBOTTOM | wxRIGHT, 5);
+	buttonsSizer->Add(mUpButton, 0, wxEXPAND | wxALL, 3);
+	buttonsSizer->Add(mDownButton, 0, wxEXPAND | wxTOP | wxBOTTOM | wxRIGHT, 3);
+	buttonsSizer->Add(mEditButton, 0, wxEXPAND | wxTOP | wxBOTTOM | wxRIGHT, 3);
 	buttonsStaticBoxSizer->Add(buttonsSizer, 0, wxALIGN_RIGHT);
 
 	wxBoxSizer* rightSizer = new wxBoxSizer(wxVERTICAL);
@@ -61,26 +67,19 @@ DeclarationView::DeclarationView(wxWindow* parent)
 	rightSizer->Add(actionsStaticBoxSizer, 1, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 5);
 	rightSizer->Add(buttonsStaticBoxSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 5);
 
-	m_upTerminalButton->Bind(wxEVT_BUTTON,
-		&DeclarationView::OnTerminalButtonUp, this);
-	m_downTerminalButton->Bind(wxEVT_BUTTON,
-		&DeclarationView::OnTerminalButtonDown, this);
-	m_editTerminalButton->Bind(wxEVT_BUTTON,
-		&DeclarationView::OnTerminalButtonEdit, this);
-
 	m_terminalsListbox->Bind(wxEVT_LEFT_DOWN, &DeclarationView::OnTerminalsListboxMouseDown, this);
 	m_terminalsListbox->Bind(wxEVT_LISTBOX_DCLICK, &DeclarationView::OnTerminalsListboxDoubleClick, this);
 	m_terminalsListbox->Bind(wxEVT_LISTBOX, &DeclarationView::OnTerminalsListboxSelection, this);
-
-	m_upActionButton->Bind(wxEVT_BUTTON, &DeclarationView::OnActionButtonUp, this);
-	m_downActionButton->Bind(wxEVT_BUTTON, &DeclarationView::OnActionButtonDown, this);
-	m_editActionButton->Bind(wxEVT_BUTTON, &DeclarationView::OnActionButtonEdit, this);
 
 	m_actionsListbox->Bind(wxEVT_LEFT_DOWN, &DeclarationView::OnActionsListboxMouseDown, this);
 	m_actionsListbox->Bind(wxEVT_LISTBOX_DCLICK, &DeclarationView::OnActionsListboxDoubleClick, this);
 	m_actionsListbox->Bind(wxEVT_LISTBOX, &DeclarationView::OnActionsListboxSelection, this);
 
 	m_input->Bind(wxEVT_STC_UPDATEUI, &DeclarationView::OnTextCtrlCursorUpdate, this);
+
+	mUpButton->Bind(wxEVT_BUTTON, &DeclarationView::OnUpButton, this);
+	mDownButton->Bind(wxEVT_BUTTON, &DeclarationView::OnDownButton, this);
+	mEditButton->Bind(wxEVT_BUTTON, &DeclarationView::OnEditButton, this);
 
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
 	sizer->Add(leftStaticBoxSizer, 3, wxEXPAND | wxALL, 5);
@@ -90,87 +89,14 @@ DeclarationView::DeclarationView(wxWindow* parent)
 	SetDoubleBuffered(true);
 }
 
-wxPanel* DeclarationView::CreateTerminalsPanel(wxWindow* window)
-{
-	wxPanel* panel = new wxPanel(window, wxID_ANY);
-	wxBoxSizer* pSizer = new wxBoxSizer(wxVERTICAL);
-
-	m_terminalsListbox = new wxListBox(
-		panel, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-		wxArrayString(), wxBORDER_SIMPLE);
-	pSizer->Add(m_terminalsListbox, 1, wxEXPAND | wxALL, 5);
-
-	m_upTerminalButton = CreateButton(panel, wxART_GO_UP);
-	m_downTerminalButton = CreateButton(panel, wxART_GO_DOWN);
-	m_editTerminalButton = CreateButton(panel, wxART_LIST_VIEW);
-
-	m_upTerminalButton->Hide();
-	m_downTerminalButton->Hide();
-	m_editTerminalButton->Hide();
-
-	wxBoxSizer* bSizer = new wxBoxSizer(wxHORIZONTAL);
-	bSizer->Add(m_upTerminalButton, 0);
-	bSizer->Add(m_downTerminalButton, 0, wxLEFT, 5);
-	bSizer->Add(m_editTerminalButton, 0, wxLEFT, 5);
-
-	const int buttonsAlignFlags = wxALIGN_RIGHT | wxLEFT | wxRIGHT | wxBOTTOM;
-	pSizer->Add(bSizer, 0, buttonsAlignFlags, 5);
-	panel->SetSizer(pSizer);
-
-	return panel;
-}
-
-wxPanel* DeclarationView::CreateActionsPanel(wxWindow* window)
-{
-	wxPanel* panel = new wxPanel(window, wxID_ANY);
-	wxBoxSizer* pSizer = new wxBoxSizer(wxVERTICAL);
-
-	m_actionsListbox = new wxListBox(
-		panel, wxID_ANY, wxDefaultPosition,
-		wxDefaultSize, wxArrayString(), wxBORDER_SIMPLE);
-	pSizer->Add(m_actionsListbox, 1, wxEXPAND | wxALL, 5);
-
-	m_upActionButton = CreateButton(panel, wxART_GO_UP);
-	m_downActionButton = CreateButton(panel, wxART_GO_DOWN);
-	m_editActionButton = CreateButton(panel, wxART_LIST_VIEW);
-
-	m_upActionButton->Hide();
-	m_downActionButton->Hide();
-	m_editActionButton->Hide();
-
-	wxBoxSizer* bSizer = new wxBoxSizer(wxHORIZONTAL);
-	bSizer->Add(m_upActionButton, 0);
-	bSizer->Add(m_downActionButton, 0, wxLEFT, 5);
-	bSizer->Add(m_editActionButton, 0, wxLEFT, 5);
-
-	const int buttonsAlignFlags = wxALIGN_RIGHT | wxLEFT | wxRIGHT | wxBOTTOM;
-	pSizer->Add(bSizer, 0, buttonsAlignFlags, 5);
-	panel->SetSizer(pSizer);
-
-	return panel;
-}
-
 wxString DeclarationView::GetDeclaration() const
 {
 	return m_input->GetValue();
 }
 
-void DeclarationView::SplitPanels(float sashPositionPercentage)
-{
-	/*assert(sashPositionPercentage <= 1.f);
-	const int cWidth = GetSize().GetWidth();
-	const int cSashPosition = int(sashPositionPercentage * cWidth);
-
-	m_splitter->SplitVertically(
-		m_left,
-		m_right,
-		cSashPosition
-	);*/
-}
-
 SignalScopedConnection DeclarationView::DoOnTextCtrlCursorUpdate(CursorUpdateSignal::slot_type slot)
 {
-	return mTextCtrlCursorUpdateSignal.connect(slot);
+	return mCursorUpdateSignal.connect(slot);
 }
 
 void DeclarationView::SetLexerTerminals(const ILexer& lexer)
@@ -229,7 +155,7 @@ SignalScopedConnection DeclarationView::DoOnActionSelection(SelectionSignal::slo
 	return mActionSelectionSignal.connect(slot);
 }
 
-void DeclarationView::OnTerminalButtonUp(wxCommandEvent&)
+void DeclarationView::OnTerminalButtonUp()
 {
 	const int selection = m_terminalsListbox->GetSelection();
 	const int upperIndex = selection - 1;
@@ -244,7 +170,7 @@ void DeclarationView::OnTerminalButtonUp(wxCommandEvent&)
 	}
 }
 
-void DeclarationView::OnTerminalButtonDown(wxCommandEvent&)
+void DeclarationView::OnTerminalButtonDown()
 {
 	const int selection = m_terminalsListbox->GetSelection();
 	const unsigned lowerIndex = unsigned(selection) + 1;
@@ -259,7 +185,7 @@ void DeclarationView::OnTerminalButtonDown(wxCommandEvent&)
 	}
 }
 
-void DeclarationView::OnTerminalButtonEdit(wxCommandEvent&)
+void DeclarationView::OnTerminalButtonEdit()
 {
 	const int selection = m_terminalsListbox->GetSelection();
 	if (selection != wxNOT_FOUND)
@@ -278,6 +204,7 @@ void DeclarationView::OnTerminalsListboxDoubleClick(wxCommandEvent& event)
 
 void DeclarationView::OnTerminalsListboxMouseDown(wxMouseEvent& event)
 {
+	m_actionsListbox->Deselect(wxNOT_FOUND);
 	// Если выбран хотя бы один элемент, а также пользователь кликнул
 	//  по пустой части списка, тогда полностью снимаем все выделения
 	wxArrayInt selections;
@@ -296,7 +223,7 @@ void DeclarationView::OnTerminalsListboxSelection(wxCommandEvent& event)
 	mTerminalSelectionSignal(event.GetSelection());
 }
 
-void DeclarationView::OnActionButtonUp(wxCommandEvent&)
+void DeclarationView::OnActionButtonUp()
 {
 	const int selection = m_actionsListbox->GetSelection();
 	const int upperIndex = selection - 1;
@@ -311,7 +238,7 @@ void DeclarationView::OnActionButtonUp(wxCommandEvent&)
 	}
 }
 
-void DeclarationView::OnActionButtonDown(wxCommandEvent&)
+void DeclarationView::OnActionButtonDown()
 {
 	const int selection = m_actionsListbox->GetSelection();
 	const unsigned lowerIndex = unsigned(selection) + 1;
@@ -326,7 +253,7 @@ void DeclarationView::OnActionButtonDown(wxCommandEvent&)
 	}
 }
 
-void DeclarationView::OnActionButtonEdit(wxCommandEvent&)
+void DeclarationView::OnActionButtonEdit()
 {
 	const int selection = m_actionsListbox->GetSelection();
 	if (selection != wxNOT_FOUND)
@@ -345,6 +272,7 @@ void DeclarationView::OnActionsListboxDoubleClick(wxCommandEvent& event)
 
 void DeclarationView::OnActionsListboxMouseDown(wxMouseEvent& event)
 {
+	m_terminalsListbox->Deselect(wxNOT_FOUND);
 	// Если выбран хотя бы один элемент, а также пользователь кликнул
 	//  по пустой части списка, тогда полностью снимаем все выделения
 	wxArrayInt selections;
@@ -363,12 +291,63 @@ void DeclarationView::OnActionsListboxSelection(wxCommandEvent& event)
 	mActionSelectionSignal(event.GetSelection());
 }
 
+void DeclarationView::OnUpButton(wxCommandEvent&)
+{
+	if (m_terminalsListbox->GetSelection() != wxNOT_FOUND)
+	{
+		assert(m_actionsListbox->GetSelection() == wxNOT_FOUND);
+		OnTerminalButtonUp();
+		return;
+	}
+
+	if (m_actionsListbox->GetSelection() != wxNOT_FOUND)
+	{
+		assert(m_terminalsListbox->GetSelection() == wxNOT_FOUND);
+		OnActionButtonUp();
+		return;
+	}
+}
+
+void DeclarationView::OnDownButton(wxCommandEvent&)
+{
+	if (m_terminalsListbox->GetSelection() != wxNOT_FOUND)
+	{
+		assert(m_actionsListbox->GetSelection() == wxNOT_FOUND);
+		OnTerminalButtonDown();
+		return;
+	}
+
+	if (m_actionsListbox->GetSelection() != wxNOT_FOUND)
+	{
+		assert(m_terminalsListbox->GetSelection() == wxNOT_FOUND);
+		OnActionButtonDown();
+		return;
+	}
+}
+
+void DeclarationView::OnEditButton(wxCommandEvent&)
+{
+	if (m_terminalsListbox->GetSelection() != wxNOT_FOUND)
+	{
+		assert(m_actionsListbox->GetSelection() == wxNOT_FOUND);
+		OnTerminalButtonEdit();
+		return;
+	}
+
+	if (m_actionsListbox->GetSelection() != wxNOT_FOUND)
+	{
+		assert(m_terminalsListbox->GetSelection() == wxNOT_FOUND);
+		OnActionButtonEdit();
+		return;
+	}
+}
+
 void DeclarationView::OnTextCtrlCursorUpdate(wxStyledTextEvent& event)
 {
 	int linePos = 0;
 	m_input->GetCurLine(&linePos);
 
-	mTextCtrlCursorUpdateSignal(
+	mCursorUpdateSignal(
 		m_input->GetCurrentLine() + 1,
 		m_input->GetColumn(m_input->GetCurrentPos()) + 1,
 		linePos + 1

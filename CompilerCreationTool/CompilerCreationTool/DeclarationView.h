@@ -20,65 +20,57 @@ public:
 
 public:
 	explicit DeclarationView(wxWindow* parent);
-
 	wxString GetDeclaration() const;
+
 	void SetLexerTerminals(const ILexer& lexer);
 	void SetParserActions(const IParser<ParseResults>& parser);
-	void SplitPanels(float sashPositionPercentage);
 
 	SignalScopedConnection DoOnTextCtrlCursorUpdate(CursorUpdateSignal::slot_type slot);
-
 	SignalScopedConnection DoOnTerminalPositionChange(PositionChangeSignal::slot_type slot);
 	SignalScopedConnection DoOnTerminalEdit(ItemEditSignal::slot_type slot);
 	SignalScopedConnection DoOnTerminalSelection(SelectionSignal::slot_type slot);
-
 	SignalScopedConnection DoOnActionPositionChange(PositionChangeSignal::slot_type slot);
 	SignalScopedConnection DoOnActionEdit(ItemEditSignal::slot_type slot);
 	SignalScopedConnection DoOnActionSelection(SelectionSignal::slot_type slot);
 
 private:
-	wxPanel* CreateTerminalsPanel(wxWindow* parent);
-	wxPanel* CreateActionsPanel(wxWindow* parent);
+	void OnTerminalButtonUp();
+	void OnTerminalButtonDown();
+	void OnTerminalButtonEdit();
 
-	// Event handlers
-	void OnTerminalButtonUp(wxCommandEvent& event);
-	void OnTerminalButtonDown(wxCommandEvent& event);
-	void OnTerminalButtonEdit(wxCommandEvent& event);
+	void OnActionButtonUp();
+	void OnActionButtonDown();
+	void OnActionButtonEdit();
 
 	void OnTerminalsListboxDoubleClick(wxCommandEvent& event);
 	void OnTerminalsListboxMouseDown(wxMouseEvent& event);
 	void OnTerminalsListboxSelection(wxCommandEvent& event);
 
-	void OnActionButtonUp(wxCommandEvent& event);
-	void OnActionButtonDown(wxCommandEvent& event);
-	void OnActionButtonEdit(wxCommandEvent& event);
-
 	void OnActionsListboxDoubleClick(wxCommandEvent& event);
 	void OnActionsListboxMouseDown(wxMouseEvent& event);
 	void OnActionsListboxSelection(wxCommandEvent& event);
 
+	void OnUpButton(wxCommandEvent& event);
+	void OnDownButton(wxCommandEvent& event);
+	void OnEditButton(wxCommandEvent& event);
+
 	void OnTextCtrlCursorUpdate(wxStyledTextEvent& event);
 
 private:
-	//wxPanel* m_left;
-	//wxPanel* m_right;
-
 	wxStyledTextCtrl* m_input;
+
 	wxListBox* m_terminalsListbox;
 	wxListBox* m_actionsListbox;
-	wxButton* m_upTerminalButton;
-	wxButton* m_downTerminalButton;
-	wxButton* m_editTerminalButton;
-	wxButton* m_upActionButton;
-	wxButton* m_downActionButton;
-	wxButton* m_editActionButton;
 
-	CursorUpdateSignal mTextCtrlCursorUpdateSignal;
+	wxButton* mUpButton;
+	wxButton* mDownButton;
+	wxButton* mEditButton;
 
+	// Signals
+	CursorUpdateSignal mCursorUpdateSignal;
 	PositionChangeSignal m_terminalPositionChangeSignal;
 	SelectionSignal mTerminalSelectionSignal;
 	ItemEditSignal m_terminalEditSignal;
-
 	PositionChangeSignal m_actionPositionChangeSignal;
 	SelectionSignal mActionSelectionSignal;
 	ItemEditSignal m_actionEditSignal;

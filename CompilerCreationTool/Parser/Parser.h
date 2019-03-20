@@ -22,6 +22,7 @@ public:
 	void SetAction(size_t index, std::unique_ptr<IAction> && action) override;
 	void SwapActions(size_t oldPos, size_t newPos) override;
 
+	boost::optional<size_t> GetActionPos(const std::string& name) const override;
 	const IAction& GetAction(size_t index) const override;
 	IAction& GetAction(size_t index) override;
 	size_t GetActionsCount() const override;

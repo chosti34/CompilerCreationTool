@@ -15,6 +15,7 @@ public:
 	void SetPattern(size_t index, const TokenPattern& newValue) override;
 	void SwapPatterns(size_t lhs, size_t rhs) override;
 
+	boost::optional<size_t> GetPatternPos(const std::string& name) const override;
 	const TokenPattern& GetPattern(size_t index) const override;
 	TokenPattern& GetPattern(size_t index) override;
 	size_t GetPatternsCount() const override;

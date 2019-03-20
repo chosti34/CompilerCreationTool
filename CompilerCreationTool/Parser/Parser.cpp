@@ -28,12 +28,13 @@ public:
 	ActionExecutor(const Token& token, IParserLogger* logger)
 		: mCurrentToken(token)
 		, mLogger(logger)
+		, mHasErrors(false)
 	{
 	}
 
 	std::unique_ptr<IExpressionAST> GetExpressionRoot()
 	{
-		if (mExpressionsStack.size() == 1)
+		if (mExpressionsStack.size() == 1 && !mHasErrors)
 		{
 			return Pop(mExpressionsStack);
 		}
@@ -50,6 +51,7 @@ public:
 		{
 			int value = std::stoi(mCurrentToken.value);
 			mExpressionsStack.push_back(std::make_unique<LiteralExpressionAST>(value));
+			mHasErrors = true;
 		}
 		catch (...)
 		{
@@ -63,6 +65,7 @@ public:
 		{
 			double value = std::stod(mCurrentToken.value);
 			mExpressionsStack.push_back(std::make_unique<LiteralExpressionAST>(value));
+			mHasErrors = true;
 		}
 		catch (...)
 		{
@@ -75,6 +78,7 @@ public:
 		if (mExpressionsStack.size() < 2)
 		{
 			throw std::runtime_error("expressions stack must contain atleast 2 elements");
+			mHasErrors = true;
 		}
 		auto right = Pop(mExpressionsStack);
 		auto left = Pop(mExpressionsStack);
@@ -85,6 +89,7 @@ private:
 	const Token& mCurrentToken;
 	std::vector<std::unique_ptr<IExpressionAST>> mExpressionsStack;
 	IParserLogger* mLogger;
+	bool mHasErrors;
 };
 }
 
@@ -232,6 +237,19 @@ void Parser::SetAction(size_t index, std::unique_ptr<IAction> && action)
 void Parser::SwapActions(size_t oldPos, size_t newPos)
 {
 	std::iter_swap(mActionList.begin() + oldPos, mActionList.begin() + newPos);
+}
+
+boost::optional<size_t> Parser::GetActionPos(const std::string& name) const
+{
+	for (std::size_t index = 0; index < mActionList.size(); ++index)
+	{
+		const IAction& action = *mActionList[index];
+		if (action.GetName() == name)
+		{
+			return boost::make_optional(index);
+		}
+	}
+	return boost::none;
 }
 
 const IAction& Parser::GetAction(size_t index) const

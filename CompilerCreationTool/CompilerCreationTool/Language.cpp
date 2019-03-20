@@ -28,7 +28,11 @@ std::unique_ptr<ILexer> CreateDefaultLexer(const IGrammar& grammar)
 	return lexer;
 }
 
-
+template <typename T>
+bool Contains(const std::set<T> &set, const T& value)
+{
+	return set.find(value) != set.end();
+}
 }
 
 Language::Language()
@@ -53,45 +57,71 @@ void Language::SetGrammar(std::unique_ptr<grammarlib::IGrammar> && grammar)
 {
 	assert(grammar);
 
-	/*auto lexer = CreateDefaultLexer(*grammar);
-	auto parser = std::make_unique<Parser>(ParserTable::Create(*grammar), *lexer);
-	parser->SetActionNames(GatherAllActions(*grammar));
-
-	if (IsInitialized())
-	{
-		for (size_t i = 0; i < lexer->GetPatternsCount(); ++i)
-		{
-			const TokenPattern& oldPattern = lexer->GetPattern(i);
-			if (auto pos = m_lexer->GetPatternPos(oldPattern.GetName()))
-			{
-				lexer->SetPattern(m_lexer->GetPattern(*pos));
-			}
-		}
-
-		for (size_t i = 0; i < parser->GetActionsCount(); ++i)
-		{
-			const IAction& oldAction = parser->GetAction(i);
-			if (auto pos = m_parser->GetActionPos(oldAction.GetName()))
-			{
-				IAction& newAction = parser->GetAction(*pos);
-				newAction.SetName(oldAction.GetName());
-				newAction.SetType(oldAction.GetType());
-			}
-		}
-	}*/
-
 	// «амер€ем врем€ выполнени€ инициализации
 	auto beginTime = std::chrono::steady_clock::now();
 
 	// ¬ыполн€ем инициализацию пользовательского €зыка по грамматике
-	m_grammar = std::move(grammar);
-	m_lexer = CreateDefaultLexer(*m_grammar);
-	m_parser = std::make_unique<Parser>(ParserTable::Create(*m_grammar), *m_lexer);
-	m_parser->SetActionNames(GatherAllActions(*m_grammar));
+	auto lexer = CreateDefaultLexer(*grammar);
+	auto parser = std::make_unique<Parser>(ParserTable::Create(*grammar), *lexer);
+	parser->SetActionNames(GatherAllActions(*grammar));
 
 	auto endTime = std::chrono::steady_clock::now();
 	auto elapsedSeconds = std::chrono::duration<double>(endTime - beginTime);
 
+	if (IsInitialized())
+	{
+		std::vector<std::pair<int, int>> indices;
+		std::set<int> swapped;
+
+		for (std::size_t i = 0; i < lexer->GetPatternsCount(); ++i)
+		{
+			const TokenPattern& newPattern = lexer->GetPattern(i);
+			if (auto pos = m_lexer->GetPatternPos(newPattern.GetName()))
+			{
+				lexer->SetPattern(i, m_lexer->GetPattern(*pos));
+				indices.emplace_back(i, std::min(*pos, lexer->GetPatternsCount() - 1));
+			}
+		}
+
+		for (std::size_t i = 0; i < indices.size(); ++i)
+		{
+			if (!Contains(swapped, indices[i].first) && !Contains(swapped, indices[i].second))
+			{
+				lexer->SwapPatterns(indices[i].first, indices[i].second);
+				swapped.insert(indices[i].first);
+				swapped.insert(indices[i].second);
+			}
+		}
+
+		indices.clear();
+		swapped.clear();
+
+		for (size_t i = 0; i < parser->GetActionsCount(); ++i)
+		{
+			IAction& newAction = parser->GetAction(i);
+			if (auto pos = m_parser->GetActionPos(newAction.GetName()))
+			{
+				IAction& oldAction = m_parser->GetAction(*pos);
+				newAction.SetName(oldAction.GetName());
+				newAction.SetType(oldAction.GetType());
+				indices.emplace_back(i, std::min(*pos, parser->GetActionsCount() - 1));
+			}
+		}
+
+		for (std::size_t i = 0; i < indices.size(); ++i)
+		{
+			if (!Contains(swapped, indices[i].first) && !Contains(swapped, indices[i].second))
+			{
+				parser->SwapActions(indices[i].first, indices[i].second);
+				swapped.insert(indices[i].first);
+				swapped.insert(indices[i].second);
+			}
+		}
+	}
+
+	m_grammar = std::move(grammar);
+	m_lexer = std::move(lexer);
+	m_parser = std::move(parser);
 	m_info = std::make_unique<LanguageInformation>(*m_lexer, *m_parser, *m_grammar, elapsedSeconds);
 }
 

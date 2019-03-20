@@ -78,6 +78,12 @@ void Lexer::SetText(const std::string& text)
 
 void Lexer::AppendPattern(const TokenPattern& pattern)
 {
+#ifdef _DEBUG
+	auto it = std::find_if(mPatterns.begin(), mPatterns.end(), [&pattern](const TokenPattern& p) {
+		return p.GetName() == pattern.GetName();
+	});
+	assert(it == mPatterns.end());
+#endif
 	mPatterns.push_back(pattern);
 }
 
@@ -93,6 +99,19 @@ void Lexer::SetPattern(size_t index, const TokenPattern& newValue)
 		throw std::out_of_range("index must be less than patterns count");
 	}
 	mPatterns[index] = newValue;
+}
+
+boost::optional<size_t> Lexer::GetPatternPos(const std::string& name) const
+{
+	for (std::size_t index = 0; index < mPatterns.size(); ++index)
+	{
+		const TokenPattern& pattern = mPatterns[index];
+		if (pattern.GetName() == name)
+		{
+			return boost::make_optional(index);
+		}
+	}
+	return boost::none;
 }
 
 const TokenPattern& Lexer::GetPattern(size_t index) const

@@ -15,7 +15,7 @@
 
 namespace
 {
-wxButton* CreateButton(wxPanel* panel, const wxArtID& artId)
+wxButton* CreateButton(wxWindow* panel, const wxArtID& artId)
 {
 	wxButton* button = new wxButton(panel, wxID_ANY);
 	wxBitmap bitmap = wxArtProvider::GetBitmap(artId);
@@ -37,12 +37,29 @@ DeclarationView::DeclarationView(wxWindow* parent)
 	m_input->SetScrollWidthTracking(true);
 	SetupStyledTextCtrlMargins(*m_input);
 
-	wxAuiNotebook* notebook = new wxAuiNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_TOP | wxAUI_NB_TAB_MOVE);
-	wxPanel* terminalsPanel = CreateTerminalsPanel(notebook);
-	wxPanel* actionsPanel = CreateActionsPanel(notebook);
+	wxStaticBoxSizer* terminalsStaticBoxSizer = new wxStaticBoxSizer(wxVERTICAL, this, "Terminals");
+	wxPanel* terminalsPanel = CreateTerminalsPanel(terminalsStaticBoxSizer->GetStaticBox());
+	terminalsStaticBoxSizer->Add(terminalsPanel, 1, wxEXPAND | wxALL, 5);
 
-	notebook->AddPage(terminalsPanel, "Terminals");
-	notebook->AddPage(actionsPanel, "Actions");
+	wxStaticBoxSizer* actionsStaticBoxSizer = new wxStaticBoxSizer(wxVERTICAL, this, "Actions");
+	wxPanel* actionsPanel = CreateActionsPanel(actionsStaticBoxSizer->GetStaticBox());
+	actionsStaticBoxSizer->Add(actionsPanel, 1, wxEXPAND | wxALL, 5);
+
+	wxStaticBoxSizer* buttonsStaticBoxSizer = new wxStaticBoxSizer(wxVERTICAL, this);
+	wxButton* upButton = CreateButton(buttonsStaticBoxSizer->GetStaticBox(), wxART_GO_UP);
+	wxButton* downButton = CreateButton(buttonsStaticBoxSizer->GetStaticBox(), wxART_GO_DOWN);
+	wxButton* editButton = CreateButton(buttonsStaticBoxSizer->GetStaticBox(), wxART_LIST_VIEW);
+
+	wxBoxSizer* buttonsSizer = new wxBoxSizer(wxHORIZONTAL);
+	buttonsSizer->Add(upButton, 0, wxEXPAND | wxALL, 5);
+	buttonsSizer->Add(downButton, 0, wxEXPAND | wxTOP | wxBOTTOM | wxRIGHT, 5);
+	buttonsSizer->Add(editButton, 0, wxEXPAND | wxTOP | wxBOTTOM | wxRIGHT, 5);
+	buttonsStaticBoxSizer->Add(buttonsSizer, 0, wxALIGN_RIGHT);
+
+	wxBoxSizer* rightSizer = new wxBoxSizer(wxVERTICAL);
+	rightSizer->Add(terminalsStaticBoxSizer, 1, wxEXPAND | wxALL, 5);
+	rightSizer->Add(actionsStaticBoxSizer, 1, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 5);
+	rightSizer->Add(buttonsStaticBoxSizer, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 5);
 
 	m_upTerminalButton->Bind(wxEVT_BUTTON,
 		&DeclarationView::OnTerminalButtonUp, this);
@@ -67,7 +84,7 @@ DeclarationView::DeclarationView(wxWindow* parent)
 
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
 	sizer->Add(leftStaticBoxSizer, 3, wxEXPAND | wxALL, 5);
-	sizer->Add(notebook, 2, wxEXPAND);
+	sizer->Add(rightSizer, 2, wxEXPAND);
 	SetSizerAndFit(sizer);
 
 	SetDoubleBuffered(true);
@@ -86,6 +103,10 @@ wxPanel* DeclarationView::CreateTerminalsPanel(wxWindow* window)
 	m_upTerminalButton = CreateButton(panel, wxART_GO_UP);
 	m_downTerminalButton = CreateButton(panel, wxART_GO_DOWN);
 	m_editTerminalButton = CreateButton(panel, wxART_LIST_VIEW);
+
+	m_upTerminalButton->Hide();
+	m_downTerminalButton->Hide();
+	m_editTerminalButton->Hide();
 
 	wxBoxSizer* bSizer = new wxBoxSizer(wxHORIZONTAL);
 	bSizer->Add(m_upTerminalButton, 0);
@@ -112,6 +133,10 @@ wxPanel* DeclarationView::CreateActionsPanel(wxWindow* window)
 	m_upActionButton = CreateButton(panel, wxART_GO_UP);
 	m_downActionButton = CreateButton(panel, wxART_GO_DOWN);
 	m_editActionButton = CreateButton(panel, wxART_LIST_VIEW);
+
+	m_upActionButton->Hide();
+	m_downActionButton->Hide();
+	m_editActionButton->Hide();
 
 	wxBoxSizer* bSizer = new wxBoxSizer(wxHORIZONTAL);
 	bSizer->Add(m_upActionButton, 0);

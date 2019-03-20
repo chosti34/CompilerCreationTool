@@ -4,7 +4,7 @@
 MainPanel::MainPanel(wxFrame* parent)
 	: wxPanel(parent, wxID_ANY)
 {
-	m_notebook = new wxNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+	m_notebook = new wxAuiNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_TOP | wxAUI_NB_TAB_MOVE);
 	m_declarationView = new DeclarationView(m_notebook);
 	m_statesView = new StatesView(m_notebook);
 	m_editorView = new EditorView(m_notebook);
@@ -18,6 +18,7 @@ MainPanel::MainPanel(wxFrame* parent)
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
 	sizer->Add(m_notebook, 1, wxEXPAND | wxALL, 5);
 	SetSizerAndFit(sizer);
+	//SetDoubleBuffered(true);
 }
 
 DeclarationView* MainPanel::GetGrammarDeclarationView()
@@ -28,6 +29,10 @@ DeclarationView* MainPanel::GetGrammarDeclarationView()
 TreeView* MainPanel::GetTreeView()
 {
 	return mTreeView;
+}
+
+void MainPanel::OnPaint(wxPaintEvent& event)
+{
 }
 
 StatesView* MainPanel::GetParsesStatesView()

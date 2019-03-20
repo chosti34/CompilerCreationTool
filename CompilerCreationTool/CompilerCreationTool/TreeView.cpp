@@ -16,8 +16,7 @@ public:
 		, mBitmap(nullptr)
 	{
 		wxScrolledWindow::Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SIMPLE);
-		SetDoubleBuffered(true);
-		Refresh(true);
+		SetBackgroundColour(wxColour(255, 255, 255));
 	}
 
 	void SetImage(const wxImage& image)
@@ -25,13 +24,11 @@ public:
 		mBitmap = std::make_unique<wxBitmap>(image);
 		SetScrollbars(gcScrollUnits, gcScrollUnits, mBitmap->GetWidth(), mBitmap->GetHeight(), 0, 0, true);
 		SetVirtualSize(mBitmap->GetWidth() + gcImageOffsetHor, mBitmap->GetHeight() + gcImageOffsetVert);
-		Refresh(true);
 	}
 
 	void UnsetImage()
 	{
 		mBitmap = nullptr;
-		Refresh(true);
 	}
 
 private:
@@ -48,7 +45,7 @@ private:
 		}
 		else
 		{
-			dc.Clear();
+			//dc.Clear();
 		}
 	}
 

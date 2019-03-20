@@ -9,6 +9,10 @@
 #include <wx/notebook.h>
 #include <wx/artprov.h>
 
+#include <wx/listctrl.h>
+#include <wx/grid.h>
+#include <wx/aui/auibook.h>
+
 namespace
 {
 wxButton* CreateButton(wxPanel* panel, const wxArtID& artId)
@@ -25,13 +29,20 @@ wxButton* CreateButton(wxPanel* panel, const wxArtID& artId)
 DeclarationView::DeclarationView(wxWindow* parent)
 	: wxPanel(parent, wxID_ANY)
 {
-	m_splitter = new wxSplitterWindow(
-		this, wxID_ANY, wxDefaultPosition,
-		wxDefaultSize, wxSP_LIVE_UPDATE);
-	m_splitter->SetMinimumPaneSize(200);
+	wxStaticBoxSizer* leftStaticBoxSizer = new wxStaticBoxSizer(wxVERTICAL, this, "Grammar");
+	m_input = new wxStyledTextCtrl(leftStaticBoxSizer->GetStaticBox(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTE_DONTWRAP);
+	leftStaticBoxSizer->Add(m_input, 1, wxEXPAND | wxALL, 5);
 
-	CreateLeftPanelControls();
-	CreateRightPanelControls();
+	m_input->SetScrollWidth(m_input->GetSize().GetWidth());
+	m_input->SetScrollWidthTracking(true);
+	SetupStyledTextCtrlMargins(*m_input);
+
+	wxAuiNotebook* notebook = new wxAuiNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_TOP | wxAUI_NB_TAB_MOVE);
+	wxPanel* terminalsPanel = CreateTerminalsPanel(notebook);
+	wxPanel* actionsPanel = CreateActionsPanel(notebook);
+
+	notebook->AddPage(terminalsPanel, "Terminals");
+	notebook->AddPage(actionsPanel, "Actions");
 
 	m_upTerminalButton->Bind(wxEVT_BUTTON,
 		&DeclarationView::OnTerminalButtonUp, this);
@@ -55,45 +66,16 @@ DeclarationView::DeclarationView(wxWindow* parent)
 	m_input->Bind(wxEVT_STC_UPDATEUI, &DeclarationView::OnTextCtrlCursorUpdate, this);
 
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-	sizer->Add(m_splitter, 1, wxEXPAND | wxALL, 5);
+	sizer->Add(leftStaticBoxSizer, 3, wxEXPAND | wxALL, 5);
+	sizer->Add(notebook, 2, wxEXPAND);
 	SetSizerAndFit(sizer);
 
 	SetDoubleBuffered(true);
 }
 
-void DeclarationView::CreateLeftPanelControls()
+wxPanel* DeclarationView::CreateTerminalsPanel(wxWindow* window)
 {
-	m_left = new wxPanel(m_splitter, wxID_ANY);
-
-	m_input = new wxStyledTextCtrl(
-		m_left, wxID_ANY, wxDefaultPosition,
-		wxDefaultSize, wxTE_DONTWRAP);
-	SetupStyledTextCtrlMargins(*m_input);
-
-	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-	sizer->Add(m_input, 1, wxEXPAND | wxALL, 5);
-	m_left->SetSizer(sizer);
-}
-
-void DeclarationView::CreateRightPanelControls()
-{
-	m_right = new wxPanel(m_splitter, wxID_ANY);
-	wxNotebook* notebook = new wxNotebook(m_right, wxID_ANY);
-
-	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-	sizer->Add(notebook, 1, wxEXPAND | wxALL, 5);
-	m_right->SetSizer(sizer);
-
-	wxPanel* terminalsPanel = CreateTerminalsPanel(notebook);
-	wxPanel* actionsPanel = CreateActionsPanel(notebook);
-
-	notebook->AddPage(terminalsPanel, wxT("Terminals"));
-	notebook->AddPage(actionsPanel, wxT("Actions"));
-}
-
-wxPanel* DeclarationView::CreateTerminalsPanel(wxNotebook* notebook)
-{
-	wxPanel* panel = new wxPanel(notebook, wxID_ANY);
+	wxPanel* panel = new wxPanel(window, wxID_ANY);
 	wxBoxSizer* pSizer = new wxBoxSizer(wxVERTICAL);
 
 	m_terminalsListbox = new wxListBox(
@@ -117,9 +99,9 @@ wxPanel* DeclarationView::CreateTerminalsPanel(wxNotebook* notebook)
 	return panel;
 }
 
-wxPanel* DeclarationView::CreateActionsPanel(wxNotebook* notebook)
+wxPanel* DeclarationView::CreateActionsPanel(wxWindow* window)
 {
-	wxPanel* panel = new wxPanel(notebook, wxID_ANY);
+	wxPanel* panel = new wxPanel(window, wxID_ANY);
 	wxBoxSizer* pSizer = new wxBoxSizer(wxVERTICAL);
 
 	m_actionsListbox = new wxListBox(
@@ -150,7 +132,7 @@ wxString DeclarationView::GetDeclaration() const
 
 void DeclarationView::SplitPanels(float sashPositionPercentage)
 {
-	assert(sashPositionPercentage <= 1.f);
+	/*assert(sashPositionPercentage <= 1.f);
 	const int cWidth = GetSize().GetWidth();
 	const int cSashPosition = int(sashPositionPercentage * cWidth);
 
@@ -158,7 +140,7 @@ void DeclarationView::SplitPanels(float sashPositionPercentage)
 		m_left,
 		m_right,
 		cSashPosition
-	);
+	);*/
 }
 
 SignalScopedConnection DeclarationView::DoOnTextCtrlCursorUpdate(CursorUpdateSignal::slot_type slot)

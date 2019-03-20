@@ -37,10 +37,8 @@ public:
 	SignalScopedConnection DoOnActionSelection(SelectionSignal::slot_type slot);
 
 private:
-	void CreateLeftPanelControls();
-	void CreateRightPanelControls();
-	wxPanel* CreateTerminalsPanel(wxNotebook* notebook);
-	wxPanel* CreateActionsPanel(wxNotebook* notebook);
+	wxPanel* CreateTerminalsPanel(wxWindow* parent);
+	wxPanel* CreateActionsPanel(wxWindow* parent);
 
 	// Event handlers
 	void OnTerminalButtonUp(wxCommandEvent& event);
@@ -62,9 +60,8 @@ private:
 	void OnTextCtrlCursorUpdate(wxStyledTextEvent& event);
 
 private:
-	wxPanel* m_left;
-	wxPanel* m_right;
-	wxSplitterWindow* m_splitter;
+	//wxPanel* m_left;
+	//wxPanel* m_right;
 
 	wxStyledTextCtrl* m_input;
 	wxListBox* m_terminalsListbox;

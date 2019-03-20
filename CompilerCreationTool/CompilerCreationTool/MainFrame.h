@@ -14,6 +14,7 @@ public:
 
 public:
 	MainFrame(const wxString& title, const wxSize& size);
+	~MainFrame();
 
 	MainPanel* GetMainPanel();
 	wxStatusBar* GetStatusBar();

@@ -2,6 +2,7 @@
 #include "MainFrame.h"
 #include <wx/statline.h>
 #include <wx/artprov.h>
+#include <wx/aui/auibar.h>
 
 namespace
 {
@@ -34,7 +35,7 @@ wxMenuBar* CreateMenuBar()
 
 void CustomizeStatusBar(wxStatusBar& statusbar)
 {
-	statusbar.SetStatusText(wxT("\tWelcome to CompilerCreationTool!"), 0);
+	statusbar.SetStatusText(wxT("Welcome to CompilerCreationTool!"), 0);
 	statusbar.SetStatusText(wxT("Ln 1"), 1);
 	statusbar.SetStatusText(wxT("Col 1"), 2);
 	statusbar.SetStatusText(wxT("Ch 1"), 3);
@@ -104,6 +105,10 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	m_panel->GetCodeEditorView()->SplitPanels(0.6f);
 	m_panel->GetGrammarDeclarationView()->SplitPanels(0.6f);
 	Centre();
+}
+
+MainFrame::~MainFrame()
+{
 }
 
 MainPanel* MainFrame::GetMainPanel()

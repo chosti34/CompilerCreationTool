@@ -27,6 +27,8 @@ std::unique_ptr<ILexer> CreateDefaultLexer(const IGrammar& grammar)
 	}
 	return lexer;
 }
+
+
 }
 
 Language::Language()
@@ -50,6 +52,33 @@ bool Language::IsInitialized() const
 void Language::SetGrammar(std::unique_ptr<grammarlib::IGrammar> && grammar)
 {
 	assert(grammar);
+
+	/*auto lexer = CreateDefaultLexer(*grammar);
+	auto parser = std::make_unique<Parser>(ParserTable::Create(*grammar), *lexer);
+	parser->SetActionNames(GatherAllActions(*grammar));
+
+	if (IsInitialized())
+	{
+		for (size_t i = 0; i < lexer->GetPatternsCount(); ++i)
+		{
+			const TokenPattern& oldPattern = lexer->GetPattern(i);
+			if (auto pos = m_lexer->GetPatternPos(oldPattern.GetName()))
+			{
+				lexer->SetPattern(m_lexer->GetPattern(*pos));
+			}
+		}
+
+		for (size_t i = 0; i < parser->GetActionsCount(); ++i)
+		{
+			const IAction& oldAction = parser->GetAction(i);
+			if (auto pos = m_parser->GetActionPos(oldAction.GetName()))
+			{
+				IAction& newAction = parser->GetAction(*pos);
+				newAction.SetName(oldAction.GetName());
+				newAction.SetType(oldAction.GetType());
+			}
+		}
+	}*/
 
 	// «амер€ем врем€ выполнени€ инициализации
 	auto beginTime = std::chrono::steady_clock::now();

@@ -4,6 +4,7 @@
 #include "DeclarationView.h"
 #include "TreeView.h"
 #include <wx/notebook.h>
+#include <wx/aui/auibook.h>
 
 class MainPanel : public wxPanel
 {
@@ -16,7 +17,10 @@ public:
 	TreeView* GetTreeView();
 
 private:
-	wxNotebook* m_notebook;
+	void OnPaint(wxPaintEvent& event);
+
+private:
+	wxAuiNotebook* m_notebook;
 	EditorView* m_editorView;
 	StatesView* m_statesView;
 	DeclarationView* m_declarationView;

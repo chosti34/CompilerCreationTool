@@ -13,14 +13,14 @@
 LanguageController::LanguageController(Language* language, MainFrame* frame)
 	: m_language(language)
 	, m_frame(frame)
-	, m_editorView(m_frame->GetMainPanel()->GetCodeEditorView())
+	/*, m_editorView(m_frame->GetMainPanel()->GetCodeEditorView())
 	, m_statesView(m_frame->GetMainPanel()->GetParsesStatesView())
 	, m_declarationView(m_frame->GetMainPanel()->GetGrammarDeclarationView())
-	, mTreeView(m_frame->GetMainPanel()->GetTreeView())
+	, mTreeView(m_frame->GetMainPanel()->GetTreeView())*/
 {
 	namespace ph = std::placeholders;
 
-	m_connections.push_back(m_declarationView->DoOnTerminalPositionChange(
+	/*m_connections.push_back(m_declarationView->DoOnTerminalPositionChange(
 		bind(&LanguageController::OnTerminalPositionChange, this, ph::_1, ph::_2)));
 	m_connections.push_back(m_declarationView->DoOnTerminalEdit(
 		bind(&LanguageController::OnTerminalEdit, this, ph::_1)));
@@ -44,7 +44,7 @@ LanguageController::LanguageController(Language* language, MainFrame* frame)
 	m_connections.push_back(m_editorView->DoOnInputTextCtrlCursorUpdate(
 		std::bind(&LanguageController::OnEditorTextCtrlCursorUpdate, this, ph::_1, ph::_2, ph::_3)));
 	m_connections.push_back(m_declarationView->DoOnTextCtrlCursorUpdate(
-		std::bind(&LanguageController::OnDeclarationTextCtrlCursorUpdate, this, ph::_1, ph::_2, ph::_3)));
+		std::bind(&LanguageController::OnDeclarationTextCtrlCursorUpdate, this, ph::_1, ph::_2, ph::_3)));*/
 }
 
 void LanguageController::UpdateStatusbarTerminalInfo(int index)

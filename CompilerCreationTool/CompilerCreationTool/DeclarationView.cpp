@@ -85,8 +85,6 @@ DeclarationView::DeclarationView(wxWindow* parent)
 	sizer->Add(leftStaticBoxSizer, 3, wxEXPAND | wxALL, 5);
 	sizer->Add(rightSizer, 2, wxEXPAND);
 	SetSizerAndFit(sizer);
-
-	SetDoubleBuffered(true);
 }
 
 wxString DeclarationView::GetDeclaration() const

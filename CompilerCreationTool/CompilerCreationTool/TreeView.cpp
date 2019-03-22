@@ -17,6 +17,7 @@ public:
 	{
 		wxScrolledWindow::Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SIMPLE);
 		SetBackgroundColour(wxColour(255, 255, 255));
+		SetDoubleBuffered(true);
 	}
 
 	void SetImage(const wxImage& image)
@@ -58,7 +59,7 @@ wxBEGIN_EVENT_TABLE(TreeView::ScrolledWindow, wxScrolledWindow)
 wxEND_EVENT_TABLE()
 
 TreeView::TreeView(wxWindow* parent)
-	: wxPanel(parent, wxID_ANY)
+	: wxPanel(parent, wxID_ANY, wxDefaultPosition, wxSize(300, 150))
 	, mScrolledWindow(new ScrolledWindow(this))
 {
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);

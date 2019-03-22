@@ -7,7 +7,7 @@
 namespace
 {
 const wxString TITLE = wxT("CompilerCreationTool");
-const wxSize WINDOW_INITIAL_SIZE = { 800, 640 };
+const wxSize WINDOW_INITIAL_SIZE = { 945, 735 };
 const wxSize WINDOW_MIN_SIZE = { 480, 320 };
 }
 
@@ -40,16 +40,16 @@ private:
 	wxIMPLEMENT_APP_CONSOLE(App);
 #endif
 
-//
-/////////////////////////////////////////////////////////////////////////////////
-//// Name:        auidemo.cpp
-//// Purpose:     wxaui: wx advanced user interface - sample/test program
-//// Author:      Benjamin I. Williams
-//// Modified by:
-//// Created:     2005-10-03
-//// Copyright:   (C) Copyright 2005, Kirix Corporation, All Rights Reserved.
-//// Licence:     wxWindows Library Licence, Version 3.1
-/////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////
+ //Name:        auidemo.cpp
+ //Purpose:     wxaui: wx advanced user interface - sample/test program
+ //Author:      Benjamin I. Williams
+ //Modified by:
+ //Created:     2005-10-03
+ //Copyright:   (C) Copyright 2005, Kirix Corporation, All Rights Reserved.
+ //Licence:     wxWindows Library Licence, Version 3.1
+/////////////////////////////////////////////////////////////////////////////
 //#include "pch.h"
 //
 //// For compilers that support precompilation, includes "wx/wx.h".
@@ -951,8 +951,12 @@ private:
 //
 //	m_mgr.AddPane(CreateTreeCtrl(), wxAuiPaneInfo().
 //		Name("test8").Caption("Tree Pane").
-//		Left().Layer(1).Position(1).
+//		Left().Layer(1).Position(0).
 //		CloseButton(true).MaximizeButton(true));
+//
+//	m_mgr.AddPane(new wxTextCtrl(this, wxID_ANY), wxAuiPaneInfo().
+//		Name("CustomTest").Caption("Second Tree Pane").Show(true).
+//		Left().Position(1).CloseButton(false));
 //
 //	m_mgr.AddPane(CreateSizeReportCtrl(), wxAuiPaneInfo().
 //		Name("test9").Caption("Min Size 200x100").
@@ -968,12 +972,18 @@ private:
 //	// Make it even to use 16 pixel icons with default 17 caption height.
 //	iconSize &= ~1;
 //
-//	m_mgr.AddPane(wnd10, wxAuiPaneInfo().
+//	auto info = wxAuiPaneInfo().
 //		Name("test10").Caption("Text Pane with Hide Prompt").
-//		Bottom().Layer(1).Position(1).
+//		Bottom().Layer(1).Position(1).MaximizeButton(true).MinimizeButton(true).
 //		Icon(wxArtProvider::GetBitmap(wxART_WARNING,
 //			wxART_OTHER,
-//			wxSize(iconSize, iconSize))));
+//			wxSize(iconSize, iconSize)));
+//	info.dock_proportion = 30;
+//	info.BestSize(wxSize(100, 400));
+//	info.MinSize(wxSize(100, 200));
+//
+//	m_mgr.AddPane(wnd10, info);
+//
 //
 //	m_mgr.AddPane(CreateSizeReportCtrl(), wxAuiPaneInfo().
 //		Name("test11").Caption("Fixed Pane").
@@ -1046,6 +1056,7 @@ private:
 //	m_mgr.GetPane("test10").Show().Bottom().Layer(0).Row(0).Position(0);
 //	m_mgr.GetPane("notebook_content").Show();
 //	wxString perspective_default = m_mgr.SavePerspective();
+//	m_mgr.GetPane("CustomTest").Show();
 //
 //	m_perspectives.Add(perspective_default);
 //	m_perspectives.Add(perspective_all);
@@ -1600,7 +1611,7 @@ private:
 //		text.Printf("This is text box %d", ++n);
 //
 //	return new wxTextCtrl(this, wxID_ANY, text,
-//		wxPoint(0, 0), FromDIP(wxSize(150, 90)),
+//		wxPoint(0, 0), FromDIP(wxSize(150, 600)),
 //		wxNO_BORDER | wxTE_MULTILINE);
 //}
 //

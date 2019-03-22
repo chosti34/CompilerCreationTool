@@ -5,6 +5,9 @@
 #include <wx/panel.h>
 #include <wx/string.h>
 
+#include <wx/aui/framemanager.h>
+#include <wx/aui/auibook.h>
+
 class MainFrame : public wxFrame
 {
 public:
@@ -38,6 +41,8 @@ private:
 	void OnHelp(wxCommandEvent& event);
 
 private:
+	wxAuiManager m_manager;
+	wxAuiNotebook* m_notebook;
 	MainPanel* m_panel;
 	wxToolBar* mToolbar;
 	wxStatusBar* mStatusBar;

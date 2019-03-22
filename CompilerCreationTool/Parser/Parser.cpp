@@ -51,10 +51,10 @@ public:
 		{
 			int value = std::stoi(mCurrentToken.value);
 			mExpressionsStack.push_back(std::make_unique<LiteralExpressionAST>(value));
-			mHasErrors = true;
 		}
 		catch (...)
 		{
+			mHasErrors = true;
 			throw std::runtime_error("failed to create integer node from: '" + mCurrentToken.name + "'");
 		}
 	}
@@ -65,10 +65,10 @@ public:
 		{
 			double value = std::stod(mCurrentToken.value);
 			mExpressionsStack.push_back(std::make_unique<LiteralExpressionAST>(value));
-			mHasErrors = true;
 		}
 		catch (...)
 		{
+			mHasErrors = true;
 			throw std::runtime_error("failed to create float node from: '" + mCurrentToken.name + "'");
 		}
 	}
@@ -77,8 +77,8 @@ public:
 	{
 		if (mExpressionsStack.size() < 2)
 		{
-			throw std::runtime_error("expressions stack must contain atleast 2 elements");
 			mHasErrors = true;
+			throw std::runtime_error("expressions stack must contain atleast 2 elements");
 		}
 		auto right = Pop(mExpressionsStack);
 		auto left = Pop(mExpressionsStack);

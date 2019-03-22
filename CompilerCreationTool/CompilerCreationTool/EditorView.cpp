@@ -55,6 +55,7 @@ EditorView::EditorView(wxWindow* parent)
 		wxDefaultSize,
 		wxSP_LIVE_UPDATE | wxSP_3D);
 	m_splitter->SetMinimumPaneSize(20);
+	m_splitter->SetDoubleBuffered(true);
 
 	m_left = new wxPanel(m_splitter, wxID_ANY);
 	m_input = SetupLeftPanel(*m_left);
@@ -64,11 +65,12 @@ EditorView::EditorView(wxWindow* parent)
 
 	m_input->Bind(wxEVT_STC_UPDATEUI, &EditorView::OnOutputStyledTextCtrlUpdateUI, this);
 
+
+	m_splitter->SplitVertically(m_left, m_right, 100);
+
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
 	sizer->Add(m_splitter, 1, wxEXPAND);
 	SetSizerAndFit(sizer);
-
-	SetDoubleBuffered(true);
 }
 
 SignalScopedConnection EditorView::DoOnInputTextCtrlCursorUpdate(
@@ -79,9 +81,9 @@ SignalScopedConnection EditorView::DoOnInputTextCtrlCursorUpdate(
 
 void EditorView::SplitPanels(float sashPositionPercentage)
 {
-	assert(sashPositionPercentage <= 1.f);
+	/*assert(sashPositionPercentage <= 1.f);
 	const int cWidth = m_splitter->GetSize().GetWidth();
-	m_splitter->SplitVertically(m_left, m_right, sashPositionPercentage * cWidth);
+	m_splitter->SplitVertically(m_left, m_right, sashPositionPercentage * cWidth);*/
 }
 
 wxString EditorView::GetUserInput()

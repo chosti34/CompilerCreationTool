@@ -1,7 +1,7 @@
 #pragma once
 #include "EditorView.h"
 #include "StatesView.h"
-#include "DeclarationView.h"
+#include "GrammarView.h"
 #include "TreeView.h"
 #include <wx/notebook.h>
 #include <wx/aui/auibook.h>
@@ -13,7 +13,7 @@ public:
 
 	EditorView* GetCodeEditorView();
 	StatesView* GetParsesStatesView();
-	DeclarationView* GetGrammarDeclarationView();
+	GrammarView* GetGrammarDeclarationView();
 	TreeView* GetTreeView();
 
 private:
@@ -23,6 +23,6 @@ private:
 	wxAuiNotebook* m_notebook;
 	EditorView* m_editorView;
 	StatesView* m_statesView;
-	DeclarationView* m_declarationView;
+	GrammarView* m_declarationView;
 	TreeView* mTreeView;
 };

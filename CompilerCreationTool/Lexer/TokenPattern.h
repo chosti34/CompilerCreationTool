@@ -12,8 +12,9 @@ public:
 
 	bool SetOrigin(const std::string& origin);
 	const std::string& GetOrigin() const;
-
 	const std::regex& GetRegex() const;
+
+	void SetEndingFlag(bool flag);
 	bool IsEnding() const;
 
 private:

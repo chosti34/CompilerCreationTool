@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "StatesView.h"
 #include "../Utils/string_utils.h"
-#include <map>
 
 namespace
 {
@@ -23,9 +22,8 @@ std::string GetStateFlagsRepresentation(const IParserState& state)
 
 StatesView::StatesView(wxWindow* parent)
 	: wxPanel(parent, wxID_ANY)
+	, m_list(new wxListView(this, wxID_ANY))
 {
-	m_list = new wxListView(this, wxID_ANY);
-
 	m_list->AppendColumn(wxT("Index"));
 	m_list->AppendColumn(wxT("Name"));
 	m_list->AppendColumn(wxT("Next"));
@@ -34,7 +32,9 @@ StatesView::StatesView(wxWindow* parent)
 
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
 	sizer->Add(m_list, 1, wxEXPAND | wxALL, 5);
-	SetSizerAndFit(sizer);
+	SetSizer(sizer);
+
+	m_list->Bind(wxEVT_SIZE, &StatesView::OnListResize, this);
 }
 
 void StatesView::SetParserTable(const IParserTable& table)
@@ -60,6 +60,8 @@ void StatesView::SetParserTable(const IParserTable& table)
 
 void StatesView::AdjustColumnWidth()
 {
+	m_list->Freeze();
+
 	const int cWidth = m_list->GetSize().GetWidth();
 	for (int i = 0; i < m_list->GetColumnCount(); ++i)
 	{
@@ -67,4 +69,11 @@ void StatesView::AdjustColumnWidth()
 		const float cCoeff = 1.f / m_list->GetColumnCount();
 		m_list->SetColumnWidth(i, cCoeff * cWidth);
 	}
+
+	m_list->Thaw();
+}
+
+void StatesView::OnListResize(wxSizeEvent&)
+{
+	AdjustColumnWidth();
 }

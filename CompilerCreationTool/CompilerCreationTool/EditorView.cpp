@@ -7,70 +7,33 @@ namespace
 {
 wxStyledTextCtrl* SetupLeftPanel(wxPanel& panel)
 {
-	wxStaticText* title = new wxStaticText(&panel, wxID_ANY, wxT("Source code"));
-	wxStaticLine* line = new wxStaticLine(&panel, wxID_ANY);
-
 	wxStyledTextCtrl* input = new wxStyledTextCtrl(
 		&panel, wxID_ANY, wxDefaultPosition,
 		wxDefaultSize, wxTE_DONTWRAP);
 	SetupStyledTextCtrlMargins(*input);
 
+	input->SetScrollWidth(input->GetSize().GetWidth());
+	input->SetScrollWidthTracking(true);
+
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-	sizer->Add(title, 0, wxEXPAND | wxTOP | wxLEFT | wxRIGHT, 5);
-	sizer->Add(line, 0, wxEXPAND | wxALL, 5);
 	sizer->Add(input, 1, wxEXPAND | wxALL, 5);
 	panel.SetSizer(sizer);
 
 	return input;
-}
-
-wxTextCtrl* SetupRightPanel(wxPanel& panel)
-{
-	wxStaticText* rightTitle = new wxStaticText(&panel, wxID_ANY, wxT("Output"));
-	wxStaticLine* rightLine = new wxStaticLine(&panel, wxID_ANY);
-
-	wxTextCtrl* output = new wxTextCtrl(
-		&panel, wxID_ANY, wxEmptyString,
-		wxDefaultPosition, wxDefaultSize,
-		wxTE_DONTWRAP | wxTE_MULTILINE);
-	output->SetEditable(false);
-
-	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-	sizer->Add(rightTitle, 0, wxEXPAND | wxTOP | wxLEFT | wxRIGHT, 5);
-	sizer->Add(rightLine, 0, wxEXPAND | wxALL, 5);
-	sizer->Add(output, 1, wxEXPAND | wxALL, 5);
-	panel.SetSizer(sizer);
-
-	return output;
 }
 }
 
 EditorView::EditorView(wxWindow* parent)
 	: wxPanel(parent, wxID_ANY)
 {
-	m_splitter = new wxSplitterWindow(
-		this,
-		wxID_ANY,
-		wxDefaultPosition,
-		wxDefaultSize,
-		wxSP_LIVE_UPDATE | wxSP_3D);
-	m_splitter->SetMinimumPaneSize(20);
-	m_splitter->SetDoubleBuffered(true);
-
-	m_left = new wxPanel(m_splitter, wxID_ANY);
-	m_input = SetupLeftPanel(*m_left);
-
-	m_right = new wxPanel(m_splitter, wxID_ANY);
-	m_output = SetupRightPanel(*m_right);
-
-	m_input->Bind(wxEVT_STC_UPDATEUI, &EditorView::OnOutputStyledTextCtrlUpdateUI, this);
-
-
-	m_splitter->SplitVertically(m_left, m_right, 100);
+	wxPanel* panel = new wxPanel(this, wxID_ANY);
+	m_input = SetupLeftPanel(*panel);
 
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-	sizer->Add(m_splitter, 1, wxEXPAND);
+	sizer->Add(panel, 1, wxEXPAND);
 	SetSizerAndFit(sizer);
+
+	m_input->Bind(wxEVT_STC_UPDATEUI, &EditorView::OnUpdateUI, this);
 }
 
 SignalScopedConnection EditorView::DoOnInputTextCtrlCursorUpdate(
@@ -79,19 +42,12 @@ SignalScopedConnection EditorView::DoOnInputTextCtrlCursorUpdate(
 	return mCursorUpdateSignal.connect(slot);
 }
 
-void EditorView::SplitPanels(float sashPositionPercentage)
-{
-	/*assert(sashPositionPercentage <= 1.f);
-	const int cWidth = m_splitter->GetSize().GetWidth();
-	m_splitter->SplitVertically(m_left, m_right, sashPositionPercentage * cWidth);*/
-}
-
-wxString EditorView::GetUserInput()
+wxString EditorView::GetUserInput() const
 {
 	return m_input->GetValue();
 }
 
-void EditorView::OnOutputStyledTextCtrlUpdateUI(wxStyledTextEvent& event)
+void EditorView::OnUpdateUI(wxStyledTextEvent& event)
 {
 	int linePos = 0;
 	m_input->GetCurLine(&linePos);
@@ -103,9 +59,4 @@ void EditorView::OnOutputStyledTextCtrlUpdateUI(wxStyledTextEvent& event)
 	);
 
 	event.Skip(true);
-}
-
-wxTextCtrl* EditorView::GetOutputTextCtrl()
-{
-	return m_output;
 }

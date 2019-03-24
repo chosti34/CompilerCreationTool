@@ -10,14 +10,20 @@ TextCtrlLogger::TextCtrlLogger(wxTextCtrl* ctrl)
 
 void TextCtrlLogger::Log(const std::string& message)
 {
+	mTextCtrl->Freeze();
 	mTextCtrl->SetEditable(true);
 	mTextCtrl->AppendText(message);
 	mTextCtrl->SetEditable(false);
+	mTextCtrl->Thaw();
+	mTextCtrl->ShowPosition(mTextCtrl->GetLastPosition());
 }
 
 void TextCtrlLogger::Clear()
 {
+	mTextCtrl->Freeze();
 	mTextCtrl->SetEditable(true);
 	mTextCtrl->Clear();
 	mTextCtrl->SetEditable(false);
+	mTextCtrl->Thaw();
+	mTextCtrl->ShowPosition(mTextCtrl->GetLastPosition());
 }

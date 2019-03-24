@@ -1,7 +1,0 @@
-digraph {
-0 [shape="circle" label="Binary"];
-1 [shape="circle" label="Literal (2)"];
-2 [shape="circle" label="Literal (2)"];
-0->1 [label=" "];
-0->2 [label=" "];
-}

@@ -46,8 +46,6 @@ TerminalEditDialog::TerminalEditDialog(wxWindow* parent, TokenPattern& pattern)
 	sizer->Add(hSizer, 0, wxALIGN_RIGHT | wxLEFT | wxRIGHT | wxBOTTOM, 5);
 	panel->SetSizerAndFit(sizer);
 	CentreOnParent();
-
-	SetDoubleBuffered(true);
 }
 
 void TerminalEditDialog::OnOk(wxCommandEvent& event)

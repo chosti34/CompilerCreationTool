@@ -2,30 +2,21 @@
 #include "Signal.h"
 #include <wx/panel.h>
 #include <wx/stc/stc.h>
-#include <wx/splitter.h>
 
 class EditorView : public wxPanel
 {
 public:
-	// Line, column and character
 	using CursorUpdateSignal = Signal<void(int, int, int)>;
 
 	explicit EditorView(wxWindow* parent);
-	SignalScopedConnection DoOnInputTextCtrlCursorUpdate(
-		CursorUpdateSignal::slot_type slot);
+	wxString GetUserInput() const;
 
-	void SplitPanels(float sashPositionPercentage);
-	wxTextCtrl* GetOutputTextCtrl();
-	wxString GetUserInput();
+	SignalScopedConnection DoOnInputTextCtrlCursorUpdate(CursorUpdateSignal::slot_type slot);
 
 private:
-	void OnOutputStyledTextCtrlUpdateUI(wxStyledTextEvent& event);
+	void OnUpdateUI(wxStyledTextEvent& event);
 
 private:
-	CursorUpdateSignal mCursorUpdateSignal;
-	wxSplitterWindow* m_splitter;
 	wxStyledTextCtrl* m_input;
-	wxTextCtrl* m_output;
-	wxPanel* m_left;
-	wxPanel* m_right;
+	CursorUpdateSignal mCursorUpdateSignal;
 };

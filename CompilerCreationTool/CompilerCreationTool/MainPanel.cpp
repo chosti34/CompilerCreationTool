@@ -5,7 +5,7 @@ MainPanel::MainPanel(wxFrame* parent)
 	: wxPanel(parent, wxID_ANY)
 {
 	m_notebook = new wxAuiNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
-	m_declarationView = new DeclarationView(m_notebook);
+	m_declarationView = new GrammarView(m_notebook);
 	m_statesView = new StatesView(m_notebook);
 	m_editorView = new EditorView(m_notebook);
 	mTreeView = new TreeView(m_notebook);
@@ -20,7 +20,7 @@ MainPanel::MainPanel(wxFrame* parent)
 	SetSizerAndFit(sizer);
 }
 
-DeclarationView* MainPanel::GetGrammarDeclarationView()
+GrammarView* MainPanel::GetGrammarDeclarationView()
 {
 	return m_declarationView;
 }

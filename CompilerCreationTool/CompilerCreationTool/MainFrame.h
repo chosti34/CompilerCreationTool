@@ -1,38 +1,62 @@
 #pragma once
 #include "Signal.h"
-#include "MainPanel.h"
-#include <wx/frame.h>
-#include <wx/panel.h>
-#include <wx/string.h>
+#include "ViewIdentifiers.h"
+
+#include "TreeView.h"
+#include "OutputView.h"
+#include "EditorView.h"
+#include "StatesView.h"
+#include "GrammarView.h"
+#include "EntitiesListboxView.h"
 
 #include <wx/aui/framemanager.h>
 #include <wx/aui/auibook.h>
 
+#include <wx/frame.h>
+#include <wx/string.h>
+#include <map>
+
 class MainFrame : public wxFrame
 {
 public:
-	using LanguageBuildSignal = Signal<void()>;
-	using ParserRunSignal = Signal<void()>;
-	using InfoQuerySignal = Signal<void()>;
+	using ButtonPressSignal = Signal<void()>;
 
-public:
 	MainFrame(const wxString& title, const wxSize& size);
 	~MainFrame();
 
-	MainPanel* GetMainPanel();
-	wxStatusBar* GetStatusBar();
+	GrammarView* GetDeclarationView();
+	StatesView* GetStatesView();
+	EditorView* GetEditorView();
+	TreeView* GetTreeView();
 
-	SignalScopedConnection DoOnLanguageBuildButtonPress(LanguageBuildSignal::slot_type slot);
-	SignalScopedConnection DoOnParserRunButtonPress(ParserRunSignal::slot_type slot);
-	SignalScopedConnection DoOnInfoQuery(InfoQuerySignal::slot_type slot);
+	EntitiesListboxView* GetTerminalsView();
+	EntitiesListboxView* GetActionsView();
+	OutputView* GetOutputView();
+
+	wxStatusBar* GetStatusBar();
+	wxToolBar* GetToolBar();
+
+	SignalScopedConnection DoOnBuildButtonPress(ButtonPressSignal::slot_type slot);
+	SignalScopedConnection DoOnRunButtonPress(ButtonPressSignal::slot_type slot);
+	SignalScopedConnection DoOnInfoButtonPress(ButtonPressSignal::slot_type slot);
+
+	SignalScopedConnection DoOnUpButtonPress(ButtonPressSignal::slot_type slot);
+	SignalScopedConnection DoOnDownButtonPress(ButtonPressSignal::slot_type slot);
+	SignalScopedConnection DoOnEditButtonPress(ButtonPressSignal::slot_type slot);
 
 private:
-	void ShowAboutMessageBox();
+	void InvokeSignal(Buttons::ID id);
+	void OpenAboutDialog();
 
+private:
 	wxDECLARE_EVENT_TABLE();
 	void OnExit(wxCommandEvent& event);
 	void OnAbout(wxCommandEvent& event);
 	void OnSize(wxSizeEvent& event);
+
+	void OnItemUp(wxCommandEvent& event);
+	void OnItemDown(wxCommandEvent& event);
+	void OnItemEdit(wxCommandEvent& event);
 
 	void OnBuild(wxCommandEvent& event);
 	void OnRun(wxCommandEvent& event);
@@ -41,12 +65,19 @@ private:
 	void OnHelp(wxCommandEvent& event);
 
 private:
-	wxAuiManager m_manager;
+	wxAuiManager m_auiManager;
+
 	wxAuiNotebook* m_notebook;
-	MainPanel* m_panel;
-	wxToolBar* mToolbar;
-	wxStatusBar* mStatusBar;
-	LanguageBuildSignal m_languageBuildButtonPressSignal;
-	ParserRunSignal m_parserRunButtonPressSignal;
-	InfoQuerySignal m_infoQuerySignal;
+	GrammarView* m_declarationView;
+	StatesView* m_statesView;
+	EditorView* m_editorView;
+	TreeView* m_treeView;
+	EntitiesListboxView* m_terminalsView;
+	EntitiesListboxView* m_actionsView;
+	OutputView* m_outputView;
+
+	wxStatusBar* m_statusbar;
+	wxToolBar* m_toolbar;
+
+	std::map<Buttons::ID, ButtonPressSignal> m_signals;
 };

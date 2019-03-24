@@ -8,33 +8,37 @@ public:
 	LanguageController(Language* language, MainFrame* frame);
 
 private:
-	void UpdateStatusbarTerminalInfo(int index);
-	void UpdateStatusbarActionInfo(int index);
-
-	// Signal handlers //
 	void OnLanguageBuildButtonPress();
 	void OnParserRunButtonPress();
 	void OnLanguageInfoButtonPress();
 
-	void OnTerminalPositionChange(int oldPos, int newPos);
-	void OnTerminalSelection(int selection);
-	void OnTerminalEdit(int index);
+	void OnTerminalsViewFocus();
+	void OnActionsViewFocus();
 
+	void OnTerminalPositionChange(int oldPos, int newPos);
 	void OnActionPositionChange(int oldPos, int newPos);
+
+	void OnTerminalSelection(int selection);
 	void OnActionSelection(int selection);
+
+	void OnTerminalEdit(int index);
 	void OnActionEdit(int index);
 
-	void OnDeclarationTextCtrlCursorUpdate(int line, int col, int ch);
-	void OnEditorTextCtrlCursorUpdate(int line, int col, int ch);
-	void OnCursorUpdate(int line, int col, int ch);
-	//////////////////////////////////////////////////////////////////////////
+	void OnGrammarTextCtrlUpdateUI(int line, int col, int ch);
+	void OnEditorTextCtrlUpdateUI(int line, int col, int ch);
 
 private:
 	Language* m_language;
 	MainFrame* m_frame;
-	TreeView* mTreeView;
-	EditorView* m_editorView;
+
+	GrammarView* m_grammarView;
 	StatesView* m_statesView;
-	DeclarationView* m_declarationView;
+	EditorView* m_editorView;
+	TreeView* m_treeView;
+
+	EntitiesListboxView* m_terminalsView;
+	EntitiesListboxView* m_actionsView;
+	OutputView* m_outputView;
+
 	std::vector<SignalScopedConnection> m_connections;
 };

@@ -6,10 +6,13 @@
 class StatesView : public wxPanel
 {
 public:
-	StatesView(wxWindow* parent);
+	explicit StatesView(wxWindow* parent);
 
 	void SetParserTable(const IParserTable& table);
 	void AdjustColumnWidth();
+
+private:
+	void OnListResize(wxSizeEvent& event);
 
 private:
 	wxListView* m_list;

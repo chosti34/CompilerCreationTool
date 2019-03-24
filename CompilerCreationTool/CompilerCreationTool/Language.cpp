@@ -79,6 +79,7 @@ void Language::SetGrammar(std::unique_ptr<grammarlib::IGrammar> && grammar)
 			if (auto pos = m_lexer->GetPatternPos(newPattern.GetName()))
 			{
 				lexer->SetPattern(i, m_lexer->GetPattern(*pos));
+				lexer->GetPattern(i).SetEndingFlag(lexer->GetPattern(i).GetName() == grammar->GetEndTerminal());
 				indices.emplace_back(i, std::min(*pos, lexer->GetPatternsCount() - 1));
 			}
 		}

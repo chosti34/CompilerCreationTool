@@ -17,7 +17,7 @@ bool RegexAllowsEmptyString(const std::regex& regex)
 	return std::regex_match("", regex);
 }
 }
-
+ 
 TokenPattern::TokenPattern(
 	const std::string& name,
 	const std::string& origin,
@@ -62,6 +62,11 @@ const std::string& TokenPattern::GetOrigin() const
 const std::regex& TokenPattern::GetRegex() const
 {
 	return m_regex;
+}
+
+void TokenPattern::SetEndingFlag(bool flag)
+{
+	m_isEnding = flag;
 }
 
 bool TokenPattern::IsEnding() const

@@ -153,14 +153,16 @@
   <ItemGroup>
     <ClInclude Include="ActionEditDialog.h" />
     <ClInclude Include="ASTGraphvizVisualizer.h" />
+    <ClInclude Include="EntitiesListboxView.h" />
     <ClInclude Include="Language.h" />
-    <ClInclude Include="DeclarationView.h" />
+    <ClInclude Include="GrammarView.h" />
     <ClInclude Include="LanguageController.h" />
     <ClInclude Include="LanguageInformation.h" />
     <ClInclude Include="LanguageInformationDialog.h" />
     <ClInclude Include="MainFrame.h" />
     <ClInclude Include="MainPanel.h" />
     <ClInclude Include="EditorView.h" />
+    <ClInclude Include="OutputView.h" />
     <ClInclude Include="StatesView.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Signal.h" />
@@ -168,13 +170,15 @@
     <ClInclude Include="TerminalEditDialog.h" />
     <ClInclude Include="TextCtrlLogger.h" />
     <ClInclude Include="TreeView.h" />
+    <ClInclude Include="ViewIdentifiers.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ActionEditDialog.cpp" />
     <ClCompile Include="ASTGraphvizVisualizer.cpp" />
     <ClCompile Include="CtrlHelpers.cpp" />
+    <ClCompile Include="EntitiesListboxView.cpp" />
     <ClCompile Include="Language.cpp" />
-    <ClCompile Include="DeclarationView.cpp" />
+    <ClCompile Include="GrammarView.cpp" />
     <ClCompile Include="LanguageController.cpp" />
     <ClCompile Include="LanguageInformation.cpp" />
     <ClCompile Include="LanguageInformationDialog.cpp" />
@@ -182,6 +186,7 @@
     <ClCompile Include="MainFrame.cpp" />
     <ClCompile Include="MainPanel.cpp" />
     <ClCompile Include="EditorView.cpp" />
+    <ClCompile Include="OutputView.cpp" />
     <ClCompile Include="StatesView.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

@@ -11,9 +11,8 @@
 
 #include <wx/aui/framemanager.h>
 #include <wx/aui/auibook.h>
-
-#include <wx/frame.h>
 #include <wx/string.h>
+#include <wx/frame.h>
 #include <map>
 
 class MainFrame : public wxFrame
@@ -36,13 +35,8 @@ public:
 	wxStatusBar* GetStatusBar();
 	wxToolBar* GetToolBar();
 
-	SignalScopedConnection DoOnBuildButtonPress(ButtonPressSignal::slot_type slot);
-	SignalScopedConnection DoOnRunButtonPress(ButtonPressSignal::slot_type slot);
-	SignalScopedConnection DoOnInfoButtonPress(ButtonPressSignal::slot_type slot);
-
-	SignalScopedConnection DoOnUpButtonPress(ButtonPressSignal::slot_type slot);
-	SignalScopedConnection DoOnDownButtonPress(ButtonPressSignal::slot_type slot);
-	SignalScopedConnection DoOnEditButtonPress(ButtonPressSignal::slot_type slot);
+	SignalScopedConnection DoOnButtonPress(Buttons::ID button,
+		ButtonPressSignal::slot_type slot);
 
 private:
 	void InvokeSignal(Buttons::ID id);

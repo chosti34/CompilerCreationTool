@@ -1,6 +1,7 @@
 #pragma once
 #include "NodeVisitor.h"
 #include <boost/variant.hpp>
+#include <string>
 
 class IExpressionAST
 {
@@ -80,3 +81,21 @@ private:
 	std::unique_ptr<IExpressionAST> mRight;
 	Operator mOperator;
 };
+
+inline std::string ToString(BinaryExpressionAST::Operator op)
+{
+	switch (op)
+	{
+	case BinaryExpressionAST::Plus:
+		return "+";
+	case BinaryExpressionAST::Minus:
+		return "-";
+	case BinaryExpressionAST::Mul:
+		return "*";
+	case BinaryExpressionAST::Div:
+		return "/";
+	default:
+		assert(false);
+		throw std::logic_error("can't cast undefined binary expression operator to string");
+	}
+}

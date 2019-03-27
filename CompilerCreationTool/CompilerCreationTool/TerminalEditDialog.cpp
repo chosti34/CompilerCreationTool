@@ -8,7 +8,7 @@ const wxSize DIALOG_SIZE = { 250, 250 };
 }
 
 TerminalEditDialog::TerminalEditDialog(wxWindow* parent, TokenPattern& pattern)
-	: wxDialog(parent, wxID_ANY, wxT("Configure Terminal"),
+	: wxDialog(parent, wxID_ANY, wxT("Configure Terminal '" + pattern.GetName() + "'"),
 		wxDefaultPosition, DIALOG_SIZE, wxDEFAULT_DIALOG_STYLE)
 	, m_pattern(pattern)
 {

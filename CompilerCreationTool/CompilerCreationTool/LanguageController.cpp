@@ -48,26 +48,16 @@ LanguageController::LanguageController(Language* language, MainFrame* frame)
 {
 	namespace ph = std::placeholders;
 
-	/*m_connections.push_back(m_declarationView->DoOnTerminalPositionChange(
-		bind(&LanguageController::OnTerminalPositionChange, this, ph::_1, ph::_2)));
-	m_connections.push_back(m_declarationView->DoOnTerminalEdit(
-		bind(&LanguageController::OnTerminalEdit, this, ph::_1)));
-	m_connections.push_back(m_declarationView->DoOnTerminalSelection(
-		bind(&LanguageController::OnTerminalSelection, this, ph::_1)));*/
+	m_connections.push_back(m_frame->DoOnButtonPress(Buttons::Build, std::bind(&LanguageController::OnBuildButtonPress, this)));
+	m_connections.push_back(m_frame->DoOnButtonPress(Buttons::Run, std::bind(&LanguageController::OnRunButtonPress, this)));
+	m_connections.push_back(m_frame->DoOnButtonPress(Buttons::Info, std::bind(&LanguageController::OnInfoButtonPress, this)));
 
-	/*m_connections.push_back(m_declarationView->DoOnActionPositionChange(
-		bind(&LanguageController::OnActionPositionChange, this, ph::_1, ph::_2)));
-	m_connections.push_back(m_declarationView->DoOnActionEdit(
-		bind(&LanguageController::OnActionEdit, this, ph::_1)));
-	m_connections.push_back(m_declarationView->DoOnActionSelection(
-		bind(&LanguageController::OnActionSelection, this, ph::_1)));*/
+	m_connections.push_back(m_frame->DoOnButtonPress(Buttons::Up, std::bind(&LanguageController::OnUpButtonPress, this)));
+	m_connections.push_back(m_frame->DoOnButtonPress(Buttons::Down, std::bind(&LanguageController::OnDownButtonPress, this)));
+	m_connections.push_back(m_frame->DoOnButtonPress(Buttons::Edit, std::bind(&LanguageController::OnEditButtonPress, this)));
 
-	m_connections.push_back(m_frame->DoOnBuildButtonPress(std::bind(&LanguageController::OnLanguageBuildButtonPress, this)));
-	m_connections.push_back(m_frame->DoOnRunButtonPress(std::bind(&LanguageController::OnParserRunButtonPress, this)));
-	m_connections.push_back(m_frame->DoOnInfoButtonPress(std::bind(&LanguageController::OnLanguageInfoButtonPress, this)));
-
-	m_connections.push_back(m_terminalsView->DoOnFocusSet(std::bind(&LanguageController::OnTerminalsViewFocus, this)));
-	m_connections.push_back(m_actionsView->DoOnFocusSet(std::bind(&LanguageController::OnActionsViewFocus, this)));
+	m_connections.push_back(m_terminalsView->DoOnItemDeselection(std::bind(&LanguageController::OnTerminalsViewDeselection, this)));
+	m_connections.push_back(m_actionsView->DoOnItemDeselection(std::bind(&LanguageController::OnActionsViewDeselection, this)));
 
 	m_connections.push_back(m_terminalsView->DoOnItemSelection(std::bind(&LanguageController::OnTerminalSelection, this, ph::_1)));
 	m_connections.push_back(m_actionsView->DoOnItemSelection(std::bind(&LanguageController::OnActionSelection, this, ph::_1)));
@@ -75,13 +65,11 @@ LanguageController::LanguageController(Language* language, MainFrame* frame)
 	m_connections.push_back(m_terminalsView->DoOnItemDoubleSelection(std::bind(&LanguageController::OnTerminalEdit, this, ph::_1)));
 	m_connections.push_back(m_actionsView->DoOnItemDoubleSelection(std::bind(&LanguageController::OnActionEdit, this, ph::_1)));
 
-	/*m_connections.push_back(m_editorView->DoOnInputTextCtrlCursorUpdate(
-		std::bind(&LanguageController::OnEditorTextCtrlCursorUpdate, this, ph::_1, ph::_2, ph::_3)));
-	m_connections.push_back(m_declarationView->DoOnTextCtrlCursorUpdate(
-		std::bind(&LanguageController::OnDeclarationTextCtrlCursorUpdate, this, ph::_1, ph::_2, ph::_3)));*/
+	m_connections.push_back(m_grammarView->DoOnTextCtrlUpdateUI(std::bind(&LanguageController::OnGrammarTextCtrlUpdateUI, this, ph::_1, ph::_2, ph::_3)));
+	m_connections.push_back(m_editorView->DoOnTextCtrlUpdateUI(std::bind(&LanguageController::OnEditorTextCtrlUpdateUI, this, ph::_1, ph::_2, ph::_3)));
 }
 
-void LanguageController::OnLanguageBuildButtonPress()
+void LanguageController::OnBuildButtonPress()
 {
 	auto builder = std::make_unique<grammarlib::GrammarBuilder>();
 	m_language->SetGrammar(builder->CreateGrammar(m_grammarView->GetDeclaration()));
@@ -89,9 +77,11 @@ void LanguageController::OnLanguageBuildButtonPress()
 	m_terminalsView->SetItems(GetTerminalsArray(m_language->GetLexer()));
 	m_actionsView->SetItems(GetActionsArray(m_language->GetParser()));
 	m_statesView->SetParserTable(m_language->GetParser().GetTable());
+	m_frame->GetToolBar()->EnableTool(Buttons::Run, true);
+	m_frame->GetToolBar()->EnableTool(Buttons::Info, true);
 }
 
-void LanguageController::OnParserRunButtonPress()
+void LanguageController::OnRunButtonPress()
 {
 	assert(m_language->IsInitialized());
 
@@ -139,25 +129,70 @@ void LanguageController::OnParserRunButtonPress()
 	logger->Log("=========================\n");
 }
 
-void LanguageController::OnLanguageInfoButtonPress()
+void LanguageController::OnInfoButtonPress()
 {
 	assert(m_language->IsInitialized());
 	LanguageInformationDialog dialog(m_frame, m_language->GetInfo());
 	dialog.ShowModal();
 }
 
-void LanguageController::OnTerminalsViewFocus()
+void LanguageController::OnUpButtonPress()
 {
+	if (m_terminalsView->HasSelection() && m_terminalsView->MoveSelectionUp())
+	{
+		OnTerminalPositionChange(m_terminalsView->GetSelection(), m_terminalsView->GetSelection() + 1);
+	}
+	else if (m_actionsView->HasSelection() && m_actionsView->MoveSelectionUp())
+	{
+		OnActionPositionChange(m_actionsView->GetSelection(), m_actionsView->GetSelection() + 1);
+	}
+}
+
+void LanguageController::OnDownButtonPress()
+{
+	if (m_terminalsView->HasSelection() && m_terminalsView->MoveSelectionDown())
+	{
+		OnTerminalPositionChange(m_terminalsView->GetSelection(), m_terminalsView->GetSelection() - 1);
+	}
+	else if (m_actionsView->HasSelection() && m_actionsView->MoveSelectionDown())
+	{
+		OnActionPositionChange(m_terminalsView->GetSelection(), m_terminalsView->GetSelection() - 1);
+	}
+}
+
+void LanguageController::OnEditButtonPress()
+{
+	if (m_terminalsView->HasSelection())
+	{
+		OnTerminalEdit(m_terminalsView->GetSelection());
+	}
+	else if (m_actionsView->HasSelection())
+	{
+		OnActionEdit(m_actionsView->GetSelection());
+	}
+}
+
+void LanguageController::OnTerminalsViewDeselection()
+{
+	std::cout << "Term deselection" << std::endl;
+	m_frame->GetToolBar()->EnableTool(Buttons::Up, false);
+	m_frame->GetToolBar()->EnableTool(Buttons::Down, false);
+	m_frame->GetToolBar()->EnableTool(Buttons::Edit, false);
 	m_actionsView->DeselectAll();
 }
 
-void LanguageController::OnActionsViewFocus()
+void LanguageController::OnActionsViewDeselection()
 {
+	std::cout << "Action deselection" << std::endl;
+	m_frame->GetToolBar()->EnableTool(Buttons::Up, false);
+	m_frame->GetToolBar()->EnableTool(Buttons::Down, false);
+	m_frame->GetToolBar()->EnableTool(Buttons::Edit, false);
 	m_terminalsView->DeselectAll();
 }
 
 void LanguageController::OnTerminalPositionChange(int oldPos, int newPos)
 {
+	assert(m_language->IsInitialized());
 	m_language->GetLexer().SwapPatterns(size_t(oldPos), size_t(newPos));
 }
 
@@ -169,12 +204,20 @@ void LanguageController::OnActionPositionChange(int oldPos, int newPos)
 
 void LanguageController::OnTerminalSelection(int selection)
 {
+	m_actionsView->DeselectAll();
+	m_frame->GetToolBar()->EnableTool(Buttons::Up, true);
+	m_frame->GetToolBar()->EnableTool(Buttons::Down, true);
+	m_frame->GetToolBar()->EnableTool(Buttons::Edit, true);
 	wxStatusBar* statusbar = m_frame->GetStatusBar();
 	statusbar->SetStatusText(m_language->GetLexer().GetPattern(selection).GetOrigin(), 4);
 }
 
 void LanguageController::OnActionSelection(int selection)
 {
+	m_terminalsView->DeselectAll();
+	m_frame->GetToolBar()->EnableTool(Buttons::Up, true);
+	m_frame->GetToolBar()->EnableTool(Buttons::Down, true);
+	m_frame->GetToolBar()->EnableTool(Buttons::Edit, true);
 	wxStatusBar* statusbar = m_frame->GetStatusBar();
 	statusbar->SetStatusText(ToString(m_language->GetParser().GetAction(selection).GetType()), 4);
 }
@@ -188,7 +231,7 @@ void LanguageController::OnTerminalEdit(int index)
 	if (pattern.IsEnding())
 	{
 		using namespace std::string_literals;
-		const wxString cTitle = wxT("Information About Terminal");
+		const wxString cTitle = wxT("Information About Terminal '" + pattern.GetName() + "'");
 		const wxString cMessage = "'"s + pattern.GetName() +
 			"' is grammar's ending terminal - you cannot edit it."s;
 		wxMessageBox(cMessage, cTitle, wxOK | wxICON_WARNING);

@@ -36,10 +36,10 @@ EditorView::EditorView(wxWindow* parent)
 	m_input->Bind(wxEVT_STC_UPDATEUI, &EditorView::OnUpdateUI, this);
 }
 
-SignalScopedConnection EditorView::DoOnInputTextCtrlCursorUpdate(
+SignalScopedConnection EditorView::DoOnTextCtrlUpdateUI(
 	CursorUpdateSignal::slot_type slot)
 {
-	return mCursorUpdateSignal.connect(slot);
+	return mUpdateUISignal.connect(slot);
 }
 
 wxString EditorView::GetUserInput() const
@@ -52,7 +52,7 @@ void EditorView::OnUpdateUI(wxStyledTextEvent& event)
 	int linePos = 0;
 	m_input->GetCurLine(&linePos);
 
-	mCursorUpdateSignal(
+	mUpdateUISignal(
 		m_input->GetCurrentLine() + 1,
 		m_input->GetColumn(m_input->GetCurrentPos()) + 1,
 		linePos + 1

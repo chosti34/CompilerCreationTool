@@ -46,7 +46,7 @@ void ASTGraphvizVisualizer::Visit(const BinaryExpressionAST& binary)
 	const size_t parent = mIndex;
 
 	mOutput << mIndex++ << " [";
-	mOutput << "shape=\"circle\" label=\"Binary\"];" << std::endl;
+	mOutput << "shape=\"circle\" label=\"Binary (" << ToString(binary.GetOperator()) << ")\"];" << std::endl;
 
 	binary.GetLeft().Accept(*this);
 	binary.GetRight().Accept(*this);

@@ -87,8 +87,24 @@ void AddTools(wxToolBar& toolbar)
 MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	: wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, size)
 {
+	// Menu bar
+	SetMenuBar(CreateMenuBar());
+
+	// Tool bar
+	m_toolbar = CreateToolBar(wxTB_FLAT);
+	AddTools(*m_toolbar);
+	m_toolbar->Realize();
+
+	m_toolbar->EnableTool(Buttons::Run, false);
+	m_toolbar->EnableTool(Buttons::Info, false);
+	m_toolbar->EnableTool(Buttons::Up, false);
+	m_toolbar->EnableTool(Buttons::Down, false);
+	m_toolbar->EnableTool(Buttons::Edit, false);
+
+	// AUI panels
 	m_auiManager.SetManagedWindow(this);
-	m_auiManager.SetFlags(m_auiManager.GetFlags() | wxAUI_MGR_LIVE_RESIZE | wxAUI_MGR_TRANSPARENT_DRAG | wxAUI_MGR_ALLOW_ACTIVE_PANE);
+	m_auiManager.SetFlags(m_auiManager.GetFlags() | wxAUI_MGR_LIVE_RESIZE |
+		wxAUI_MGR_TRANSPARENT_DRAG | wxAUI_MGR_ALLOW_ACTIVE_PANE);
 
 	wxAuiDockArt* art = m_auiManager.GetArtProvider();
 	art->SetMetric(wxAUI_DOCKART_SASH_SIZE, 2);
@@ -101,9 +117,11 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	art->SetColor(wxAUI_DOCKART_INACTIVE_CAPTION_TEXT_COLOUR, wxColour(255, 255, 255));
 	art->SetFont(wxAUI_DOCKART_CAPTION_FONT, wxFont(wxFontInfo().Family(wxFONTFAMILY_SWISS)));
 
-	m_notebook = new wxAuiNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_TAB_MOVE | wxAUI_NB_TAB_EXTERNAL_MOVE | wxAUI_NB_TAB_SPLIT | wxAUI_NB_WINDOWLIST_BUTTON | wxNO_BORDER);
-	wxAuiManager& manager = const_cast<wxAuiManager&>(m_notebook->GetAuiManager());
-	manager.SetFlags(manager.GetFlags() | wxAUI_MGR_LIVE_RESIZE);
+	m_notebook = new wxAuiNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+		wxAUI_NB_TAB_MOVE | wxAUI_NB_TAB_EXTERNAL_MOVE | wxAUI_NB_TAB_SPLIT |
+		wxAUI_NB_WINDOWLIST_BUTTON | wxNO_BORDER);
+	wxAuiManager& notebookAuiManager = const_cast<wxAuiManager&>(m_notebook->GetAuiManager());
+	notebookAuiManager.SetFlags(notebookAuiManager.GetFlags() | wxAUI_MGR_LIVE_RESIZE);
 	m_notebook->SetArtProvider(new wxAuiSimpleTabArt);
 
 	m_declarationView = new GrammarView(m_notebook);
@@ -120,25 +138,21 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	m_actionsView = new EntitiesListboxView(this);
 	m_outputView = new OutputView(this);
 
-	m_auiManager.AddPane(m_notebook, wxAuiPaneInfo().Name("NotebookContent").CenterPane().PaneBorder(false));
-	m_auiManager.AddPane(m_terminalsView, wxAuiPaneInfo().Name("TerminalsListbox").Caption("  Terminals").Left().Position(0).CloseButton(false).Dockable(true));
-	m_auiManager.AddPane(m_actionsView, wxAuiPaneInfo().Name("ActionsListbox").Caption("  Actions").Left().Position(1).CloseButton(false).Dockable(true));
-	m_auiManager.AddPane(m_outputView, wxAuiPaneInfo().Name("OutputPane").Caption("  Output").Bottom().Position(1).MaximizeButton(true).CloseButton(false).Dockable(true));
+	m_auiManager.AddPane(m_notebook, wxAuiPaneInfo().
+		Name("NotebookContent").CenterPane().PaneBorder(false));
+	m_auiManager.AddPane(m_terminalsView, wxAuiPaneInfo().Name("TerminalsListbox").
+		Caption("  Terminals").Left().Position(0).CloseButton(false).Dockable(true));
+	m_auiManager.AddPane(m_actionsView, wxAuiPaneInfo().Name("ActionsListbox").
+		Caption("  Actions").Left().Position(1).CloseButton(false).Dockable(true));
+	m_auiManager.AddPane(m_outputView, wxAuiPaneInfo().Name("OutputPane").
+		Caption("  Output").Bottom().Position(1).MaximizeButton(true).CloseButton(false).Dockable(true));
+	m_auiManager.Update();
 
-	SetMenuBar(CreateMenuBar());
-
-	m_toolbar = CreateToolBar(wxTB_FLAT);
-	AddTools(*m_toolbar);
-	m_toolbar->Realize();
-
-	m_toolbar->EnableTool(Buttons::Run, false);
-	m_toolbar->EnableTool(Buttons::Info, false);
-
+	// Status bar
 	m_statusbar = CreateStatusBar(5);
 	CustomizeStatusBar(*m_statusbar);
 
 	Centre();
-	m_auiManager.Update();
 }
 
 MainFrame::~MainFrame()
@@ -191,34 +205,10 @@ wxToolBar* MainFrame::GetToolBar()
 	return m_toolbar;
 }
 
-SignalScopedConnection MainFrame::DoOnBuildButtonPress(ButtonPressSignal::slot_type slot)
+SignalScopedConnection MainFrame::DoOnButtonPress(Buttons::ID button,
+	ButtonPressSignal::slot_type slot)
 {
-	return m_signals[Buttons::Build].connect(slot);
-}
-
-SignalScopedConnection MainFrame::DoOnRunButtonPress(ButtonPressSignal::slot_type slot)
-{
-	return m_signals[Buttons::Run].connect(slot);
-}
-
-SignalScopedConnection MainFrame::DoOnInfoButtonPress(ButtonPressSignal::slot_type slot)
-{
-	return m_signals[Buttons::Info].connect(slot);
-}
-
-SignalScopedConnection MainFrame::DoOnUpButtonPress(ButtonPressSignal::slot_type slot)
-{
-	return m_signals[Buttons::Up].connect(slot);
-}
-
-SignalScopedConnection MainFrame::DoOnDownButtonPress(ButtonPressSignal::slot_type slot)
-{
-	return m_signals[Buttons::Down].connect(slot);
-}
-
-SignalScopedConnection MainFrame::DoOnEditButtonPress(ButtonPressSignal::slot_type slot)
-{
-	return m_signals[Buttons::Edit].connect(slot);
+	return m_signals[button].connect(slot);
 }
 
 void MainFrame::InvokeSignal(Buttons::ID id)
@@ -251,8 +241,6 @@ void MainFrame::OnBuild(wxCommandEvent&)
 	try
 	{
 		InvokeSignal(Buttons::Build);
-		m_toolbar->EnableTool(Buttons::Run, true);
-		m_toolbar->EnableTool(Buttons::Info, true);
 	}
 	catch (const std::exception& ex)
 	{

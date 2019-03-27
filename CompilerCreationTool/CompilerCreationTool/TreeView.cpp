@@ -17,7 +17,6 @@ public:
 	{
 		wxScrolledWindow::Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SIMPLE);
 		SetBackgroundColour(wxColour(255, 255, 255));
-		SetDoubleBuffered(true);
 	}
 
 	void SetImage(const wxImage& image)
@@ -65,7 +64,6 @@ TreeView::TreeView(wxWindow* parent)
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 	sizer->Add(mScrolledWindow, 1, wxEXPAND | wxALL, 10);
 	SetSizer(sizer);
-	SetDoubleBuffered(true);
 	Refresh(true);
 }
 

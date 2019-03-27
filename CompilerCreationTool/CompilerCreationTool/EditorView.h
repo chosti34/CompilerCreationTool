@@ -11,12 +11,12 @@ public:
 	explicit EditorView(wxWindow* parent);
 	wxString GetUserInput() const;
 
-	SignalScopedConnection DoOnInputTextCtrlCursorUpdate(CursorUpdateSignal::slot_type slot);
+	SignalScopedConnection DoOnTextCtrlUpdateUI(CursorUpdateSignal::slot_type slot);
 
 private:
 	void OnUpdateUI(wxStyledTextEvent& event);
 
 private:
 	wxStyledTextCtrl* m_input;
-	CursorUpdateSignal mCursorUpdateSignal;
+	CursorUpdateSignal mUpdateUISignal;
 };

@@ -11,9 +11,7 @@ EntitiesListboxView::EntitiesListboxView(wxWindow* parent)
 
 	m_listbox->Bind(wxEVT_LISTBOX, &EntitiesListboxView::OnListboxItemSelection, this);
 	m_listbox->Bind(wxEVT_LISTBOX_DCLICK, &EntitiesListboxView::OnListboxItemDoubleSelection, this);
-
 	m_listbox->Bind(wxEVT_LEFT_DOWN, &EntitiesListboxView::OnListboxMouseDown, this);
-	m_listbox->Bind(wxEVT_SET_FOCUS, &EntitiesListboxView::OnFocusSet, this);
 }
 
 void EntitiesListboxView::SetItems(const wxArrayString& items)
@@ -36,6 +34,47 @@ int EntitiesListboxView::GetSelection() const
 	return m_listbox->GetSelection();
 }
 
+bool EntitiesListboxView::HasSelection() const
+{
+	return m_listbox->GetSelection() != wxNOT_FOUND;
+}
+
+bool EntitiesListboxView::MoveSelectionUp()
+{
+	const int selection = m_listbox->GetSelection();
+	const int upper = selection - 1;
+	assert(selection != wxNOT_FOUND);
+
+	if (upper >= 0)
+	{
+		const wxString swapValue = m_listbox->GetString(selection);
+		m_listbox->SetString(selection, m_listbox->GetString(upper));
+		m_listbox->SetString(upper, swapValue);
+		m_listbox->SetSelection(upper);
+		return true;
+	}
+
+	return false;
+}
+
+bool EntitiesListboxView::MoveSelectionDown()
+{
+	const int selection = m_listbox->GetSelection();
+	const int lower = selection + 1;
+	assert(selection != wxNOT_FOUND);
+
+	if (lower < int(m_listbox->GetCount()))
+	{
+		const wxString swapValue = m_listbox->GetString(selection);
+		m_listbox->SetString(selection, m_listbox->GetString(lower));
+		m_listbox->SetString(lower, swapValue);
+		m_listbox->SetSelection(lower);
+		return true;
+	}
+
+	return false;
+}
+
 SignalScopedConnection EntitiesListboxView::DoOnItemDoubleSelection(Signal<void(int)>::slot_type slot)
 {
 	return m_itemDoubleSelectionSignal.connect(slot);
@@ -46,9 +85,9 @@ SignalScopedConnection EntitiesListboxView::DoOnItemSelection(Signal<void(int)>:
 	return m_itemSelectionSignal.connect(slot);
 }
 
-SignalScopedConnection EntitiesListboxView::DoOnFocusSet(Signal<void()>::slot_type slot)
+SignalScopedConnection EntitiesListboxView::DoOnItemDeselection(Signal<void()>::slot_type slot)
 {
-	return m_focusSignal.connect(slot);
+	return m_itemDeselectionSignal.connect(slot);
 }
 
 void EntitiesListboxView::OnListboxItemDoubleSelection(wxCommandEvent& event)
@@ -68,19 +107,12 @@ void EntitiesListboxView::OnListboxItemSelection(wxCommandEvent& event)
 
 void EntitiesListboxView::OnListboxMouseDown(wxMouseEvent& event)
 {
-	// ≈сли выбран хот€ бы один элемент, а также пользователь кликнул
-	//  по пустой части списка, тогда полностью снимаем все выделени€
+	// ≈сли пользователь кликнул по пустой части списка, тогда полностью снимаем все выделени€
 	wxArrayInt selections;
-	if (m_listbox->GetSelections(selections) != 0 &&
-		m_listbox->HitTest(event.GetPosition()) == wxNOT_FOUND)
+	if (m_listbox->HitTest(event.GetPosition()) == wxNOT_FOUND)
 	{
 		m_listbox->Deselect(wxNOT_FOUND);
+		m_itemDeselectionSignal();
 	}
-	event.Skip(true);
-}
-
-void EntitiesListboxView::OnFocusSet(wxFocusEvent& event)
-{
-	m_focusSignal();
 	event.Skip(true);
 }

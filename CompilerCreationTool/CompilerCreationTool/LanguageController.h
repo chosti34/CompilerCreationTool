@@ -8,12 +8,16 @@ public:
 	LanguageController(Language* language, MainFrame* frame);
 
 private:
-	void OnLanguageBuildButtonPress();
-	void OnParserRunButtonPress();
-	void OnLanguageInfoButtonPress();
+	void OnBuildButtonPress();
+	void OnRunButtonPress();
+	void OnInfoButtonPress();
 
-	void OnTerminalsViewFocus();
-	void OnActionsViewFocus();
+	void OnUpButtonPress();
+	void OnDownButtonPress();
+	void OnEditButtonPress();
+
+	void OnTerminalsViewDeselection();
+	void OnActionsViewDeselection();
 
 	void OnTerminalPositionChange(int oldPos, int newPos);
 	void OnActionPositionChange(int oldPos, int newPos);

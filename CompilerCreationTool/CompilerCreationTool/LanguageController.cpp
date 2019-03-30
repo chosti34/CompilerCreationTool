@@ -69,6 +69,18 @@ LanguageController::LanguageController(Language* language, MainFrame* frame)
 	m_connections.push_back(m_editorView->DoOnTextCtrlUpdateUI(std::bind(&LanguageController::OnEditorTextCtrlUpdateUI, this, ph::_1, ph::_2, ph::_3)));
 }
 
+void LanguageController::SwapTerminalPositions(int from, int to)
+{
+	assert(m_language->IsInitialized());
+	m_language->GetLexer().SwapPatterns(size_t(from), size_t(to));
+}
+
+void LanguageController::SwapActionPositions(int from, int to)
+{
+	assert(m_language->IsInitialized());
+	m_language->GetParser().SwapActions(size_t(from), size_t(to));
+}
+
 void LanguageController::OnBuildButtonPress()
 {
 	auto builder = std::make_unique<grammarlib::GrammarBuilder>();
@@ -140,11 +152,11 @@ void LanguageController::OnUpButtonPress()
 {
 	if (m_terminalsView->HasSelection() && m_terminalsView->MoveSelectionUp())
 	{
-		OnTerminalPositionChange(m_terminalsView->GetSelection(), m_terminalsView->GetSelection() + 1);
+		SwapTerminalPositions(m_terminalsView->GetSelection(), m_terminalsView->GetSelection() + 1);
 	}
 	else if (m_actionsView->HasSelection() && m_actionsView->MoveSelectionUp())
 	{
-		OnActionPositionChange(m_actionsView->GetSelection(), m_actionsView->GetSelection() + 1);
+		SwapActionPositions(m_actionsView->GetSelection(), m_actionsView->GetSelection() + 1);
 	}
 }
 
@@ -152,11 +164,11 @@ void LanguageController::OnDownButtonPress()
 {
 	if (m_terminalsView->HasSelection() && m_terminalsView->MoveSelectionDown())
 	{
-		OnTerminalPositionChange(m_terminalsView->GetSelection(), m_terminalsView->GetSelection() - 1);
+		SwapTerminalPositions(m_terminalsView->GetSelection(), m_terminalsView->GetSelection() - 1);
 	}
 	else if (m_actionsView->HasSelection() && m_actionsView->MoveSelectionDown())
 	{
-		OnActionPositionChange(m_terminalsView->GetSelection(), m_terminalsView->GetSelection() - 1);
+		SwapActionPositions(m_actionsView->GetSelection(), m_actionsView->GetSelection() - 1);
 	}
 }
 
@@ -188,18 +200,6 @@ void LanguageController::OnActionsViewDeselection()
 	m_frame->GetToolBar()->EnableTool(Buttons::Down, false);
 	m_frame->GetToolBar()->EnableTool(Buttons::Edit, false);
 	m_terminalsView->DeselectAll();
-}
-
-void LanguageController::OnTerminalPositionChange(int oldPos, int newPos)
-{
-	assert(m_language->IsInitialized());
-	m_language->GetLexer().SwapPatterns(size_t(oldPos), size_t(newPos));
-}
-
-void LanguageController::OnActionPositionChange(int oldPos, int newPos)
-{
-	assert(m_language->IsInitialized());
-	m_language->GetParser().SwapActions(size_t(oldPos), size_t(newPos));
 }
 
 void LanguageController::OnTerminalSelection(int selection)

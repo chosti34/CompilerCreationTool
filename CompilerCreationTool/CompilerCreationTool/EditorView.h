@@ -6,17 +6,22 @@
 class EditorView : public wxPanel
 {
 public:
-	using CursorUpdateSignal = Signal<void(int, int, int)>;
-
 	explicit EditorView(wxWindow* parent);
 	wxString GetUserInput() const;
 
-	SignalScopedConnection DoOnTextCtrlUpdateUI(CursorUpdateSignal::slot_type slot);
+	using UpdateUISignal = Signal<void(int, int, int)>;
+	SignalScopedConnection DoOnTextCtrlUpdateUI(UpdateUISignal::slot_type slot);
+
+	using FocusChangeSignal = Signal<void(bool)>;
+	SignalScopedConnection DoOnFocusChange(FocusChangeSignal::slot_type slot);
 
 private:
-	void OnUpdateUI(wxStyledTextEvent& event);
+	void OnTextUpdateUI(wxStyledTextEvent& event);
+	void OnTextFocusGain(wxFocusEvent& event);
+	void OnTextFocusLost(wxFocusEvent& event);
 
 private:
-	wxStyledTextCtrl* m_input;
-	CursorUpdateSignal mUpdateUISignal;
+	wxStyledTextCtrl* mInput;
+	UpdateUISignal mTextUpdateUISignal;
+	FocusChangeSignal mFocusChangeSignal;
 };

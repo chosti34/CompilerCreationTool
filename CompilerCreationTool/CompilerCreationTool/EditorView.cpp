@@ -3,60 +3,65 @@
 #include "CtrlHelpers.h"
 #include <wx/statline.h>
 
-namespace
-{
-wxStyledTextCtrl* SetupLeftPanel(wxPanel& panel)
-{
-	wxStyledTextCtrl* input = new wxStyledTextCtrl(
-		&panel, wxID_ANY, wxDefaultPosition,
-		wxDefaultSize, wxTE_DONTWRAP);
-	SetupStyledTextCtrlMargins(*input);
-
-	input->SetScrollWidth(input->GetSize().GetWidth());
-	input->SetScrollWidthTracking(true);
-
-	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-	sizer->Add(input, 1, wxEXPAND | wxALL, 5);
-	panel.SetSizer(sizer);
-
-	return input;
-}
-}
-
 EditorView::EditorView(wxWindow* parent)
 	: wxPanel(parent, wxID_ANY)
 {
-	wxPanel* panel = new wxPanel(this, wxID_ANY);
-	m_input = SetupLeftPanel(*panel);
+	mInput = new wxStyledTextCtrl(
+		this, wxID_ANY, wxDefaultPosition,
+		wxDefaultSize, wxTE_DONTWRAP);
+	SetupStyledTextCtrlMargins(*mInput);
+
+	mInput->SetScrollWidth(mInput->GetSize().GetWidth());
+	mInput->SetScrollWidthTracking(true);
 
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-	sizer->Add(panel, 1, wxEXPAND);
+	sizer->Add(mInput, 1, wxEXPAND);
 	SetSizerAndFit(sizer);
 
-	m_input->Bind(wxEVT_STC_UPDATEUI, &EditorView::OnUpdateUI, this);
+	mInput->Bind(wxEVT_STC_UPDATEUI, &EditorView::OnTextUpdateUI, this);
+	mInput->Bind(wxEVT_SET_FOCUS, &EditorView::OnTextFocusGain, this);
+	mInput->Bind(wxEVT_KILL_FOCUS, &EditorView::OnTextFocusLost, this);
 }
 
-SignalScopedConnection EditorView::DoOnTextCtrlUpdateUI(
-	CursorUpdateSignal::slot_type slot)
+SignalScopedConnection EditorView::DoOnTextCtrlUpdateUI(UpdateUISignal::slot_type slot)
 {
-	return mUpdateUISignal.connect(slot);
+	return mTextUpdateUISignal.connect(slot);
+}
+
+SignalScopedConnection EditorView::DoOnFocusChange(FocusChangeSignal::slot_type slot)
+{
+	return mFocusChangeSignal.connect(slot);
 }
 
 wxString EditorView::GetUserInput() const
 {
-	return m_input->GetValue();
+	return mInput->GetValue();
 }
 
-void EditorView::OnUpdateUI(wxStyledTextEvent& event)
+void EditorView::OnTextUpdateUI(wxStyledTextEvent& event)
 {
 	int linePos = 0;
-	m_input->GetCurLine(&linePos);
+	mInput->GetCurLine(&linePos);
 
-	mUpdateUISignal(
-		m_input->GetCurrentLine() + 1,
-		m_input->GetColumn(m_input->GetCurrentPos()) + 1,
+	mTextUpdateUISignal(
+		mInput->GetCurrentLine() + 1,
+		mInput->GetColumn(mInput->GetCurrentPos()) + 1,
 		linePos + 1
 	);
 
+	event.Skip(true);
+}
+
+void EditorView::OnTextFocusGain(wxFocusEvent& event)
+{
+	std::cout << "Editor focus gain\n";
+	mFocusChangeSignal(true);
+	event.Skip(true);
+}
+
+void EditorView::OnTextFocusLost(wxFocusEvent& event)
+{
+	std::cout << "Editor focus lost\n";
+	mFocusChangeSignal(false);
 	event.Skip(true);
 }

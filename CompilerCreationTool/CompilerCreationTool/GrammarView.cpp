@@ -6,39 +6,62 @@
 GrammarView::GrammarView(wxWindow* parent)
 	: wxPanel(parent, wxID_ANY)
 {
-	m_input = new wxStyledTextCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTE_DONTWRAP);
+	mInput = new wxStyledTextCtrl(
+		this, wxID_ANY, wxDefaultPosition,
+		wxDefaultSize, wxTE_DONTWRAP);
+	SetupStyledTextCtrlMargins(*mInput);
 
-	m_input->SetScrollWidth(m_input->GetSize().GetWidth());
-	m_input->SetScrollWidthTracking(true);
-	SetupStyledTextCtrlMargins(*m_input);
+	mInput->SetScrollWidth(mInput->GetSize().GetWidth());
+	mInput->SetScrollWidthTracking(true);
 
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-	sizer->Add(m_input, 1, wxEXPAND | wxALL, 5);
+	sizer->Add(mInput, 1, wxEXPAND);
 	SetSizerAndFit(sizer);
 
-	m_input->Bind(wxEVT_STC_UPDATEUI, &GrammarView::OnTextCtrlUpdateUI, this);
+	mInput->Bind(wxEVT_STC_UPDATEUI, &GrammarView::OnTextCtrlUpdateUI, this);
+	mInput->Bind(wxEVT_SET_FOCUS, &GrammarView::OnTextFocusGain, this);
+	mInput->Bind(wxEVT_KILL_FOCUS, &GrammarView::OnTextFocusLost, this);
 }
 
 wxString GrammarView::GetDeclaration() const
 {
-	return m_input->GetValue();
+	return mInput->GetValue();
 }
 
-SignalScopedConnection GrammarView::DoOnTextCtrlUpdateUI(Signal<void(int, int, int)>::slot_type slot)
+SignalScopedConnection GrammarView::DoOnTextCtrlUpdateUI(UpdateUISignal::slot_type slot)
 {
-	return m_updateUISignal.connect(slot);
+	return mTextUpdateUISignal.connect(slot);
+}
+
+SignalScopedConnection GrammarView::DoOnFocusChange(FocusChangeSignal::slot_type slot)
+{
+	return mFocusChangeSignal.connect(slot);
 }
 
 void GrammarView::OnTextCtrlUpdateUI(wxStyledTextEvent& event)
 {
 	int linePos = 0;
-	m_input->GetCurLine(&linePos);
+	mInput->GetCurLine(&linePos);
 
-	m_updateUISignal(
-		m_input->GetCurrentLine() + 1,
-		m_input->GetColumn(m_input->GetCurrentPos()) + 1,
+	mTextUpdateUISignal(
+		mInput->GetCurrentLine() + 1,
+		mInput->GetColumn(mInput->GetCurrentPos()) + 1,
 		linePos + 1
 	);
 
+	event.Skip(true);
+}
+
+void GrammarView::OnTextFocusGain(wxFocusEvent& event)
+{
+	std::cout << "Grammar focus gain\n";
+	mFocusChangeSignal(true);
+	event.Skip(true);
+}
+
+void GrammarView::OnTextFocusLost(wxFocusEvent& event)
+{
+	std::cout << "Grammar focus lost\n";
+	mFocusChangeSignal(false);
 	event.Skip(true);
 }

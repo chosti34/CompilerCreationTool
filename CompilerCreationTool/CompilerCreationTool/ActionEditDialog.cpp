@@ -8,7 +8,7 @@ const wxSize DIALOG_SIZE = { 300, 140 };
 }
 
 ActionEditDialog::ActionEditDialog(wxWindow* parent, const IAction& action)
-	: wxDialog(parent, wxID_ANY, wxT("Configure Action"),
+	: wxDialog(parent, wxID_ANY, wxT("Edit Action '" + action.GetName() + "'"),
 		wxDefaultPosition, DIALOG_SIZE, wxDEFAULT_DIALOG_STYLE)
 {
 	wxPanel* panel = new wxPanel(this);

@@ -8,6 +8,10 @@ public:
 	LanguageController(Language* language, MainFrame* frame);
 
 private:
+	void SwapTerminalPositions(int from, int to);
+	void SwapActionPositions(int from, int to);
+
+private:
 	void OnBuildButtonPress();
 	void OnRunButtonPress();
 	void OnInfoButtonPress();
@@ -18,9 +22,6 @@ private:
 
 	void OnTerminalsViewDeselection();
 	void OnActionsViewDeselection();
-
-	void OnTerminalPositionChange(int oldPos, int newPos);
-	void OnActionPositionChange(int oldPos, int newPos);
 
 	void OnTerminalSelection(int selection);
 	void OnActionSelection(int selection);

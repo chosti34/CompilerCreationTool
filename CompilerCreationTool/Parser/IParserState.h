@@ -18,7 +18,7 @@ public:
 	virtual boost::optional<size_t> GetNextAddress() const = 0;
 	virtual void SetNextAddress(boost::optional<size_t> address) = 0;
 
-	virtual const std::set<std::string>* GetAcceptableTerminals() const = 0;
+	virtual const std::set<std::string>& GetAcceptableTerminals() const = 0;
 	virtual void SetAcceptableTerminals(const std::set<std::string>& terminals) = 0;
 	virtual bool AcceptsTerminal(const std::string& terminal) const = 0;
 };

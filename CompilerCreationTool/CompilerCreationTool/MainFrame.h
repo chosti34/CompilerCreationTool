@@ -3,10 +3,9 @@
 #include "ViewIdentifiers.h"
 
 #include "TreeView.h"
+#include "TextView.h"
 #include "OutputView.h"
-#include "EditorView.h"
 #include "StatesView.h"
-#include "GrammarView.h"
 #include "EntitiesListboxView.h"
 
 #include <wx/aui/framemanager.h>
@@ -18,14 +17,12 @@
 class MainFrame : public wxFrame
 {
 public:
-	using ButtonPressSignal = Signal<void()>;
-
 	MainFrame(const wxString& title, const wxSize& size);
 	~MainFrame();
 
-	GrammarView* GetDeclarationView();
+	TextView* GetDeclarationView();
 	StatesView* GetStatesView();
-	EditorView* GetEditorView();
+	TextView* GetEditorView();
 	TreeView* GetTreeView();
 
 	EntitiesListboxView* GetTerminalsView();
@@ -35,11 +32,11 @@ public:
 	wxStatusBar* GetStatusBar();
 	wxToolBar* GetToolBar();
 
-	SignalScopedConnection DoOnButtonPress(Buttons::ID button,
-		ButtonPressSignal::slot_type slot);
+	using ButtonPressSignal = Signal<void()>;
+	SignalScopedConnection DoOnButtonPress(Buttons::ID button, ButtonPressSignal::slot_type slot);
 
 private:
-	void InvokeSignal(Buttons::ID id);
+	void SendButtonPressedSignal(Buttons::ID buttonID);
 	void OpenAboutDialog();
 
 private:
@@ -48,30 +45,36 @@ private:
 	void OnAbout(wxCommandEvent& event);
 	void OnSize(wxSizeEvent& event);
 
-	void OnItemUp(wxCommandEvent& event);
-	void OnItemDown(wxCommandEvent& event);
-	void OnItemEdit(wxCommandEvent& event);
+	void OnNew(wxCommandEvent& event);
+	void OnOpen(wxCommandEvent& event);
+	void OnSave(wxCommandEvent& event);
+	void OnSaveAs(wxCommandEvent& event);
 
 	void OnBuild(wxCommandEvent& event);
 	void OnRun(wxCommandEvent& event);
 	void OnInfo(wxCommandEvent& event);
 
+	void OnItemUp(wxCommandEvent& event);
+	void OnItemDown(wxCommandEvent& event);
+	void OnItemEdit(wxCommandEvent& event);
+
 	void OnHelp(wxCommandEvent& event);
 
 private:
-	wxAuiManager m_auiManager;
+	wxAuiManager mAuiManager;
 
-	wxAuiNotebook* m_notebook;
-	GrammarView* m_declarationView;
-	StatesView* m_statesView;
-	EditorView* m_editorView;
-	TreeView* m_treeView;
-	EntitiesListboxView* m_terminalsView;
-	EntitiesListboxView* m_actionsView;
-	OutputView* m_outputView;
+	wxAuiNotebook* mNotebook;
+	TextView* mGrammarView;
+	TextView* mEditorView;
+	TreeView* mTreeView;
+	StatesView* mStatesView;
 
-	wxStatusBar* m_statusbar;
-	wxToolBar* m_toolbar;
+	EntitiesListboxView* mTerminalsView;
+	EntitiesListboxView* mActionsView;
+	OutputView* mOutputView;
 
-	std::map<Buttons::ID, ButtonPressSignal> m_signals;
+	wxStatusBar* mStatusbar;
+	wxToolBar* mToolbar;
+
+	std::map<Buttons::ID, ButtonPressSignal> mSignals;
 };

@@ -11,5 +11,5 @@ enum class StateFlag
 	Attribute
 };
 
-std::string ToString(const StateFlag& flag);
+std::string ToString(StateFlag flag);
 std::vector<StateFlag> GetAllStateFlags();

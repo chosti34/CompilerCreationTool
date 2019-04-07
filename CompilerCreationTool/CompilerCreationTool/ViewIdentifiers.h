@@ -19,3 +19,16 @@ namespace Buttons
 		Help
 	};
 }
+
+namespace StatusBarFields
+{
+	enum ID
+	{
+		HelpInfo = 0,
+		Line,
+		Column,
+		Ch,
+		ContextInfo,
+		Count
+	};
+}

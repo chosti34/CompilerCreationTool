@@ -7,6 +7,8 @@
 #include "../Parser/ParserTable.h"
 #include "../Grammar/GrammarUtils.h"
 
+#include <tinyxml2.h>
+
 using namespace grammarlib;
 
 namespace

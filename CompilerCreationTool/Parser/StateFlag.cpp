@@ -2,23 +2,23 @@
 #include "StateFlag.h"
 #include <cassert>
 
-std::string ToString(const StateFlag& flag)
+std::string ToString(StateFlag flag)
 {
 	switch (flag)
 	{
-	case StateFlag::End:
-		return "End";
+	case StateFlag::Shift:
+		return "Shift";
 	case StateFlag::Push:
 		return "Push";
 	case StateFlag::Error:
 		return "Error";
-	case StateFlag::Shift:
-		return "Shift";
+	case StateFlag::End:
+		return "End";
 	case StateFlag::Attribute:
 		return "Attribute";
 	default:
 		assert(false);
-		throw std::logic_error("can't convert undefined state flag to string");
+		throw std::logic_error("can't convert unknown state flag to string");
 	}
 }
 

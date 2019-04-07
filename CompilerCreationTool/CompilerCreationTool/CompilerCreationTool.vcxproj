@@ -155,13 +155,11 @@
     <ClInclude Include="ASTGraphvizVisualizer.h" />
     <ClInclude Include="EntitiesListboxView.h" />
     <ClInclude Include="Language.h" />
-    <ClInclude Include="GrammarView.h" />
     <ClInclude Include="LanguageController.h" />
     <ClInclude Include="LanguageInformation.h" />
     <ClInclude Include="LanguageInformationDialog.h" />
+    <ClInclude Include="LanguageSerialization.h" />
     <ClInclude Include="MainFrame.h" />
-    <ClInclude Include="MainPanel.h" />
-    <ClInclude Include="EditorView.h" />
     <ClInclude Include="OutputView.h" />
     <ClInclude Include="StatesView.h" />
     <ClInclude Include="pch.h" />
@@ -169,6 +167,7 @@
     <ClInclude Include="CtrlHelpers.h" />
     <ClInclude Include="TerminalEditDialog.h" />
     <ClInclude Include="TextCtrlLogger.h" />
+    <ClInclude Include="TextView.h" />
     <ClInclude Include="TreeView.h" />
     <ClInclude Include="ViewIdentifiers.h" />
   </ItemGroup>
@@ -178,14 +177,12 @@
     <ClCompile Include="CtrlHelpers.cpp" />
     <ClCompile Include="EntitiesListboxView.cpp" />
     <ClCompile Include="Language.cpp" />
-    <ClCompile Include="GrammarView.cpp" />
     <ClCompile Include="LanguageController.cpp" />
     <ClCompile Include="LanguageInformation.cpp" />
     <ClCompile Include="LanguageInformationDialog.cpp" />
+    <ClCompile Include="LanguageSerialization.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainFrame.cpp" />
-    <ClCompile Include="MainPanel.cpp" />
-    <ClCompile Include="EditorView.cpp" />
     <ClCompile Include="OutputView.cpp" />
     <ClCompile Include="StatesView.cpp" />
     <ClCompile Include="pch.cpp">
@@ -196,6 +193,7 @@
     </ClCompile>
     <ClCompile Include="TerminalEditDialog.cpp" />
     <ClCompile Include="TextCtrlLogger.cpp" />
+    <ClCompile Include="TextView.cpp" />
     <ClCompile Include="TreeView.cpp" />
   </ItemGroup>
   <ItemGroup>

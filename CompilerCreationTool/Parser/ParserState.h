@@ -17,7 +17,7 @@ public:
 	boost::optional<size_t> GetNextAddress() const override;
 	void SetNextAddress(boost::optional<size_t> address) override;
 
-	const std::set<std::string>* GetAcceptableTerminals() const override;
+	const std::set<std::string>& GetAcceptableTerminals() const override;
 	void SetAcceptableTerminals(const std::set<std::string>& terminals) override;
 	bool AcceptsTerminal(const std::string & terminal) const override;
 
@@ -25,5 +25,5 @@ private:
 	std::string m_name;
 	boost::optional<size_t> m_nextAddress;
 	std::unordered_map<StateFlag, bool> m_flags;
-	boost::optional<std::set<std::string>> m_acceptables;
+	std::set<std::string> m_acceptables;
 };

@@ -18,6 +18,7 @@ public:
 	virtual size_t GetProductionsCount() const = 0;
 	virtual bool IsEmpty() const = 0;
 
+	virtual const std::string& GetText() const = 0;
 	virtual const std::string& GetStartSymbol() const = 0;
 	virtual const std::string& GetEndTerminal() const = 0;
 };

@@ -3,25 +3,29 @@
 #include <wx/panel.h>
 #include <wx/stc/stc.h>
 
-class GrammarView : public wxPanel
+class TextView : public wxPanel
 {
 public:
-	explicit GrammarView(wxWindow* parent);
-	wxString GetDeclaration() const;
+	explicit TextView(wxWindow* parent);
+	wxString GetText() const;
+
+	int GetCurrentLine() const;
+	int GetCurrentCol() const;
+	int GetCurrentCh() const;
 
 	using UpdateUISignal = Signal<void(int, int, int)>;
-	SignalScopedConnection DoOnTextCtrlUpdateUI(Signal<void(int, int, int)>::slot_type slot);
+	SignalScopedConnection DoOnUIUpdate(UpdateUISignal::slot_type slot);
 
 	using FocusChangeSignal = Signal<void(bool)>;
 	SignalScopedConnection DoOnFocusChange(FocusChangeSignal::slot_type slot);
 
 private:
-	void OnTextCtrlUpdateUI(wxStyledTextEvent& event);
+	void OnUpdateUI(wxStyledTextEvent& event);
 	void OnTextFocusGain(wxFocusEvent& event);
 	void OnTextFocusLost(wxFocusEvent& event);
 
 private:
 	wxStyledTextCtrl* mInput;
-	UpdateUISignal mTextUpdateUISignal;
+	UpdateUISignal mUpdateUISignal;
 	FocusChangeSignal mFocusChangeSignal;
 };

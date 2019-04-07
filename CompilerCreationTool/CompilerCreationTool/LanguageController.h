@@ -8,10 +8,17 @@ public:
 	LanguageController(Language* language, MainFrame* frame);
 
 private:
+	void UpdateStatusBarOnTextFocusChange(TextView& view, const std::string& name, bool focus);
+	void UpdateStatusBarCursorInfo(int line, int col, int ch);
 	void SwapTerminalPositions(int from, int to);
 	void SwapActionPositions(int from, int to);
 
-private:
+private: // Signal handlers
+	void OnNewButtonPress();
+	void OnOpenButtonPress();
+	void OnSaveButtonPress();
+	void OnSaveAsButtonPress();
+
 	void OnBuildButtonPress();
 	void OnRunButtonPress();
 	void OnInfoButtonPress();
@@ -31,19 +38,21 @@ private:
 
 	void OnGrammarTextCtrlUpdateUI(int line, int col, int ch);
 	void OnEditorTextCtrlUpdateUI(int line, int col, int ch);
+	void OnGrammarTextFocusChange(bool focus);
+	void OnEditorTextFocusChange(bool focus);
 
 private:
-	Language* m_language;
-	MainFrame* m_frame;
+	Language* mLanguage;
+	MainFrame* mFrame;
 
-	GrammarView* m_grammarView;
-	StatesView* m_statesView;
-	EditorView* m_editorView;
-	TreeView* m_treeView;
+	TextView* mGrammarView;
+	StatesView* mStatesView;
+	TextView* mEditorView;
+	TreeView* mTreeView;
 
-	EntitiesListboxView* m_terminalsView;
-	EntitiesListboxView* m_actionsView;
-	OutputView* m_outputView;
+	EntitiesListboxView* mTerminalsView;
+	EntitiesListboxView* mActionsView;
+	OutputView* mOutputView;
 
-	std::vector<SignalScopedConnection> m_connections;
+	std::vector<SignalScopedConnection> mConnections;
 };

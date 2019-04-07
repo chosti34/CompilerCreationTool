@@ -23,19 +23,23 @@ wxMenuBar* CreateMenuBar()
 	return menubar;
 }
 
-void CustomizeStatusBar(wxStatusBar& statusbar)
+wxStatusBar* CreateStatusBar(wxFrame& frame)
 {
-	statusbar.SetStatusText(wxT("Welcome to CompilerCreationTool!"), 0);
-	statusbar.SetStatusText(wxT("Ln 1"), 1);
-	statusbar.SetStatusText(wxT("Col 1"), 2);
-	statusbar.SetStatusText(wxT("Ch 1"), 3);
-	statusbar.SetStatusText(wxT("Select Item..."), 4);
+	wxStatusBar* statusbar = frame.CreateStatusBar(StatusBarFields::Count);
+
+	statusbar->SetStatusText(wxT("Welcome to CompilerCreationTool!"), StatusBarFields::HelpInfo);
+	statusbar->SetStatusText(wxT(""), StatusBarFields::Line);
+	statusbar->SetStatusText(wxT(""), StatusBarFields::Column);
+	statusbar->SetStatusText(wxT(""), StatusBarFields::Ch);
+	statusbar->SetStatusText(wxT(""), StatusBarFields::ContextInfo);
 
 	const int styles[] = { wxSB_FLAT, wxSB_FLAT, wxSB_FLAT, wxSB_FLAT, wxSB_FLAT };
-	statusbar.SetStatusStyles(5, styles);
+	statusbar->SetStatusStyles(5, styles);
 
 	const int widths[] = { -5, -1, -1, -2, -1 };
-	statusbar.SetStatusWidths(5, widths);
+	statusbar->SetStatusWidths(5, widths);
+
+	return statusbar;
 }
 
 void AddTools(wxToolBar& toolbar)
@@ -91,22 +95,22 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	SetMenuBar(CreateMenuBar());
 
 	// Tool bar
-	m_toolbar = CreateToolBar(wxTB_FLAT);
-	AddTools(*m_toolbar);
-	m_toolbar->Realize();
+	mToolbar = CreateToolBar(wxTB_FLAT);
+	AddTools(*mToolbar);
+	mToolbar->Realize();
 
-	m_toolbar->EnableTool(Buttons::Run, false);
-	m_toolbar->EnableTool(Buttons::Info, false);
-	m_toolbar->EnableTool(Buttons::Up, false);
-	m_toolbar->EnableTool(Buttons::Down, false);
-	m_toolbar->EnableTool(Buttons::Edit, false);
+	mToolbar->EnableTool(Buttons::Run, false);
+	mToolbar->EnableTool(Buttons::Info, false);
+	mToolbar->EnableTool(Buttons::Up, false);
+	mToolbar->EnableTool(Buttons::Down, false);
+	mToolbar->EnableTool(Buttons::Edit, false);
 
 	// AUI panels
-	m_auiManager.SetManagedWindow(this);
-	m_auiManager.SetFlags(m_auiManager.GetFlags() | wxAUI_MGR_LIVE_RESIZE |
+	mAuiManager.SetManagedWindow(this);
+	mAuiManager.SetFlags(mAuiManager.GetFlags() | wxAUI_MGR_LIVE_RESIZE |
 		wxAUI_MGR_TRANSPARENT_DRAG | wxAUI_MGR_ALLOW_ACTIVE_PANE);
 
-	wxAuiDockArt* art = m_auiManager.GetArtProvider();
+	wxAuiDockArt* art = mAuiManager.GetArtProvider();
 	art->SetMetric(wxAUI_DOCKART_SASH_SIZE, 2);
 	art->SetMetric(wxAUI_DOCKART_CAPTION_SIZE, 22);
 	art->SetMetric(wxAUI_DOCKART_PANE_BORDER_SIZE, 0);
@@ -117,104 +121,102 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	art->SetColor(wxAUI_DOCKART_INACTIVE_CAPTION_TEXT_COLOUR, wxColour(255, 255, 255));
 	art->SetFont(wxAUI_DOCKART_CAPTION_FONT, wxFont(wxFontInfo().Family(wxFONTFAMILY_SWISS)));
 
-	m_notebook = new wxAuiNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+	mNotebook = new wxAuiNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
 		wxAUI_NB_TAB_MOVE | wxAUI_NB_TAB_EXTERNAL_MOVE | wxAUI_NB_TAB_SPLIT |
 		wxAUI_NB_WINDOWLIST_BUTTON | wxNO_BORDER);
-	wxAuiManager& notebookAuiManager = const_cast<wxAuiManager&>(m_notebook->GetAuiManager());
+	wxAuiManager& notebookAuiManager = const_cast<wxAuiManager&>(mNotebook->GetAuiManager());
 	notebookAuiManager.SetFlags(notebookAuiManager.GetFlags() | wxAUI_MGR_LIVE_RESIZE);
-	m_notebook->SetArtProvider(new wxAuiSimpleTabArt);
+	mNotebook->SetArtProvider(new wxAuiSimpleTabArt);
 
-	m_declarationView = new GrammarView(m_notebook);
-	m_editorView = new EditorView(m_notebook);
-	m_statesView = new StatesView(m_notebook);
-	m_treeView = new TreeView(m_notebook);
+	mGrammarView = new TextView(mNotebook);
+	mEditorView = new TextView(mNotebook);
+	mStatesView = new StatesView(mNotebook);
+	mTreeView = new TreeView(mNotebook);
 
-	m_notebook->AddPage(m_declarationView, "Grammar");
-	m_notebook->AddPage(m_statesView, "States");
-	m_notebook->AddPage(m_editorView, "Editor");
-	m_notebook->AddPage(m_treeView, "AST");
+	mNotebook->AddPage(mGrammarView, "Grammar");
+	mNotebook->AddPage(mStatesView, "States");
+	mNotebook->AddPage(mEditorView, "Editor");
+	mNotebook->AddPage(mTreeView, "AST");
 
-	m_terminalsView = new EntitiesListboxView(this);
-	m_actionsView = new EntitiesListboxView(this);
-	m_outputView = new OutputView(this);
+	mTerminalsView = new EntitiesListboxView(this);
+	mActionsView = new EntitiesListboxView(this);
+	mOutputView = new OutputView(this);
 
-	m_auiManager.AddPane(m_notebook, wxAuiPaneInfo().
+	mAuiManager.AddPane(mNotebook, wxAuiPaneInfo().
 		Name("NotebookContent").CenterPane().PaneBorder(false));
-	m_auiManager.AddPane(m_terminalsView, wxAuiPaneInfo().Name("TerminalsListbox").
+	mAuiManager.AddPane(mTerminalsView, wxAuiPaneInfo().Name("TerminalsListbox").
 		Caption("  Terminals").Left().Position(0).CloseButton(false).Dockable(true));
-	m_auiManager.AddPane(m_actionsView, wxAuiPaneInfo().Name("ActionsListbox").
+	mAuiManager.AddPane(mActionsView, wxAuiPaneInfo().Name("ActionsListbox").
 		Caption("  Actions").Left().Position(1).CloseButton(false).Dockable(true));
-	m_auiManager.AddPane(m_outputView, wxAuiPaneInfo().Name("OutputPane").
+	mAuiManager.AddPane(mOutputView, wxAuiPaneInfo().Name("OutputPane").
 		Caption("  Output").Bottom().Position(1).MaximizeButton(true).CloseButton(false).Dockable(true));
-	m_auiManager.Update();
+	mAuiManager.Update();
 
 	// Status bar
-	m_statusbar = CreateStatusBar(5);
-	CustomizeStatusBar(*m_statusbar);
-
+	mStatusbar = ::CreateStatusBar(*this);
 	Centre();
 }
 
 MainFrame::~MainFrame()
 {
-	m_auiManager.UnInit();
+	mAuiManager.UnInit();
 }
 
-GrammarView* MainFrame::GetDeclarationView()
+TextView* MainFrame::GetDeclarationView()
 {
-	return m_declarationView;
+	return mGrammarView;
 }
 
 StatesView* MainFrame::GetStatesView()
 {
-	return m_statesView;
+	return mStatesView;
 }
 
-EditorView* MainFrame::GetEditorView()
+TextView* MainFrame::GetEditorView()
 {
-	return m_editorView;
+	return mEditorView;
 }
 
 TreeView* MainFrame::GetTreeView()
 {
-	return m_treeView;
+	return mTreeView;
 }
 
 EntitiesListboxView* MainFrame::GetTerminalsView()
 {
-	return m_terminalsView;
+	return mTerminalsView;
 }
 
 EntitiesListboxView* MainFrame::GetActionsView()
 {
-	return m_actionsView;
+	return mActionsView;
 }
 
 OutputView* MainFrame::GetOutputView()
 {
-	return m_outputView;
+	return mOutputView;
 }
 
 wxStatusBar* MainFrame::GetStatusBar()
 {
-	return m_statusbar;
+	return mStatusbar;
 }
 
 wxToolBar* MainFrame::GetToolBar()
 {
-	return m_toolbar;
+	return mToolbar;
 }
 
 SignalScopedConnection MainFrame::DoOnButtonPress(Buttons::ID button,
 	ButtonPressSignal::slot_type slot)
 {
-	return m_signals[button].connect(slot);
+	return mSignals[button].connect(slot);
 }
 
-void MainFrame::InvokeSignal(Buttons::ID id)
+void MainFrame::SendButtonPressedSignal(Buttons::ID buttonID)
 {
-	auto found = m_signals.find(id);
-	assert(found != m_signals.end());
+	auto found = mSignals.find(buttonID);
+	assert(found != mSignals.end());
 	found->second();
 }
 
@@ -240,11 +242,11 @@ void MainFrame::OnBuild(wxCommandEvent&)
 {
 	try
 	{
-		InvokeSignal(Buttons::Build);
+		SendButtonPressedSignal(Buttons::Build);
 	}
 	catch (const std::exception& ex)
 	{
-		wxMessageBox("Can't build language: "s + ex.what() + "."s, "Can't Build", wxICON_WARNING);
+		wxMessageBox("Can't build language: "s + ex.what() + "."s, "Can't Build", wxICON_ERROR);
 	}
 }
 
@@ -252,7 +254,7 @@ void MainFrame::OnRun(wxCommandEvent&)
 {
 	try
 	{
-		InvokeSignal(Buttons::Run);
+		SendButtonPressedSignal(Buttons::Run);
 	}
 	catch (const std::exception& ex)
 	{
@@ -264,7 +266,7 @@ void MainFrame::OnInfo(wxCommandEvent&)
 {
 	try
 	{
-		InvokeSignal(Buttons::Info);
+		SendButtonPressedSignal(Buttons::Info);
 	}
 	catch (const std::exception& ex)
 	{
@@ -280,14 +282,62 @@ void MainFrame::OnHelp(wxCommandEvent&)
 void MainFrame::OnSize(wxSizeEvent& event)
 {
 	std::cout << event.GetSize().x << " " << event.GetSize().y << std::endl;
-	event.Skip();
+	event.Skip(true);
+}
+
+void MainFrame::OnNew(wxCommandEvent&)
+{
+	try
+	{
+		SendButtonPressedSignal(Buttons::New);
+	}
+	catch (const std::exception& ex)
+	{
+		wxMessageBox(ex.what(), "Can't Create New Project", wxICON_ERROR);
+	}
+}
+
+void MainFrame::OnOpen(wxCommandEvent&)
+{
+	try
+	{
+		SendButtonPressedSignal(Buttons::Open);
+	}
+	catch (const std::exception& ex)
+	{
+		wxMessageBox(ex.what(), "Can't Open Project", wxICON_ERROR);
+	}
+}
+
+void MainFrame::OnSave(wxCommandEvent&)
+{
+	try
+	{
+		SendButtonPressedSignal(Buttons::Save);
+	}
+	catch (const std::exception& ex)
+	{
+		wxMessageBox(ex.what(), "Can't Save Project", wxICON_ERROR);
+	}
+}
+
+void MainFrame::OnSaveAs(wxCommandEvent&)
+{
+	try
+	{
+		SendButtonPressedSignal(Buttons::SaveAs);
+	}
+	catch (const std::exception& ex)
+	{
+		wxMessageBox(ex.what(), "Can't Create New Language", wxICON_ERROR);
+	}
 }
 
 void MainFrame::OnItemUp(wxCommandEvent&)
 {
 	try
 	{
-		InvokeSignal(Buttons::Up);
+		SendButtonPressedSignal(Buttons::Up);
 	}
 	catch (const std::exception& ex)
 	{
@@ -299,7 +349,7 @@ void MainFrame::OnItemDown(wxCommandEvent&)
 {
 	try
 	{
-		InvokeSignal(Buttons::Down);
+		SendButtonPressedSignal(Buttons::Down);
 	}
 	catch (const std::exception& ex)
 	{
@@ -311,7 +361,7 @@ void MainFrame::OnItemEdit(wxCommandEvent&)
 {
 	try
 	{
-		InvokeSignal(Buttons::Edit);
+		SendButtonPressedSignal(Buttons::Edit);
 	}
 	catch (const std::exception& ex)
 	{
@@ -323,6 +373,10 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(wxID_EXIT, MainFrame::OnExit)
 	EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
 	EVT_SIZE(MainFrame::OnSize)
+	EVT_TOOL(Buttons::New, MainFrame::OnNew)
+	EVT_TOOL(Buttons::Open, MainFrame::OnOpen)
+	EVT_TOOL(Buttons::Save, MainFrame::OnSave)
+	EVT_TOOL(Buttons::SaveAs, MainFrame::OnSaveAs)
 	EVT_TOOL(Buttons::Build, MainFrame::OnBuild)
 	EVT_TOOL(Buttons::Run, MainFrame::OnRun)
 	EVT_TOOL(Buttons::Info, MainFrame::OnInfo)

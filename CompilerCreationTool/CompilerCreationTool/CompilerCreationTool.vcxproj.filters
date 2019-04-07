@@ -21,9 +21,6 @@
     <ClInclude Include="MainFrame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MainPanel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Language.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -31,9 +28,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LanguageController.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="EditorView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="StatesView.h">
@@ -69,10 +63,13 @@
     <ClInclude Include="OutputView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GrammarView.h">
+    <ClInclude Include="ViewIdentifiers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ViewIdentifiers.h">
+    <ClInclude Include="TextView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LanguageSerialization.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -86,16 +83,10 @@
     <ClCompile Include="MainFrame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MainPanel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Language.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LanguageController.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="EditorView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="StatesView.cpp">
@@ -131,7 +122,10 @@
     <ClCompile Include="OutputView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GrammarView.cpp">
+    <ClCompile Include="TextView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LanguageSerialization.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

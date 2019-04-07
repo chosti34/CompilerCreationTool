@@ -31,7 +31,7 @@ StatesView::StatesView(wxWindow* parent)
 	m_list->AppendColumn(wxT("Acceptables"));
 
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-	sizer->Add(m_list, 1, wxEXPAND | wxALL, 5);
+	sizer->Add(m_list, 1, wxEXPAND | wxALL);
 	SetSizer(sizer);
 
 	m_list->Bind(wxEVT_SIZE, &StatesView::OnListResize, this);
@@ -49,12 +49,12 @@ void StatesView::SetParserTable(const IParserTable& table)
 		const std::string& name = state.GetName();
 		const boost::optional<size_t> address = state.GetNextAddress();
 		const bool isAttribute = state.GetFlag(StateFlag::Attribute);
-		const std::set<std::string>* acceptables = state.GetAcceptableTerminals();
+		const std::set<std::string>& acceptables = state.GetAcceptableTerminals();
 
 		m_list->SetItem(index, 1, name);
 		m_list->SetItem(index, 2, address ? std::to_string(*address) : gcNoItem);
 		m_list->SetItem(index, 3, GetStateFlagsRepresentation(state));
-		m_list->SetItem(index, 4, isAttribute ? gcNoItem : string_utils::JoinStrings(*acceptables));
+		m_list->SetItem(index, 4, isAttribute ? gcNoItem : string_utils::JoinStrings(acceptables));
 	}
 }
 

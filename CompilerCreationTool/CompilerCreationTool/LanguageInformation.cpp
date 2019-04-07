@@ -16,8 +16,7 @@ bool HasAcceptableSetsCrossing(
 
 	for (int index : GatherProductionIndices(grammar, nonterminal))
 	{
-		assert(table.GetState(index).GetAcceptableTerminals());
-		const auto& stateAcceptables = *table.GetState(index).GetAcceptableTerminals();
+		const auto& stateAcceptables = table.GetState(index).GetAcceptableTerminals();
 
 		for (const std::string& acceptable : stateAcceptables)
 		{

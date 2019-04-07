@@ -15,7 +15,7 @@ using namespace std::literals::string_literals;
 namespace
 {
 template <typename T>
-T Pop(std::vector<T> & vect)
+T Pop(std::vector<T>& vect)
 {
 	auto value = std::move(vect.back());
 	vect.pop_back();
@@ -160,7 +160,7 @@ ParseResults Parser::Parse(const std::string& text)
 				LogIfNotNull("Parser doesn't accept token '" +
 					token.name + "' at error state", index);
 				const std::string acceptables = string_utils::JoinStrings(
-					*state.GetAcceptableTerminals(), ", ", "[", "]");
+					state.GetAcceptableTerminals(), ", ", "[", "]");
 				LogIfNotNull("List of acceptable tokens: " + acceptables);
 				return { false, nullptr };
 			}

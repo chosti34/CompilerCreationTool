@@ -50,13 +50,9 @@ void ParserState::SetNextAddress(boost::optional<size_t> address)
 	m_nextAddress = address;
 }
 
-const std::set<std::string>* ParserState::GetAcceptableTerminals() const
+const std::set<std::string>& ParserState::GetAcceptableTerminals() const
 {
-	if (bool(m_acceptables))
-	{
-		return m_acceptables.get_ptr();
-	}
-	return nullptr;
+	return m_acceptables;
 }
 
 void ParserState::SetAcceptableTerminals(const std::set<std::string>& terminals)
@@ -66,9 +62,5 @@ void ParserState::SetAcceptableTerminals(const std::set<std::string>& terminals)
 
 bool ParserState::AcceptsTerminal(const std::string& terminal) const
 {
-	if (!bool(m_acceptables))
-	{
-		throw std::runtime_error("acceptable terminals aren't defined yet");
-	}
-	return m_acceptables->find(terminal) != m_acceptables->end();
+	return m_acceptables.find(terminal) != m_acceptables.end();
 }

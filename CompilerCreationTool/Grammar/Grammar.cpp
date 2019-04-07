@@ -48,7 +48,12 @@ bool HasSymbol(const IGrammarProduction& production, const IGrammarSymbol& symbo
 }
 }
 
-bool grammarlib::Grammar::IsNormalized() const
+Grammar::Grammar(const std::string& text)
+	: mText(text)
+{
+}
+
+bool Grammar::IsNormalized() const
 {
 	return mNormalized;
 }
@@ -121,9 +126,14 @@ size_t Grammar::GetProductionsCount() const
 	return mProductions.size();
 }
 
-bool grammarlib::Grammar::IsEmpty() const
+bool Grammar::IsEmpty() const
 {
 	return mProductions.empty();
+}
+
+const std::string& Grammar::GetText() const
+{
+	return mText;
 }
 
 const std::string& Grammar::GetStartSymbol() const
@@ -149,7 +159,7 @@ const std::string& Grammar::GetEndTerminal() const
 	return symbol.GetName();
 }
 
-void grammarlib::Grammar::TryInsertFirstProduction(std::unique_ptr<IGrammarProduction> && production)
+void Grammar::TryInsertFirstProduction(std::unique_ptr<IGrammarProduction> && production)
 {
 	assert(IsEmpty());
 
@@ -169,7 +179,7 @@ void grammarlib::Grammar::TryInsertFirstProduction(std::unique_ptr<IGrammarProdu
 	mNormalized = false;
 }
 
-void grammarlib::Grammar::TryInsertProduction(std::unique_ptr<IGrammarProduction> && production)
+void Grammar::TryInsertProduction(std::unique_ptr<IGrammarProduction> && production)
 {
 	assert(!IsEmpty());
 
@@ -191,7 +201,6 @@ void grammarlib::Grammar::TryInsertProduction(std::unique_ptr<IGrammarProduction
 				production->GetBackSymbol().GetName() + "' can't be repeated");
 		}
 	}
-
 	else if (HasSymbol(*production, mProductions.front()->GetBackSymbol()))
 	{
 		throw std::runtime_error(

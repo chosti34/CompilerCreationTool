@@ -6,7 +6,7 @@ EntitiesListboxView::EntitiesListboxView(wxWindow* parent)
 	, m_listbox(new wxListBox(this, wxID_ANY))
 {
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-	sizer->Add(m_listbox, 1, wxEXPAND | wxALL, 5);
+	sizer->Add(m_listbox, 1, wxEXPAND | wxALL, 3);
 	SetSizer(sizer);
 
 	m_listbox->Bind(wxEVT_LISTBOX, &EntitiesListboxView::OnListboxItemSelection, this);

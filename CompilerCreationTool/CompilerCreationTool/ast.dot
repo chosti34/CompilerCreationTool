@@ -1,7 +1,7 @@
 digraph {
 0 [shape="circle" label="Binary (+)"];
-1 [shape="circle" label="Literal (123)"];
-2 [shape="circle" label="Literal (2)"];
+1 [shape="circle" label="Literal (172386128)"];
+2 [shape="circle" label="Literal (12312312)"];
 0->1 [label=" "];
 0->2 [label=" "];
 }

@@ -62,7 +62,7 @@ TreeView::TreeView(wxWindow* parent)
 	, mScrolledWindow(new ScrolledWindow(this))
 {
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-	sizer->Add(mScrolledWindow, 1, wxEXPAND | wxALL);
+	sizer->Add(mScrolledWindow, 1, wxEXPAND | wxALL, 3);
 	SetSizer(sizer);
 	Refresh(true);
 }

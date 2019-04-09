@@ -31,7 +31,7 @@ StatesView::StatesView(wxWindow* parent)
 	m_list->AppendColumn(wxT("Acceptables"));
 
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-	sizer->Add(m_list, 1, wxEXPAND | wxALL);
+	sizer->Add(m_list, 1, wxEXPAND | wxALL, 3);
 	SetSizer(sizer);
 
 	m_list->Bind(wxEVT_SIZE, &StatesView::OnListResize, this);

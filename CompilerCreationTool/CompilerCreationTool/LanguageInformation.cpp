@@ -6,18 +6,12 @@ using namespace grammarlib;
 
 namespace
 {
-bool HasAcceptableSetsCrossing(
-	const std::string& nonterminal,
-	const IParserTable& table,
-	const IGrammar& grammar
-)
+bool HasAcceptableSetsCrossing(const std::string& nonterminal, const IParserTable& table, const IGrammar& grammar)
 {
 	std::set<std::string> nonterminalAcceptables;
-
 	for (int index : GatherProductionIndices(grammar, nonterminal))
 	{
 		const auto& stateAcceptables = table.GetState(index).GetAcceptableTerminals();
-
 		for (const std::string& acceptable : stateAcceptables)
 		{
 			const auto inserted = nonterminalAcceptables.emplace(acceptable);
@@ -27,7 +21,6 @@ bool HasAcceptableSetsCrossing(
 			}
 		}
 	}
-
 	return false;
 }
 }

@@ -14,7 +14,7 @@ TextView::TextView(wxWindow* parent)
 	mInput->SetScrollWidthTracking(true);
 
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-	sizer->Add(mInput, 1, wxEXPAND | wxALL);
+	sizer->Add(mInput, 1, wxEXPAND | wxALL, 3);
 	SetSizerAndFit(sizer);
 
 	mInput->Bind(wxEVT_STC_UPDATEUI, &TextView::OnUpdateUI, this);

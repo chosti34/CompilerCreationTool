@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 enum class GrammarSymbolType
 {
@@ -6,3 +7,6 @@ enum class GrammarSymbolType
 	Terminal,
 	Nonterminal
 };
+
+std::string ToString(GrammarSymbolType type);
+GrammarSymbolType ToGrammarSymbolType(const std::string& str);

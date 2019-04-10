@@ -1,9 +1,10 @@
 #include "pch.h"
 #include "LanguageSerialization.h"
-#include "../Grammar/GrammarBuilder.h"
-#include "../Parser/ParserTable.h"
-#include "../Parser/ParserState.h"
+#include "../Grammar/Grammar.h"
+#include "../Grammar/GrammarSymbol.h"
+#include "../Grammar/GrammarProduction.h"
 #include "../Lexer/Lexer.h"
+#include "../Parser/Action.h"
 #include <tinyxml2.h>
 
 namespace
@@ -21,6 +22,14 @@ void EnsureNoErrors(tinyxml2::XMLError status, const std::string& message)
 		throw std::runtime_error(message);
 	}
 }
+
+void EnsureElementPtr(tinyxml2::XMLElement* elementPtr, const std::string& message)
+{
+	if (!elementPtr)
+	{
+		throw std::runtime_error(message);
+	}
+}
 }
 
 void SerializeLanguage(const std::string& filepath, const Language& language)
@@ -33,11 +42,36 @@ void SerializeLanguage(const std::string& filepath, const Language& language)
 	// Создаем корневой узел
 	tinyxml2::XMLDocument doc;
 	tinyxml2::XMLNode* root = doc.NewElement("Language");
-	doc.InsertFirstChild(root);
+	doc.InsertEndChild(root);
+
+	// Сериализуем информацию о грамматике
+	tinyxml2::XMLElement* grammarElement = doc.NewElement("Grammar");
+	root->InsertEndChild(grammarElement);
+
+	for (std::size_t row = 0; row < language.GetGrammar().GetProductionsCount(); ++row)
+	{
+		const grammarlib::IGrammarProduction& production = language.GetGrammar().GetProduction(row);
+		tinyxml2::XMLElement* productionElement = doc.NewElement("Production");
+		productionElement->SetAttribute("left", production.GetLeftPart().c_str());
+		grammarElement->InsertEndChild(productionElement);
+
+		for (std::size_t col = 0; col < production.GetSymbolsCount(); ++col)
+		{
+			const grammarlib::IGrammarSymbol& symbol = production.GetSymbol(col);
+			tinyxml2::XMLElement* symbolElement = doc.NewElement("Symbol");
+			symbolElement->SetAttribute("name", symbol.GetName().c_str());
+			symbolElement->SetAttribute("type", ToString(symbol.GetType()).c_str());
+			if (symbol.HasAttribute())
+			{
+				symbolElement->SetAttribute("attribute", symbol.GetAttribute()->c_str());
+			}
+			productionElement->InsertEndChild(symbolElement);
+		}
+	}
 
 	// Сериализуем информацию о лексере
 	tinyxml2::XMLNode* patternsElement = doc.NewElement("Patterns");
-	root->InsertFirstChild(patternsElement);
+	root->InsertEndChild(patternsElement);
 
 	const ILexer& lexer = language.GetLexer();
 	for (std::size_t row = 0; row < lexer.GetPatternsCount(); ++row)
@@ -64,65 +98,12 @@ void SerializeLanguage(const std::string& filepath, const Language& language)
 		actionsElement->InsertEndChild(actionElement);
 	}
 
-	// Сериализуем информацию о состояниях парсера
-	/*tinyxml2::XMLNode* statesElement = doc.NewElement("States");
-	root->InsertAfterChild(actionsElement, statesElement);
-
-	for (std::size_t row = 0; row < parser.GetTable().GetStatesCount(); ++row)
-	{
-		const IParserState& state = parser.GetTable().GetState(row);
-		tinyxml2::XMLElement* stateElement = doc.NewElement("State");
-		stateElement->SetAttribute("name", state.GetName().c_str());
-
-		for (StateFlag flag : GetAllStateFlags())
-		{
-			stateElement->SetAttribute(ToElementAttribute(flag).c_str(), state.GetFlag(flag));
-		}
-		if (auto next = state.GetNextAddress())
-		{
-			stateElement->SetAttribute("next", int64_t(*next));
-		}
-		for (const auto& terminal : state.GetAcceptableTerminals())
-		{
-			tinyxml2::XMLElement* acceptableElement = doc.NewElement("Acceptable");
-			acceptableElement->SetText(terminal.c_str());
-			stateElement->InsertEndChild(acceptableElement);
-		}
-
-		statesElement->InsertEndChild(stateElement);
-	}*/
-
-	// Сериализуем информацию о грамматике
-	tinyxml2::XMLElement* grammarElement = doc.NewElement("Grammar");
-	root->InsertAfterChild(actionsElement, grammarElement);
-
-	for (std::size_t row = 0; row < language.GetGrammar().GetProductionsCount(); ++row)
-	{
-		const grammarlib::IGrammarProduction& production = language.GetGrammar().GetProduction(row);
-		tinyxml2::XMLElement* productionElement = doc.NewElement("Production");
-		productionElement->SetAttribute("left", production.GetLeftPart().c_str());
-		grammarElement->InsertEndChild(productionElement);
-
-		for (std::size_t col = 0; col < production.GetSymbolsCount(); ++col)
-		{
-			const grammarlib::IGrammarSymbol& symbol = production.GetSymbol(col);
-			tinyxml2::XMLElement* symbolElement = doc.NewElement("Symbol");
-			symbolElement->SetAttribute("name", symbol.GetName().c_str());
-			symbolElement->SetAttribute("type", ToString(symbol.GetType()).c_str());
-			if (symbol.HasAttribute())
-			{
-				symbolElement->SetAttribute("attribute", symbol.GetAttribute()->c_str());
-			}
-			productionElement->InsertEndChild(symbolElement);
-		}
-	}
-
 	// Сохраняем созданный DOM в файл
 	const tinyxml2::XMLError status = doc.SaveFile(filepath.c_str());
 	EnsureNoErrors(status, "can't' serialize language to file '" + filepath + "'");
 }
 
-std::unique_ptr<Language> UnserializeLanguage(const std::string& filepath)
+void UnserializeLanguage(const std::string& filepath, Language& language)
 {
 	// Создаем DOM объект
 	tinyxml2::XMLDocument doc;
@@ -131,80 +112,88 @@ std::unique_ptr<Language> UnserializeLanguage(const std::string& filepath)
 
 	tinyxml2::XMLNode* root = doc.FirstChild();
 	tinyxml2::XMLElement* grammarElement = root->FirstChildElement("Grammar");
-	if (!grammarElement)
+	EnsureElementPtr(grammarElement, "can't unserialize language because no grammar section found");
+
+	// Создаем грамматику
+	auto grammar = std::make_unique<grammarlib::Grammar>();
+	tinyxml2::XMLElement* productionElement = grammarElement->FirstChildElement("Production");
+	EnsureElementPtr(productionElement, "can't unserialize language because grammar must have at least one production");
+
+	while (productionElement)
 	{
-		throw std::runtime_error("can't unserialize language: no grammar section");
-	}
+		const char* left;
+		status = productionElement->QueryStringAttribute("left", &left);
+		EnsureNoErrors(status, "can't unserialize language because production has no 'left' attribute");
 
-	const char* text = grammarElement->GetText();
-	if (!text)
-	{
-		throw std::runtime_error("can't unserialize language: grammar section is corrupted");
-	}
-
-	auto language = std::make_unique<Language>();
-	auto builder = std::make_unique<grammarlib::GrammarBuilder>();
-	language->SetGrammar(builder->CreateGrammar(text));
-
-	tinyxml2::XMLElement* parserElement = root->FirstChildElement("Parser");
-	if (!parserElement)
-	{
-		throw std::runtime_error("can't unserialize language: no parser section");
-	}
-
-	tinyxml2::XMLElement* statesElement = parserElement->FirstChildElement("States");
-	if (!statesElement)
-	{
-		throw std::runtime_error("can't unserialize language: no states section");
-	}
-
-	auto table = std::make_unique<ParserTable>();
-
-	tinyxml2::XMLElement* stateElement = statesElement->FirstChildElement("State");
-	while (stateElement)
-	{
-		auto state = std::make_unique<ParserState>();
-		for (StateFlag flag : GetAllStateFlags())
+		std::vector<std::unique_ptr<grammarlib::IGrammarSymbol>> right;
+		tinyxml2::XMLElement* symbolElement = productionElement->FirstChildElement("Symbol");
+		while (symbolElement)
 		{
-			bool value;
-			tinyxml2::XMLError status = stateElement->QueryBoolAttribute(ToElementAttribute(flag).c_str(), &value);
-			EnsureNoErrors(status, "can't unserialize language: corruped state");
-			state->SetFlag(flag, value);
+			const char* name;
+			status = symbolElement->QueryStringAttribute("name", &name);
+			EnsureNoErrors(status, "can't unserialize language because symbol has no 'name' attribute");
+
+			const char* type;
+			status = symbolElement->QueryStringAttribute("type", &type);
+			EnsureNoErrors(status, "can't unserialize language because symbol has no 'type' attribute");
+
+			right.emplace_back(std::make_unique<grammarlib::GrammarSymbol>(name, ToGrammarSymbolType(type)));
+			symbolElement = symbolElement->NextSiblingElement("Symbol");
 		}
 
+		grammar->AddProduction(std::make_unique<grammarlib::GrammarProduction>(left, std::move(right)));
+		productionElement = productionElement->NextSiblingElement("Production");
+	}
+
+	grammar->NormalizeIndices();
+	language.SetGrammar(std::move(grammar));
+	assert(language.IsInitialized());
+
+	// Добавляем информацию в лексер о сохраненных пользователем шаблонов разбора
+	ILexer& lexer = language.GetLexer();
+	tinyxml2::XMLElement* patternsElement = root->FirstChildElement("Patterns");
+	EnsureElementPtr(patternsElement, "can't unserialize language because no patterns element found");
+
+	tinyxml2::XMLElement* patternElement = patternsElement->FirstChildElement("Pattern");
+	EnsureElementPtr(patternElement, "can't unserialize language because lexer must have at least one pattern");
+	int count = 0;
+
+	while (patternElement)
+	{
 		const char* name;
-		tinyxml2::XMLError status = stateElement->QueryStringAttribute("name", &name);
-		EnsureNoErrors(status, "can't unserialize language: corruped state");
-		state->SetName(name);
+		status = patternElement->QueryStringAttribute("name", &name);
+		EnsureNoErrors(status, "pattern element must have 'name' attribute");
 
-		if (const tinyxml2::XMLAttribute* attribute = stateElement->FindAttribute("next"))
-		{
-			int64_t value;
-			status = attribute->QueryInt64Value(&value);
-			EnsureNoErrors(status, "can't unserialize language: corruped state");
-			state->SetNextAddress(size_t(value));
-		}
+		const char* origin;
+		status = patternElement->QueryStringAttribute("origin", &origin);
+		EnsureNoErrors(status, "pattern element must have 'origin' attribute");
 
-		std::set<std::string> acceptables;
-		tinyxml2::XMLElement* acceptableElement = stateElement->FirstChildElement("Acceptable");
+		bool isEnding;
+		status = patternElement->QueryBoolAttribute("isEnding", &isEnding);
+		EnsureNoErrors(status, "pattern element must have 'isEnding' attribute");
 
-		while (acceptableElement)
-		{
-			const char* acceptable = acceptableElement->GetText();
-			if (!acceptable)
-			{
-				throw std::runtime_error("can't unserialize language: corrupted acceptable");
-			}
-			acceptables.insert(acceptable);
-			acceptableElement = acceptableElement->NextSiblingElement("Acceptable");
-		}
-
-		state->SetAcceptableTerminals(acceptables);
-		table->AddState(std::move(state));
-		stateElement = stateElement->NextSiblingElement("State");
+		lexer.SetPattern(count++, TokenPattern(name, origin, isEnding));
+		patternElement = patternsElement->NextSiblingElement("Pattern");
 	}
 
-	auto lexer = std::make_unique<Lexer>();
+	// Добавляем информацию в парсер о сохраненных пользователем действий
+	IParser<ParseResults>& parser = language.GetParser();
+	tinyxml2::XMLElement* actionsElement = root->FirstChildElement("Actions");
+	EnsureElementPtr(actionsElement, "no actions element");
+	count = 0;
 
-	return language;
+	tinyxml2::XMLElement* actionElement = actionsElement->FirstChildElement("Action");
+	while (actionElement)
+	{
+		const char* name;
+		status = actionElement->QueryStringAttribute("name", &name);
+		EnsureNoErrors(status, "action element must have 'name' attribute");
+
+		const char* type;
+		status = actionElement->QueryStringAttribute("type", &type);
+		EnsureNoErrors(status, "action element must have 'type' attribute");
+
+		parser.SetAction(count++, std::make_unique<Action>(name, ToActionType(type)));
+		actionElement = actionsElement->NextSiblingElement("Action");
+	}
 }

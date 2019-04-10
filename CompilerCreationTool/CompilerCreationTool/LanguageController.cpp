@@ -129,7 +129,7 @@ void LanguageController::OnNewButtonPress()
 
 void LanguageController::OnOpenButtonPress()
 {
-	auto language = UnserializeLanguage("saved.xml");
+	UnserializeLanguage("saved.xml", *mLanguage);
 }
 
 void LanguageController::OnSaveButtonPress()

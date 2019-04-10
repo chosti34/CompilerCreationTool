@@ -48,15 +48,10 @@ bool HasSymbol(const IGrammarProduction& production, const IGrammarSymbol& symbo
 }
 }
 
-Grammar::Grammar(const std::string& text)
-	: mText(text)
-{
-}
-
-bool Grammar::IsNormalized() const
-{
-	return mNormalized;
-}
+//bool Grammar::IsNormalized() const
+//{
+//	return mNormalized;
+//}
 
 // Делаем все альтернативны нетерминала соседними по индексу в массиве правил грамматики
 void Grammar::NormalizeIndices()
@@ -131,10 +126,10 @@ bool Grammar::IsEmpty() const
 	return mProductions.empty();
 }
 
-const std::string& Grammar::GetText() const
-{
-	return mText;
-}
+//const std::string& Grammar::GetText() const
+//{
+//	return mText;
+//}
 
 const std::string& Grammar::GetStartSymbol() const
 {

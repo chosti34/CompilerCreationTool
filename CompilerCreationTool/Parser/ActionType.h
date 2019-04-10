@@ -16,3 +16,4 @@ enum class ActionType
 const std::vector<ActionType>& GetActionTypesList();
 int GetActionTypeIndex(ActionType type);
 std::string ToString(ActionType type);
+ActionType ToActionType(const std::string& str);

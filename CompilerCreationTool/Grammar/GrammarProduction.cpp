@@ -5,13 +5,27 @@ using namespace grammarlib;
 
 namespace
 {
-void ValidateRightPart(const std::vector<std::unique_ptr<IGrammarSymbol>>& right)
+bool HasEpsilon(const std::vector<std::unique_ptr<IGrammarSymbol>> &right)
 {
+	for (const auto& symbol : right)
+	{
+		if (symbol->GetType() == GrammarSymbolType::Epsilon)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void ValidateRightPart(const std::vector<std::unique_ptr<IGrammarSymbol>> &right)
+{
+	// Правая часть правила не может быть пустой
 	if (right.empty())
 	{
 		throw std::runtime_error("production's right part can't be empty");
 	}
-	if (right.front()->GetType() == GrammarSymbolType::Epsilon && right.size() != 1)
+	// Правило может содержать только один пустой символ
+	if (HasEpsilon(right) && right.size() != 1)
 	{
 		throw std::runtime_error("epsilon production can't contain any additional symbols");
 	}

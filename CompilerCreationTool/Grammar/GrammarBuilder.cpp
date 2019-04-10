@@ -19,7 +19,7 @@ namespace grammarlib
 {
 std::unique_ptr<IGrammar> GrammarBuilder::CreateGrammar(const std::string& text)
 {
-	auto grammar = std::make_unique<Grammar>(text);
+	auto grammar = std::make_unique<Grammar>();
 	auto factory = std::make_unique<GrammarProductionFactory>();
 
 	std::istringstream strm(text);

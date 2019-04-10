@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ActionType.h"
 #include <unordered_map>
+#include <algorithm>
 #include <cassert>
 
 namespace
@@ -53,4 +54,19 @@ std::string ToString(ActionType type)
 	}
 	assert(false);
 	throw std::logic_error("can't get string representation of undefined action type");
+}
+
+ActionType ToActionType(const std::string& str)
+{
+	auto found = std::find_if(gcActionStringMap.begin(), gcActionStringMap.end(), [&](std::pair<ActionType, std::string> && pair) {
+		return pair.second == str;
+	});
+
+	if (found != gcActionStringMap.end())
+	{
+		return found->first;
+	}
+
+	assert(false);
+	throw std::logic_error("can't convert string '" + str + "' to action type");
 }

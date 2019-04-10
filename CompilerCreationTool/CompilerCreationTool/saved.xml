@@ -1,16 +1,19 @@
 <Language>
+    <Grammar>
+        <Production left="S">
+            <Symbol name="Int" type="Terminal" attribute="CreateNumber"/>
+            <Symbol name="Plus" type="Terminal"/>
+            <Symbol name="Int" type="Terminal" attribute="CreateNumber"/>
+            <Symbol name="EOF" type="Terminal" attribute="CreateBinary"/>
+        </Production>
+    </Grammar>
     <Patterns>
-        <Pattern name="Int" origin="Int" isEnding="false"/>
+        <Pattern name="Int" origin="0|[1-9][0-9]*" isEnding="false"/>
         <Pattern name="Plus" origin="Plus" isEnding="false"/>
         <Pattern name="EOF" origin="EOF" isEnding="true"/>
     </Patterns>
-    <Actions/>
-    <Grammar>
-        <Production left="S">
-            <Symbol name="Int" type="Terminal"/>
-            <Symbol name="Plus" type="Terminal"/>
-            <Symbol name="Int" type="Terminal"/>
-            <Symbol name="EOF" type="Terminal"/>
-        </Production>
-    </Grammar>
+    <Actions>
+        <Action name="CreateNumber" type="None"/>
+        <Action name="CreateBinary" type="None"/>
+    </Actions>
 </Language>

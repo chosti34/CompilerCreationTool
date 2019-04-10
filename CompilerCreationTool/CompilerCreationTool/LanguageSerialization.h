@@ -7,4 +7,4 @@
 void SerializeLanguage(const std::string& filepath, const Language& language);
 
 // Создаем модель языка из информации записанной в файл формата XML
-std::unique_ptr<Language> UnserializeLanguage(const std::string& filepath);
+void UnserializeLanguage(const std::string& filepath, Language& language);

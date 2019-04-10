@@ -7,9 +7,6 @@ namespace grammarlib
 class Grammar : public IGrammar
 {
 public:
-	explicit Grammar(const std::string& text);
-
-	bool IsNormalized() const override;
 	void NormalizeIndices() override;
 
 	void AddProduction(std::unique_ptr<IGrammarProduction> && production) override;
@@ -18,7 +15,6 @@ public:
 	size_t GetProductionsCount() const override;
 	bool IsEmpty() const override;
 
-	const std::string& GetText() const override;
 	const std::string& GetStartSymbol() const override;
 	const std::string& GetEndTerminal() const override;
 
@@ -29,6 +25,5 @@ private:
 private:
 	std::vector<std::unique_ptr<IGrammarProduction>> mProductions;
 	bool mNormalized = false;
-	std::string mText;
 };
 }

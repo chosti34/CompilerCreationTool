@@ -1,11 +1,15 @@
 #include "pch.h"
 #include "LanguageSerialization.h"
+
 #include "../Grammar/Grammar.h"
 #include "../Grammar/GrammarSymbol.h"
 #include "../Grammar/GrammarProduction.h"
+
 #include "../Lexer/Lexer.h"
 #include "../Parser/Action.h"
+
 #include <tinyxml2.h>
+
 
 namespace
 {
@@ -36,7 +40,7 @@ void SerializeLanguage(const std::string& filepath, const Language& language)
 {
 	if (!language.IsInitialized())
 	{
-		throw std::runtime_error("can't serialize uninitialized language");
+		throw std::runtime_error("language is not initialized");
 	}
 
 	// Создаем корневой узел
@@ -108,22 +112,22 @@ void UnserializeLanguage(const std::string& filepath, Language& language)
 	// Создаем DOM объект
 	tinyxml2::XMLDocument doc;
 	tinyxml2::XMLError status = doc.LoadFile(filepath.c_str());
-	EnsureNoErrors(status, "can't open file '" + filepath + "' to read language");
+	EnsureNoErrors(status, "can't open file '" + filepath + "'");
 
 	tinyxml2::XMLNode* root = doc.FirstChild();
 	tinyxml2::XMLElement* grammarElement = root->FirstChildElement("Grammar");
-	EnsureElementPtr(grammarElement, "can't unserialize language because no grammar section found");
+	EnsureElementPtr(grammarElement, "no grammar section found");
 
 	// Создаем грамматику
 	auto grammar = std::make_unique<grammarlib::Grammar>();
 	tinyxml2::XMLElement* productionElement = grammarElement->FirstChildElement("Production");
-	EnsureElementPtr(productionElement, "can't unserialize language because grammar must have at least one production");
+	EnsureElementPtr(productionElement, "grammar must have at least one production");
 
 	while (productionElement)
 	{
 		const char* left;
 		status = productionElement->QueryStringAttribute("left", &left);
-		EnsureNoErrors(status, "can't unserialize language because production has no 'left' attribute");
+		EnsureNoErrors(status, "production has no 'left' attribute");
 
 		std::vector<std::unique_ptr<grammarlib::IGrammarSymbol>> right;
 		tinyxml2::XMLElement* symbolElement = productionElement->FirstChildElement("Symbol");
@@ -131,11 +135,11 @@ void UnserializeLanguage(const std::string& filepath, Language& language)
 		{
 			const char* name;
 			status = symbolElement->QueryStringAttribute("name", &name);
-			EnsureNoErrors(status, "can't unserialize language because symbol has no 'name' attribute");
+			EnsureNoErrors(status, "symbol has no 'name' attribute");
 
 			const char* type;
 			status = symbolElement->QueryStringAttribute("type", &type);
-			EnsureNoErrors(status, "can't unserialize language because symbol has no 'type' attribute");
+			EnsureNoErrors(status, "symbol has no 'type' attribute");
 
 			boost::optional<std::string> attribute;
 			const char* attributeValue;
@@ -160,10 +164,10 @@ void UnserializeLanguage(const std::string& filepath, Language& language)
 	// Считываем и сохраняем шаблоны разбора для лексера
 	std::vector<TokenPattern> patterns;
 	tinyxml2::XMLElement* patternsElement = root->FirstChildElement("Patterns");
-	EnsureElementPtr(patternsElement, "can't unserialize language because no patterns element found");
+	EnsureElementPtr(patternsElement, "no 'Patterns' element found");
 
 	tinyxml2::XMLElement* patternElement = patternsElement->FirstChildElement("Pattern");
-	EnsureElementPtr(patternElement, "can't unserialize language because lexer must have at least one pattern");
+	EnsureElementPtr(patternElement, "lexer must have at least one pattern");
 
 	while (patternElement)
 	{
@@ -186,7 +190,7 @@ void UnserializeLanguage(const std::string& filepath, Language& language)
 	// Считываем и сохраняем действия парсера
 	std::vector<std::unique_ptr<IAction>> actions;
 	tinyxml2::XMLElement* actionsElement = root->FirstChildElement("Actions");
-	EnsureElementPtr(actionsElement, "no actions element");
+	EnsureElementPtr(actionsElement, "no 'Actions' element");
 
 	tinyxml2::XMLElement* actionElement = actionsElement->FirstChildElement("Action");
 	while (actionElement)

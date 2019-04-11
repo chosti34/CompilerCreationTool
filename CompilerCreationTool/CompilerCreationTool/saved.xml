@@ -1,10 +1,6 @@
 <Language>
     <Grammar>
         <Production left="S">
-            <Symbol name="Int" type="Terminal"/>
-            <Symbol name="Plus" type="Terminal"/>
-            <Symbol name="Int" type="Terminal"/>
-            <Symbol name="EOF" type="Terminal"/>
         </Production>
     </Grammar>
     <Patterns>

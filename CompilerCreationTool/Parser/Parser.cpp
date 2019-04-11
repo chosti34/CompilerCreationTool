@@ -234,6 +234,11 @@ void Parser::SetAction(size_t index, std::unique_ptr<IAction> && action)
 	mActionList[index] = std::move(action);
 }
 
+void Parser::SetActions(std::vector<std::unique_ptr<IAction>> && actions)
+{
+	mActionList = std::move(actions);
+}
+
 void Parser::SwapActions(size_t oldPos, size_t newPos)
 {
 	std::iter_swap(mActionList.begin() + oldPos, mActionList.begin() + newPos);

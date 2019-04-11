@@ -22,6 +22,11 @@ TextView::TextView(wxWindow* parent)
 	mInput->Bind(wxEVT_KILL_FOCUS, &TextView::OnTextFocusLost, this);
 }
 
+void TextView::SetText(const wxString& text)
+{
+	mInput->SetText(text);
+}
+
 wxString TextView::GetText() const
 {
 	return mInput->GetText();

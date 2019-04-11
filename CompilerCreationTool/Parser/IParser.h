@@ -14,6 +14,7 @@ public:
 
 	virtual void SetActionNames(const std::vector<std::string> &actions) = 0;
 	virtual void SetAction(size_t index, std::unique_ptr<IAction> && action) = 0;
+	virtual void SetActions(std::vector<std::unique_ptr<IAction>> && actions) = 0;
 	virtual void SwapActions(size_t lhs, size_t rhs) = 0;
 
 	virtual boost::optional<size_t> GetActionPos(const std::string& name) const = 0;

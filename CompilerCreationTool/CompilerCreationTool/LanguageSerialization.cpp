@@ -137,7 +137,16 @@ void UnserializeLanguage(const std::string& filepath, Language& language)
 			status = symbolElement->QueryStringAttribute("type", &type);
 			EnsureNoErrors(status, "can't unserialize language because symbol has no 'type' attribute");
 
-			right.emplace_back(std::make_unique<grammarlib::GrammarSymbol>(name, ToGrammarSymbolType(type)));
+			boost::optional<std::string> attribute;
+			const char* attributeValue;
+
+			if (symbolElement->QueryStringAttribute("attribute", &attributeValue) != tinyxml2::XML_NO_ATTRIBUTE)
+			{
+				assert(attributeValue);
+				attribute = std::string(attributeValue);
+			}
+
+			right.emplace_back(std::make_unique<grammarlib::GrammarSymbol>(name, ToGrammarSymbolType(type), attribute));
 			symbolElement = symbolElement->NextSiblingElement("Symbol");
 		}
 
@@ -145,18 +154,16 @@ void UnserializeLanguage(const std::string& filepath, Language& language)
 		productionElement = productionElement->NextSiblingElement("Production");
 	}
 
+	// Ќормализуем индексы
 	grammar->NormalizeIndices();
-	language.SetGrammar(std::move(grammar));
-	assert(language.IsInitialized());
 
-	// ƒобавл€ем информацию в лексер о сохраненных пользователем шаблонов разбора
-	ILexer& lexer = language.GetLexer();
+	// —читываем и сохран€ем шаблоны разбора дл€ лексера
+	std::vector<TokenPattern> patterns;
 	tinyxml2::XMLElement* patternsElement = root->FirstChildElement("Patterns");
 	EnsureElementPtr(patternsElement, "can't unserialize language because no patterns element found");
 
 	tinyxml2::XMLElement* patternElement = patternsElement->FirstChildElement("Pattern");
 	EnsureElementPtr(patternElement, "can't unserialize language because lexer must have at least one pattern");
-	int count = 0;
 
 	while (patternElement)
 	{
@@ -172,15 +179,14 @@ void UnserializeLanguage(const std::string& filepath, Language& language)
 		status = patternElement->QueryBoolAttribute("isEnding", &isEnding);
 		EnsureNoErrors(status, "pattern element must have 'isEnding' attribute");
 
-		lexer.SetPattern(count++, TokenPattern(name, origin, isEnding));
-		patternElement = patternsElement->NextSiblingElement("Pattern");
+		patterns.emplace_back(name, origin, isEnding);
+		patternElement = patternElement->NextSiblingElement("Pattern");
 	}
 
-	// ƒобавл€ем информацию в парсер о сохраненных пользователем действий
-	IParser<ParseResults>& parser = language.GetParser();
+	// —читываем и сохран€ем действи€ парсера
+	std::vector<std::unique_ptr<IAction>> actions;
 	tinyxml2::XMLElement* actionsElement = root->FirstChildElement("Actions");
 	EnsureElementPtr(actionsElement, "no actions element");
-	count = 0;
 
 	tinyxml2::XMLElement* actionElement = actionsElement->FirstChildElement("Action");
 	while (actionElement)
@@ -193,7 +199,12 @@ void UnserializeLanguage(const std::string& filepath, Language& language)
 		status = actionElement->QueryStringAttribute("type", &type);
 		EnsureNoErrors(status, "action element must have 'type' attribute");
 
-		parser.SetAction(count++, std::make_unique<Action>(name, ToActionType(type)));
-		actionElement = actionsElement->NextSiblingElement("Action");
+		actions.push_back(std::make_unique<Action>(name, ToActionType(type)));
+		actionElement = actionElement->NextSiblingElement("Action");
 	}
+
+	language.SetGrammar(std::move(grammar));
+	assert(language.IsInitialized());
+	language.GetLexer().SetPatterns(std::move(patterns));
+	language.GetParser().SetActions(std::move(actions));
 }

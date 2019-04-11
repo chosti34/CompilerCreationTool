@@ -7,6 +7,8 @@ class TextView : public wxPanel
 {
 public:
 	explicit TextView(wxWindow* parent);
+
+	void SetText(const wxString& text);
 	wxString GetText() const;
 
 	int GetCurrentLine() const;

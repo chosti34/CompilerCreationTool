@@ -1,15 +1,22 @@
 #include "pch.h"
 #include "LanguageController.h"
+
 #include "TerminalEditDialog.h"
 #include "ActionEditDialog.h"
 #include "TextCtrlLogger.h"
+
 #include "LanguageSerialization.h"
 #include "LanguageInformationDialog.h"
 #include "ASTGraphvizVisualizer.h"
+
 #include "../Grammar/GrammarBuilder.h"
+#include "../Grammar/GrammarUtils.h"
 #include "../Utils/command_utils.h"
 #include "../Utils/time_utils.h"
+
+#include <wx/filedlg.h>
 #include <functional>
+
 
 namespace
 {
@@ -37,7 +44,7 @@ wxArrayString GetActionsArray(const IParser<ParseResults>& parser)
 
 void ClearStatusBarTextFields(wxStatusBar& statusbar, std::vector<int> && fields)
 {
-	for (auto field : fields)
+	for (int field : fields)
 	{
 		statusbar.SetStatusText(wxEmptyString, field);
 	}
@@ -124,12 +131,39 @@ void LanguageController::SwapActionPositions(int from, int to)
 
 void LanguageController::OnNewButtonPress()
 {
+	bool hasChanges = false;
+	if (hasChanges)
+	{
+		
+	}
+
+	//
 	std::cout << "new\n";
 }
 
 void LanguageController::OnOpenButtonPress()
 {
-	UnserializeLanguage("saved.xml", *mLanguage);
+	wxFileDialog openFileDialog(
+		mFrame, "Open language file", wxEmptyString, wxEmptyString,
+		"XML files (*.xml)|*.xml", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+
+	if (openFileDialog.ShowModal() != wxID_CANCEL)
+	{
+		// Инициализируем модель
+		UnserializeLanguage(openFileDialog.GetPath(), *mLanguage);
+
+		// Заполняем модель считанными данными
+		mLanguage->GetParser().SetLogger(std::make_unique<TextCtrlLogger>(mOutputView->GetTextCtrl()));
+		mTerminalsView->SetItems(GetTerminalsArray(mLanguage->GetLexer()));
+		mActionsView->SetItems(GetActionsArray(mLanguage->GetParser()));
+		mStatesView->SetParserTable(mLanguage->GetParser().GetTable());
+		mGrammarView->SetText(ToText(mLanguage->GetGrammar()));
+
+		// Обновляем представление
+		mFrame->GetToolBar()->EnableTool(Buttons::Run, true);
+		mFrame->GetToolBar()->EnableTool(Buttons::Info, true);
+		mFrame->Refresh(true);
+	}
 }
 
 void LanguageController::OnSaveButtonPress()
@@ -139,17 +173,29 @@ void LanguageController::OnSaveButtonPress()
 
 void LanguageController::OnSaveAsButtonPress()
 {
-	std::cout << "save as\n";
+	wxFileDialog saveFileDialog(mFrame, "Save language to file",
+		wxEmptyString, wxEmptyString, "XML files (*.xml)|*.xml",
+		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+	if (saveFileDialog.ShowModal() != wxID_CANCEL)
+	{
+		SerializeLanguage(saveFileDialog.GetPath(), *mLanguage);
+	}
 }
 
 void LanguageController::OnBuildButtonPress()
 {
+	// Инициализируем модель
 	auto builder = std::make_unique<grammarlib::GrammarBuilder>();
 	mLanguage->SetGrammar(builder->CreateGrammar(mGrammarView->GetText()));
+
+	// Заполняем модель данными по умолчанию
 	mLanguage->GetParser().SetLogger(std::make_unique<TextCtrlLogger>(mOutputView->GetTextCtrl()));
 	mTerminalsView->SetItems(GetTerminalsArray(mLanguage->GetLexer()));
 	mActionsView->SetItems(GetActionsArray(mLanguage->GetParser()));
 	mStatesView->SetParserTable(mLanguage->GetParser().GetTable());
+
+	// Обновляем представление
 	mFrame->GetToolBar()->EnableTool(Buttons::Run, true);
 	mFrame->GetToolBar()->EnableTool(Buttons::Info, true);
 }

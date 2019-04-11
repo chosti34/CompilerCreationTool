@@ -13,6 +13,7 @@ public:
 	
 	virtual void AppendPattern(const TokenPattern& pattern) = 0;
 	virtual void SetPattern(size_t index, const TokenPattern& newValue) = 0;
+	virtual void SetPatterns(std::vector<TokenPattern> && patterns) = 0;
 	virtual void SwapPatterns(size_t lhs, size_t rhs) = 0;
 
 	virtual boost::optional<size_t> GetPatternPos(const std::string& name) const = 0;

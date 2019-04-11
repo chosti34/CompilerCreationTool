@@ -67,6 +67,5 @@ ActionType ToActionType(const std::string& str)
 		return found->first;
 	}
 
-	assert(false);
-	throw std::logic_error("can't convert string '" + str + "' to action type");
+	throw std::runtime_error("can't convert string '" + str + "' to action type");
 }

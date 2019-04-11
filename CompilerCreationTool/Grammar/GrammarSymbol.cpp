@@ -10,6 +10,7 @@ GrammarSymbol::GrammarSymbol(
 )
 	: m_name(name)
 	, m_type(type)
+	, m_attribute(attribute)
 {
 }
 

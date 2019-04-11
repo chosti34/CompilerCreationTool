@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "ASTGraphvizVisualizer.h"
+#include "../Utils/string_utils.h"
 
 namespace
 {
@@ -11,7 +12,7 @@ std::string ToString(const boost::variant<int, double> &variant)
 	}
 	else if (variant.type() == typeid(double))
 	{
-		return std::to_string(boost::get<double>(variant));
+		return string_utils::TrimTrailingZerosAndPeriod(boost::get<double>(variant));
 	}
 	assert(false);
 	throw std::logic_error("can't get string representation of undefined variant");

@@ -22,6 +22,37 @@ bool HasValue(const std::set<T> &set, const T& value)
 	return set.find(value) != set.end();
 }
 
+std::string ToText(const IGrammar& grammar)
+{
+	std::string text;
+	for (std::size_t row = 0; row < grammar.GetProductionsCount(); ++row)
+	{
+		const IGrammarProduction& production = grammar.GetProduction(row);
+		text += "<" + production.GetLeftPart() + "> -> ";
+		for (std::size_t col = 0; col < production.GetSymbolsCount(); ++col)
+		{
+			const IGrammarSymbol& symbol = production.GetSymbol(col);
+			if (symbol.GetType() == GrammarSymbolType::Nonterminal)
+			{
+				text += "<" + symbol.GetName() + ">";
+			}
+			else
+			{
+				text += symbol.GetName();
+			}
+
+			if (symbol.HasAttribute())
+			{
+				auto attribute = symbol.GetAttribute();
+				text += " {" + *attribute + "}";
+			}
+
+			text += (col != production.GetSymbolsCount() - 1) ? " " : "\n";
+		}
+	}
+	return text;
+}
+
 bool HasLeftRecursion(const IGrammar& grammar, const std::string& nonterminal)
 {
 	// Нужно отслеживать уже "раскрытые" узлы стека, для этого можно хранить в множестве

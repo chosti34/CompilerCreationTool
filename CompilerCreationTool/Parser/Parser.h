@@ -20,6 +20,7 @@ public:
 
 	void SetActionNames(const std::vector<std::string>& actions) override;
 	void SetAction(size_t index, std::unique_ptr<IAction> && action) override;
+	void SetActions(std::vector<std::unique_ptr<IAction>> && actions) override;
 	void SwapActions(size_t oldPos, size_t newPos) override;
 
 	boost::optional<size_t> GetActionPos(const std::string& name) const override;

@@ -101,6 +101,11 @@ void Lexer::SetPattern(size_t index, const TokenPattern& newValue)
 	mPatterns[index] = newValue;
 }
 
+void Lexer::SetPatterns(std::vector<TokenPattern> && patterns)
+{
+	mPatterns = std::move(patterns);
+}
+
 boost::optional<size_t> Lexer::GetPatternPos(const std::string& name) const
 {
 	for (std::size_t index = 0; index < mPatterns.size(); ++index)

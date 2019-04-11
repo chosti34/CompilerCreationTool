@@ -13,6 +13,7 @@ public:
 
 	void AppendPattern(const TokenPattern& pattern) override;
 	void SetPattern(size_t index, const TokenPattern& newValue) override;
+	void SetPatterns(std::vector<TokenPattern> && patterns) override;
 	void SwapPatterns(size_t lhs, size_t rhs) override;
 
 	boost::optional<size_t> GetPatternPos(const std::string& name) const override;

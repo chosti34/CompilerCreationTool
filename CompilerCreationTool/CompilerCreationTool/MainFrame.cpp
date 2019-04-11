@@ -13,6 +13,11 @@ wxMenuBar* CreateMenuBar()
 	wxMenuBar* menubar = new wxMenuBar;
 
 	wxMenu* file = new wxMenu;
+	file->Append(wxID_NEW);
+	file->Append(wxID_OPEN);
+	file->Append(wxID_SAVE);
+	file->Append(wxID_SAVEAS);
+	file->AppendSeparator();
 	file->Append(wxID_EXIT);
 
 	wxMenu* help = new wxMenu;
@@ -370,6 +375,10 @@ void MainFrame::OnItemEdit(wxCommandEvent&)
 }
 
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
+	EVT_MENU(wxID_NEW, MainFrame::OnNew)
+	EVT_MENU(wxID_OPEN, MainFrame::OnOpen)
+	EVT_MENU(wxID_SAVE, MainFrame::OnSave)
+	EVT_MENU(wxID_SAVEAS, MainFrame::OnSaveAs)
 	EVT_MENU(wxID_EXIT, MainFrame::OnExit)
 	EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
 	EVT_SIZE(MainFrame::OnSize)

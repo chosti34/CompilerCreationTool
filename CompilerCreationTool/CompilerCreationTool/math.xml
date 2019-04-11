@@ -1,0 +1,85 @@
+<Language>
+    <Grammar>
+        <Production left="S">
+            <Symbol name="Expression" type="Nonterminal"/>
+            <Symbol name="EOF" type="Terminal"/>
+        </Production>
+        <Production left="Expression">
+            <Symbol name="AddSubExpr" type="Nonterminal"/>
+        </Production>
+        <Production left="AddSubExpr">
+            <Symbol name="MulDivExpr" type="Nonterminal"/>
+            <Symbol name="AddSubExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="AddSubExprTail">
+            <Symbol name="Plus" type="Terminal"/>
+            <Symbol name="MulDivExpr" type="Nonterminal" attribute="OnBinaryPlusParse"/>
+            <Symbol name="AddSubExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="AddSubExprTail">
+            <Symbol name="Minus" type="Terminal"/>
+            <Symbol name="MulDivExpr" type="Nonterminal" attribute="OnBinaryMinusParse"/>
+            <Symbol name="AddSubExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="AddSubExprTail">
+            <Symbol name="#Eps#" type="Epsilon"/>
+        </Production>
+        <Production left="MulDivExpr">
+            <Symbol name="AtomExpr" type="Nonterminal"/>
+            <Symbol name="MulDivExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="MulDivExprTail">
+            <Symbol name="Mul" type="Terminal"/>
+            <Symbol name="AtomExpr" type="Nonterminal" attribute="OnBinaryMulParse"/>
+            <Symbol name="MulDivExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="MulDivExprTail">
+            <Symbol name="Div" type="Terminal"/>
+            <Symbol name="AtomExpr" type="Nonterminal" attribute="OnBinaryDivParse"/>
+            <Symbol name="MulDivExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="MulDivExprTail">
+            <Symbol name="#Eps#" type="Epsilon"/>
+        </Production>
+        <Production left="AtomExpr">
+            <Symbol name="Identifier" type="Terminal" attribute="OnIdentifierParse"/>
+        </Production>
+        <Production left="AtomExpr">
+            <Symbol name="IntegerConstant" type="Terminal" attribute="OnIntegerConstantParse"/>
+        </Production>
+        <Production left="AtomExpr">
+            <Symbol name="FloatConstant" type="Terminal" attribute="OnFloatConstantParse"/>
+        </Production>
+        <Production left="AtomExpr">
+            <Symbol name="LeftParenthesis" type="Terminal"/>
+            <Symbol name="Expression" type="Nonterminal"/>
+            <Symbol name="RightParenthesis" type="Terminal"/>
+        </Production>
+        <Production left="AtomExpr">
+            <Symbol name="Minus" type="Terminal"/>
+            <Symbol name="AtomExpr" type="Nonterminal" attribute="OnUnaryMinusParse"/>
+        </Production>
+    </Grammar>
+    <Patterns>
+        <Pattern name="EOF" origin="EOF" isEnding="true"/>
+        <Pattern name="Plus" origin="Plus" isEnding="false"/>
+        <Pattern name="Minus" origin="Minus" isEnding="false"/>
+        <Pattern name="Mul" origin="Mul" isEnding="false"/>
+        <Pattern name="Div" origin="Div" isEnding="false"/>
+        <Pattern name="Identifier" origin="Identifier" isEnding="false"/>
+        <Pattern name="IntegerConstant" origin="IntegerConstant" isEnding="false"/>
+        <Pattern name="FloatConstant" origin="FloatConstant" isEnding="false"/>
+        <Pattern name="LeftParenthesis" origin="LeftParenthesis" isEnding="false"/>
+        <Pattern name="RightParenthesis" origin="RightParenthesis" isEnding="false"/>
+    </Patterns>
+    <Actions>
+        <Action name="OnBinaryPlusParse" type="None"/>
+        <Action name="OnBinaryMinusParse" type="None"/>
+        <Action name="OnBinaryMulParse" type="None"/>
+        <Action name="OnBinaryDivParse" type="None"/>
+        <Action name="OnIdentifierParse" type="None"/>
+        <Action name="OnIntegerConstantParse" type="None"/>
+        <Action name="OnFloatConstantParse" type="None"/>
+        <Action name="OnUnaryMinusParse" type="None"/>
+    </Actions>
+</Language>

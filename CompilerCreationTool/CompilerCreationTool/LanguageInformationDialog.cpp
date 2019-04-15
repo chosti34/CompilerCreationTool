@@ -10,19 +10,19 @@ const wxColour gcWarningForegroundColor = wxColour(255, 0, 0);
 }
 
 LanguageInformationDialog::LanguageInformationDialog(wxWindow* parent, const LanguageInformation& info)
-	: wxDialog(parent, wxID_ANY, wxT("Information About Language"))
+	: wxDialog(parent, wxID_ANY, wxT("Information"))
 	, m_info(info)
 {
 	wxPanel* panel = new wxPanel(this, wxID_ANY);
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
-	wxStaticBox* box = new wxStaticBox(panel, wxID_ANY, wxT("Language Info"));
+	wxStaticBox* box = new wxStaticBox(panel, wxID_ANY, wxT("Language"));
 	wxStaticBoxSizer* staticBoxSizer = new wxStaticBoxSizer(box, wxHORIZONTAL);
 
 	wxBoxSizer* leftSizer = new wxBoxSizer(wxVERTICAL);
 	wxBoxSizer* rightSizer = new wxBoxSizer(wxVERTICAL);
 
-	wxStaticText* languageBuildTimeLabel = new wxStaticText(panel, wxID_ANY, "Language Build Time:");
+	wxStaticText* languageBuildTimeLabel = new wxStaticText(panel, wxID_ANY, "Build Time:");
 	wxStaticText* terminalsCountLabel = new wxStaticText(panel, wxID_ANY, "Terminals Count:");
 	wxStaticText* actionsCountLabel = new wxStaticText(panel, wxID_ANY, "Actions Count:");
 	wxStaticText* productionsCountLabel = new wxStaticText(panel, wxID_ANY, "Productions Count:");

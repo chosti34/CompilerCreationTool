@@ -13,6 +13,7 @@
 #include "../Grammar/GrammarUtils.h"
 #include "../Utils/command_utils.h"
 #include "../Utils/time_utils.h"
+#include "../Utils/string_utils.h"
 
 #include <wx/filedlg.h>
 #include <functional>
@@ -198,6 +199,8 @@ void LanguageController::OnBuildButtonPress()
 	// Обновляем представление
 	mFrame->GetToolBar()->EnableTool(Buttons::Run, true);
 	mFrame->GetToolBar()->EnableTool(Buttons::Info, true);
+
+	wxMessageBox("Parser has been successfully built!", "Success!", wxICON_INFORMATION);
 }
 
 void LanguageController::OnRunButtonPress()
@@ -212,10 +215,19 @@ void LanguageController::OnRunButtonPress()
 	const ParseResults results = parser.Parse(mEditorView->GetText().ToStdString());
 	logger->Log(results.success ? "Successfully parsed!\n" : "Failed to parse...\n");
 
+	if (results.success)
+	{
+		wxMessageBox("Your code has been succesfully parsed!", "Success!", wxICON_INFORMATION);
+	}
+	else
+	{
+		wxMessageBox("Your code doesn't match your grammar...", "Failure...", wxICON_WARNING);
+	}
+
 	if (results.success && results.expression)
 	{
 		{
-			// Explicitly close file 'ast.dot'
+			// Implicitly close file 'ast.dot'
 			ASTGraphvizVisualizer visualizer("ast.dot");
 			visualizer.Visualize(*results.expression);
 		}

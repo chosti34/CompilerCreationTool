@@ -5,6 +5,7 @@
 namespace
 {
 const std::string gcNoItem = "<none>";
+const int gcBorderSize = 3;
 
 std::string GetStateFlagsRepresentation(const IParserState& state)
 {
@@ -31,10 +32,10 @@ StatesView::StatesView(wxWindow* parent)
 	m_list->AppendColumn(wxT("Acceptables"));
 
 	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-	sizer->Add(m_list, 1, wxEXPAND | wxALL, 3);
+	sizer->Add(m_list, 1, wxEXPAND | wxALL, gcBorderSize);
 	SetSizer(sizer);
 
-	m_list->Bind(wxEVT_SIZE, &StatesView::OnListResize, this);
+	Bind(wxEVT_SIZE, &StatesView::OnListResize, this);
 }
 
 void StatesView::SetParserTable(const IParserTable& table)
@@ -58,22 +59,22 @@ void StatesView::SetParserTable(const IParserTable& table)
 	}
 }
 
-void StatesView::AdjustColumnWidth()
+void StatesView::AdjustColumnWidth(int width)
 {
 	m_list->Freeze();
 
-	const int cWidth = m_list->GetSize().GetWidth();
 	for (int i = 0; i < m_list->GetColumnCount(); ++i)
 	{
 		assert(m_list->GetColumnCount() != 0);
 		const float cCoeff = 1.f / m_list->GetColumnCount();
-		m_list->SetColumnWidth(i, cCoeff * cWidth);
+		m_list->SetColumnWidth(i, cCoeff * (width - gcBorderSize * 2));
 	}
 
 	m_list->Thaw();
 }
 
-void StatesView::OnListResize(wxSizeEvent&)
+void StatesView::OnListResize(wxSizeEvent& event)
 {
-	AdjustColumnWidth();
+	AdjustColumnWidth(event.GetSize().x);
+	event.Skip(true);
 }

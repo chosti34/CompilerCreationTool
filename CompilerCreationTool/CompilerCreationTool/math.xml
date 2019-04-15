@@ -62,24 +62,24 @@
     </Grammar>
     <Patterns>
         <Pattern name="EOF" origin="EOF" isEnding="true"/>
-        <Pattern name="Plus" origin="Plus" isEnding="false"/>
-        <Pattern name="Minus" origin="Minus" isEnding="false"/>
-        <Pattern name="Mul" origin="Mul" isEnding="false"/>
-        <Pattern name="Div" origin="Div" isEnding="false"/>
-        <Pattern name="Identifier" origin="Identifier" isEnding="false"/>
-        <Pattern name="IntegerConstant" origin="IntegerConstant" isEnding="false"/>
-        <Pattern name="FloatConstant" origin="FloatConstant" isEnding="false"/>
-        <Pattern name="LeftParenthesis" origin="LeftParenthesis" isEnding="false"/>
-        <Pattern name="RightParenthesis" origin="RightParenthesis" isEnding="false"/>
+        <Pattern name="Plus" origin="\+" isEnding="false"/>
+        <Pattern name="Minus" origin="\-" isEnding="false"/>
+        <Pattern name="Mul" origin="\*" isEnding="false"/>
+        <Pattern name="Div" origin="\/" isEnding="false"/>
+        <Pattern name="Identifier" origin="([A-Za-z_])([A-Za-z0-9])*" isEnding="false"/>
+        <Pattern name="FloatConstant" origin="(0|[1-9])\.[0-9]+" isEnding="false"/>
+        <Pattern name="IntegerConstant" origin="0|[1-9][0-9]*" isEnding="false"/>
+        <Pattern name="LeftParenthesis" origin="\(" isEnding="false"/>
+        <Pattern name="RightParenthesis" origin="\)" isEnding="false"/>
     </Patterns>
     <Actions>
-        <Action name="OnBinaryPlusParse" type="None"/>
-        <Action name="OnBinaryMinusParse" type="None"/>
-        <Action name="OnBinaryMulParse" type="None"/>
-        <Action name="OnBinaryDivParse" type="None"/>
+        <Action name="OnBinaryPlusParse" type="CreateBinaryPlusNode"/>
+        <Action name="OnBinaryMinusParse" type="CreateBinaryMinusNode"/>
+        <Action name="OnBinaryMulParse" type="CreateBinaryMulNode"/>
+        <Action name="OnBinaryDivParse" type="CreateBinaryDivNode"/>
         <Action name="OnIdentifierParse" type="None"/>
-        <Action name="OnIntegerConstantParse" type="None"/>
-        <Action name="OnFloatConstantParse" type="None"/>
+        <Action name="OnIntegerConstantParse" type="CreateIntegerNumberNode"/>
+        <Action name="OnFloatConstantParse" type="CreateFloatNumberNode"/>
         <Action name="OnUnaryMinusParse" type="None"/>
     </Actions>
 </Language>

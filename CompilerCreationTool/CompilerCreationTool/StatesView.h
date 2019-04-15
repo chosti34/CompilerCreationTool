@@ -9,7 +9,7 @@ public:
 	explicit StatesView(wxWindow* parent);
 
 	void SetParserTable(const IParserTable& table);
-	void AdjustColumnWidth();
+	void AdjustColumnWidth(int width);
 
 private:
 	void OnListResize(wxSizeEvent& event);

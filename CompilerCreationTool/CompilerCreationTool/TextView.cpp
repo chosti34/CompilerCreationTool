@@ -32,6 +32,11 @@ wxString TextView::GetText() const
 	return mInput->GetText();
 }
 
+void TextView::Clear()
+{
+	mInput->ClearAll();
+}
+
 int TextView::GetCurrentLine() const
 {
 	return mInput->GetCurrentLine() + 1;

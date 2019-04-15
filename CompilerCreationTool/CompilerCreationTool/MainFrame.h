@@ -59,6 +59,7 @@ private:
 	void OnItemEdit(wxCommandEvent& event);
 
 	void OnHelp(wxCommandEvent& event);
+	void OnClear(wxCommandEvent& event);
 
 private:
 	wxAuiManager mAuiManager;

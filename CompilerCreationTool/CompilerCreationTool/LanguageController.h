@@ -12,12 +12,14 @@ private:
 	void UpdateStatusBarCursorInfo(int line, int col, int ch);
 	void SwapTerminalPositions(int from, int to);
 	void SwapActionPositions(int from, int to);
+	void UpdateTitle();
 
 private: // Signal handlers
 	void OnNewButtonPress();
 	void OnOpenButtonPress();
 	void OnSaveButtonPress();
 	void OnSaveAsButtonPress();
+	void OnClearButtonPress();
 
 	void OnBuildButtonPress();
 	void OnRunButtonPress();
@@ -55,4 +57,6 @@ private:
 	OutputView* mOutputView;
 
 	std::vector<SignalScopedConnection> mConnections;
+	boost::optional<std::string> mDocument;
+	bool mHasUnsavedChanges;
 };

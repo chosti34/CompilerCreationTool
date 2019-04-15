@@ -6,9 +6,8 @@
 
 namespace
 {
-const wxString TITLE = wxT("CompilerCreationTool");
-const wxSize WINDOW_INITIAL_SIZE = { 945, 735 };
-const wxSize WINDOW_MIN_SIZE = { 480, 320 };
+const wxSize gcWindowInitialSize = { 945, 735 };
+const wxSize gcWindowMinSize = { 480, 320 };
 }
 
 class App : public wxApp
@@ -19,10 +18,10 @@ public:
 		wxImage::AddHandler(new wxPNGHandler);
 
 		m_language = std::make_unique<Language>(); // model
-		m_frame = new MainFrame(TITLE, WINDOW_INITIAL_SIZE); // view
+		m_frame = new MainFrame(wxEmptyString, gcWindowInitialSize); // view
 		m_controller = std::make_unique<LanguageController>(m_language.get(), m_frame); // controller
 
-		m_frame->SetMinSize(WINDOW_MIN_SIZE);
+		m_frame->SetMinSize(gcWindowMinSize);
 		m_frame->Show(true);
 
 		return true;

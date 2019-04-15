@@ -39,12 +39,6 @@
     <ClInclude Include="ActionEditDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LanguageInformationDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LanguageInformation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TextCtrlLogger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -70,6 +64,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LanguageSerialization.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LanguageInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LanguageInfoDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -98,12 +98,6 @@
     <ClCompile Include="ActionEditDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LanguageInformationDialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="LanguageInformation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TextCtrlLogger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -126,6 +120,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LanguageSerialization.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LanguageInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LanguageInfoDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

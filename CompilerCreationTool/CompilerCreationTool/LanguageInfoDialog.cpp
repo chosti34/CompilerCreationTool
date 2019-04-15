@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "LanguageInformationDialog.h"
+#include "LanguageInfoDialog.h"
 #include "../Utils/string_utils.h"
 #include <wx/statbox.h>
 
@@ -9,7 +9,7 @@ const wxColour gcOkForegroundColor = wxColour(19, 132, 15);
 const wxColour gcWarningForegroundColor = wxColour(255, 0, 0);
 }
 
-LanguageInformationDialog::LanguageInformationDialog(wxWindow* parent, const LanguageInformation& info)
+LanguageInfoDialog::LanguageInfoDialog(wxWindow* parent, const LanguageInfo& info)
 	: wxDialog(parent, wxID_ANY, wxT("Information"))
 	, m_info(info)
 {

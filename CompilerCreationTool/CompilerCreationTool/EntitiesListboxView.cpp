@@ -24,6 +24,11 @@ void EntitiesListboxView::SetItems(const wxArrayString& items)
 	}
 }
 
+void EntitiesListboxView::ClearItems()
+{
+	m_listbox->Clear();
+}
+
 void EntitiesListboxView::DeselectAll()
 {
 	m_listbox->DeselectAll();

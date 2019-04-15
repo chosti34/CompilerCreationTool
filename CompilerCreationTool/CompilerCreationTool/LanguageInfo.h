@@ -6,10 +6,10 @@
 #include <unordered_set>
 #include <chrono>
 
-class LanguageInformation
+class LanguageInfo
 {
 public:
-	LanguageInformation(
+	LanguageInfo(
 		const ILexer& lexer,
 		const IParser<ParseResults>& parser,
 		const grammarlib::IGrammar& grammar,

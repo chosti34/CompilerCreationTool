@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Language.h"
-#include "LanguageInformation.h"
+#include "LanguageInfo.h"
 
 #include "../Lexer/Lexer.h"
 #include "../Parser/Parser.h"
@@ -125,7 +125,7 @@ void Language::SetGrammar(std::unique_ptr<grammarlib::IGrammar> && grammar)
 	m_grammar = std::move(grammar);
 	m_lexer = std::move(lexer);
 	m_parser = std::move(parser);
-	m_info = std::make_unique<LanguageInformation>(*m_lexer, *m_parser, *m_grammar, elapsedSeconds);
+	m_info = std::make_unique<LanguageInfo>(*m_lexer, *m_parser, *m_grammar, elapsedSeconds);
 }
 
 const grammarlib::IGrammar& Language::GetGrammar() const
@@ -158,7 +158,7 @@ const ILexer& Language::GetLexer() const
 	return *m_lexer;
 }
 
-const LanguageInformation& Language::GetInfo() const
+const LanguageInfo& Language::GetInfo() const
 {
 	assert(m_info);
 	return *m_info;

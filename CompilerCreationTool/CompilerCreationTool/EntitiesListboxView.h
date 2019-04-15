@@ -9,6 +9,7 @@ public:
 	explicit EntitiesListboxView(wxWindow* parent);
 
 	void SetItems(const wxArrayString& items);
+	void ClearItems();
 	void DeselectAll();
 
 	int GetSelection() const;

@@ -3,7 +3,7 @@
 #include "../Parser/IParser.h"
 #include "../Parser/ParseResults.h"
 #include "../Grammar/IGrammar.h"
-#include "LanguageInformation.h"
+#include "LanguageInfo.h"
 
 class Language
 {
@@ -22,11 +22,11 @@ public:
 	ILexer& GetLexer();
 	const ILexer& GetLexer() const;
 
-	const LanguageInformation& GetInfo() const;
+	const LanguageInfo& GetInfo() const;
 
 private:
 	std::unique_ptr<ILexer> m_lexer;
 	std::unique_ptr<IParser<ParseResults>> m_parser;
 	std::unique_ptr<grammarlib::IGrammar> m_grammar;
-	std::unique_ptr<LanguageInformation> m_info;
+	std::unique_ptr<LanguageInfo> m_info;
 };

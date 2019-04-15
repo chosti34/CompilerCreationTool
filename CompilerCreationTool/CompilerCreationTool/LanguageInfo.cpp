@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "LanguageInformation.h"
+#include "LanguageInfo.h"
 #include "../Grammar/GrammarUtils.h"
 
 using namespace grammarlib;
@@ -25,7 +25,7 @@ bool HasAcceptableSetsCrossing(const std::string& nonterminal, const IParserTabl
 }
 }
 
-LanguageInformation::LanguageInformation(
+LanguageInfo::LanguageInfo(
 	const ILexer& lexer,
 	const IParser<ParseResults>& parser,
 	const grammarlib::IGrammar& grammar,
@@ -63,37 +63,37 @@ LanguageInformation::LanguageInformation(
 	}
 }
 
-std::chrono::duration<double> const& LanguageInformation::GetBuildTime() const
+std::chrono::duration<double> const& LanguageInfo::GetBuildTime() const
 {
 	return m_buildTime;
 }
 
-unsigned LanguageInformation::GetActionsCount() const
+unsigned LanguageInfo::GetActionsCount() const
 {
 	return m_actionsCount;
 }
 
-unsigned LanguageInformation::GetTerminalsCount() const
+unsigned LanguageInfo::GetTerminalsCount() const
 {
 	return m_terminalsCount;
 }
 
-unsigned LanguageInformation::GetProductionsCount() const
+unsigned LanguageInfo::GetProductionsCount() const
 {
 	return m_productionsCount;
 }
 
-unsigned LanguageInformation::GetEmptyProductionsCount() const
+unsigned LanguageInfo::GetEmptyProductionsCount() const
 {
 	return m_emptyProductionsCount;
 }
 
-std::unordered_set<std::string> const& LanguageInformation::GetLeftRecursiveNonterminals() const
+std::unordered_set<std::string> const& LanguageInfo::GetLeftRecursiveNonterminals() const
 {
 	return m_leftRecursiveNonterminals;
 }
 
-std::unordered_set<std::string> const& LanguageInformation::GetAcceptablesCrossingNonterminals() const
+std::unordered_set<std::string> const& LanguageInfo::GetAcceptablesCrossingNonterminals() const
 {
 	return m_acceptablesCrossingNonterminals;
 }

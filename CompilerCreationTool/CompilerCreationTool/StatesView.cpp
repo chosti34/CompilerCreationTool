@@ -59,6 +59,11 @@ void StatesView::SetParserTable(const IParserTable& table)
 	}
 }
 
+void StatesView::ClearItems()
+{
+	m_list->DeleteAllItems();
+}
+
 void StatesView::AdjustColumnWidth(int width)
 {
 	m_list->Freeze();

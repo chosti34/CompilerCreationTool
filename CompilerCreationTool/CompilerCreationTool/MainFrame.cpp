@@ -20,10 +20,14 @@ wxMenuBar* CreateMenuBar()
 	file->AppendSeparator();
 	file->Append(wxID_EXIT);
 
+	wxMenu* view = new wxMenu;
+	view->Append(Buttons::Clear, "Clear", nullptr, "Clear output");
+
 	wxMenu* help = new wxMenu;
 	help->Append(wxID_ABOUT);
 
 	menubar->Append(file, wxT("&File"));
+	menubar->Append(view, wxT("&View"));
 	menubar->Append(help, wxT("&Help"));
 	return menubar;
 }
@@ -69,24 +73,24 @@ void AddTools(wxToolBar& toolbar)
 
 	wxIcon helpIcon = wxArtProvider::GetIcon(wxART_QUESTION, wxART_OTHER, iconSize);
 
-	toolbar.AddTool(Buttons::New, wxT("New"), newIcon, wxT("New Document"));
-	toolbar.AddTool(Buttons::Open, wxT("Open"), openIcon, wxT("Open Document"));
-	toolbar.AddTool(Buttons::Save, wxT("Save"), saveIcon, wxT("Save Document"));
-	toolbar.AddTool(Buttons::SaveAs, wxT("Save As"), saveAsIcon, wxT("Save Document As"));
+	toolbar.AddTool(Buttons::New, wxT("New"), newIcon, wxT("New document"));
+	toolbar.AddTool(Buttons::Open, wxT("Open"), openIcon, wxT("Open document"));
+	toolbar.AddTool(Buttons::Save, wxT("Save"), saveIcon, wxT("Save document"));
+	toolbar.AddTool(Buttons::SaveAs, wxT("Save As"), saveAsIcon, wxT("Save document as"));
 	toolbar.AddSeparator();
 
-	toolbar.AddTool(Buttons::Undo, wxT("Undo"), undoIcon, wxT("Undo command"));
-	toolbar.AddTool(Buttons::Redo, wxT("Redo"), redoIcon, wxT("Redo command"));
-	toolbar.AddSeparator();
+	//toolbar.AddTool(Buttons::Undo, wxT("Undo"), undoIcon, wxT("Undo command"));
+	//toolbar.AddTool(Buttons::Redo, wxT("Redo"), redoIcon, wxT("Redo command"));
+	//toolbar.AddSeparator();
 
 	toolbar.AddTool(Buttons::Build, wxT("Build"), buildIcon, wxT("Build"));
 	toolbar.AddTool(Buttons::Run, wxT("Run"), runIcon, wxT("Run"));
-	toolbar.AddTool(Buttons::Info, wxT("Info"), infoIcon, wxT("Get Information"));
+	toolbar.AddTool(Buttons::Info, wxT("Info"), infoIcon, wxT("Get info"));
 	toolbar.AddSeparator();
 
-	toolbar.AddTool(Buttons::Up, wxT("Up"), upIcon, wxT("Move Item Up"));
-	toolbar.AddTool(Buttons::Down, wxT("Down"), downIcon, wxT("Move Item Down"));
-	toolbar.AddTool(Buttons::Edit, wxT("Edit"), editIcon, wxT("Edit Item"));
+	toolbar.AddTool(Buttons::Up, wxT("Up"), upIcon, wxT("Move item up"));
+	toolbar.AddTool(Buttons::Down, wxT("Down"), downIcon, wxT("Move item down"));
+	toolbar.AddTool(Buttons::Edit, wxT("Edit"), editIcon, wxT("Edit item"));
 	toolbar.AddSeparator();
 
 	toolbar.AddTool(Buttons::Help, wxT("Help"), helpIcon, wxT("Help"));
@@ -96,10 +100,10 @@ void AddTools(wxToolBar& toolbar)
 MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	: wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, size)
 {
-	// Menu bar
+	// Menubar
 	SetMenuBar(CreateMenuBar());
 
-	// Tool bar
+	// Toolbar
 	mToolbar = CreateToolBar(wxTB_FLAT);
 	AddTools(*mToolbar);
 	mToolbar->Realize();
@@ -109,6 +113,8 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	mToolbar->EnableTool(Buttons::Up, false);
 	mToolbar->EnableTool(Buttons::Down, false);
 	mToolbar->EnableTool(Buttons::Edit, false);
+	mToolbar->EnableTool(Buttons::Save, false);
+	mToolbar->EnableTool(Buttons::SaveAs, false);
 
 	// AUI panels
 	mAuiManager.SetManagedWindow(this);
@@ -121,6 +127,11 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	art->SetMetric(wxAUI_DOCKART_PANE_BORDER_SIZE, 0);
 	// This dock art's metric causes too much lags
 	// art->SetMetric(wxAUI_DOCKART_GRADIENT_TYPE, wxAUI_GRADIENT_HORIZONTAL);
+
+	// Active color is set to default
+	// art->SetColor(wxAUI_DOCKART_ACTIVE_CAPTION_COLOUR, wxColour(255, 255, 200));
+	// art->SetColor(wxAUI_DOCKART_ACTIVE_CAPTION_GRADIENT_COLOUR, wxColour(255, 242, 157));
+	// art->SetColor(wxAUI_DOCKART_ACTIVE_CAPTION_TEXT_COLOUR, wxColour(0, 0, 0));
 	art->SetColor(wxAUI_DOCKART_INACTIVE_CAPTION_COLOUR, wxColour(57, 193, 239));
 	art->SetColor(wxAUI_DOCKART_INACTIVE_CAPTION_GRADIENT_COLOUR, wxColour(0, 191, 255));
 	art->SetColor(wxAUI_DOCKART_INACTIVE_CAPTION_TEXT_COLOUR, wxColour(255, 255, 255));
@@ -284,6 +295,18 @@ void MainFrame::OnHelp(wxCommandEvent&)
 	OpenAboutDialog();
 }
 
+void MainFrame::OnClear(wxCommandEvent & event)
+{
+	try
+	{
+		SendButtonPressedSignal(Buttons::Clear);
+	}
+	catch (const std::exception& ex)
+	{
+		wxMessageBox("Can't clear output: "s + ex.what() + "."s, "Can't clear output", wxICON_WARNING);
+	}
+}
+
 void MainFrame::OnSize(wxSizeEvent& event)
 {
 	std::cout << event.GetSize().x << " " << event.GetSize().y << std::endl;
@@ -395,6 +418,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(wxID_SAVEAS, MainFrame::OnSaveAs)
 	EVT_MENU(wxID_EXIT, MainFrame::OnExit)
 	EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
+	EVT_MENU(Buttons::Clear, MainFrame::OnClear)
 	EVT_SIZE(MainFrame::OnSize)
 	EVT_TOOL(Buttons::New, MainFrame::OnNew)
 	EVT_TOOL(Buttons::Open, MainFrame::OnOpen)

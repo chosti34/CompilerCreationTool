@@ -6,7 +6,7 @@
 #include "TextCtrlLogger.h"
 
 #include "LanguageSerialization.h"
-#include "LanguageInformationDialog.h"
+#include "LanguageInfoDialog.h"
 #include "ASTGraphvizVisualizer.h"
 
 #include "../Grammar/GrammarBuilder.h"
@@ -21,6 +21,9 @@
 
 namespace
 {
+const std::string gcFrameTitle = "CompilerCreationTool";
+const std::string gcUntitledFilename = "untitled";
+
 wxArrayString GetTerminalsArray(const ILexer& lexer)
 {
 	wxArrayString arr;
@@ -62,6 +65,8 @@ LanguageController::LanguageController(Language* language, MainFrame* frame)
 	, mTerminalsView(mFrame->GetTerminalsView())
 	, mActionsView(mFrame->GetActionsView())
 	, mOutputView(mFrame->GetOutputView())
+	, mDocument(boost::none)
+	, mHasUnsavedChanges(false)
 {
 	namespace ph = std::placeholders;
 
@@ -69,6 +74,7 @@ LanguageController::LanguageController(Language* language, MainFrame* frame)
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::Open, std::bind(&LanguageController::OnOpenButtonPress, this)));
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::Save, std::bind(&LanguageController::OnSaveButtonPress, this)));
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::SaveAs, std::bind(&LanguageController::OnSaveAsButtonPress, this)));
+	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::Clear, std::bind(&LanguageController::OnClearButtonPress, this)));
 
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::Build, std::bind(&LanguageController::OnBuildButtonPress, this)));
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::Run, std::bind(&LanguageController::OnRunButtonPress, this)));
@@ -92,6 +98,7 @@ LanguageController::LanguageController(Language* language, MainFrame* frame)
 
 	mConnections.push_back(mGrammarView->DoOnFocusChange(std::bind(&LanguageController::OnGrammarTextFocusChange, this, ph::_1)));
 	mConnections.push_back(mEditorView->DoOnFocusChange(std::bind(&LanguageController::OnEditorTextFocusChange, this, ph::_1)));
+	UpdateTitle();
 }
 
 void LanguageController::UpdateStatusBarOnTextFocusChange(TextView& view, const std::string& name, bool focus)
@@ -106,7 +113,7 @@ void LanguageController::UpdateStatusBarOnTextFocusChange(TextView& view, const 
 	else
 	{
 		ClearStatusBarTextFields(*statusbar, { StatusBarFields::Line, StatusBarFields::Column, StatusBarFields::Ch });
-		statusbar->PopStatusText(4);
+		statusbar->PopStatusText(StatusBarFields::ContextInfo);
 	}
 }
 
@@ -122,28 +129,77 @@ void LanguageController::SwapTerminalPositions(int from, int to)
 {
 	assert(mLanguage->IsInitialized());
 	mLanguage->GetLexer().SwapPatterns(size_t(from), size_t(to));
+	mHasUnsavedChanges = true;
+	UpdateTitle();
 }
 
 void LanguageController::SwapActionPositions(int from, int to)
 {
 	assert(mLanguage->IsInitialized());
 	mLanguage->GetParser().SwapActions(size_t(from), size_t(to));
+	mHasUnsavedChanges = true;
+	UpdateTitle();
+}
+
+void LanguageController::UpdateTitle()
+{
+	if (mDocument)
+	{
+		mFrame->SetTitle((mHasUnsavedChanges ? "*" : "") + *mDocument + " - " + gcFrameTitle);
+	}
+	else
+	{
+		mFrame->SetTitle((mHasUnsavedChanges ? "*" : "") + gcUntitledFilename + " - " + gcFrameTitle);
+	}
 }
 
 void LanguageController::OnNewButtonPress()
 {
-	bool hasChanges = false;
-	if (hasChanges)
+	if (mHasUnsavedChanges)
 	{
-		
+		if (wxMessageBox(_("Current content has not been saved! Proceed?"), _("Please confirm"),
+			wxICON_QUESTION | wxYES_NO, mFrame) == wxNO)
+		{
+			return;
+		}
 	}
 
-	//
-	std::cout << "new\n";
+	mLanguage->Reset();
+	assert(!mLanguage->IsInitialized());
+
+	mTerminalsView->ClearItems();
+	mActionsView->ClearItems();
+	mStatesView->ClearItems();
+	mGrammarView->Clear();
+	mEditorView->Clear();
+	mTreeView->UnsetImage();
+	mOutputView->GetTextCtrl()->Clear();
+
+	mFrame->GetToolBar()->EnableTool(Buttons::Run, false);
+	mFrame->GetToolBar()->EnableTool(Buttons::Info, false);
+	mFrame->GetToolBar()->EnableTool(Buttons::Down, false);
+	mFrame->GetToolBar()->EnableTool(Buttons::Up, false);
+	mFrame->GetToolBar()->EnableTool(Buttons::Edit, false);
+	mFrame->GetToolBar()->EnableTool(Buttons::Save, false);
+	mFrame->GetToolBar()->EnableTool(Buttons::SaveAs, false);
+	mFrame->Refresh(true);
+
+	mDocument = boost::none;
+	mHasUnsavedChanges = false;
+	UpdateTitle();
 }
 
 void LanguageController::OnOpenButtonPress()
 {
+	if (mHasUnsavedChanges)
+	{
+		if (wxMessageBox("Current content has not been saved! Proceed?", "Please confirm",
+			wxICON_QUESTION | wxYES_NO, mFrame) == wxNO)
+		{
+			return;
+		}
+	}
+
 	wxFileDialog openFileDialog(
 		mFrame, "Open language file", wxEmptyString, wxEmptyString,
 		"XML files (*.xml)|*.xml", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
@@ -152,24 +208,37 @@ void LanguageController::OnOpenButtonPress()
 	{
 		// Инициализируем модель
 		UnserializeLanguage(openFileDialog.GetPath(), *mLanguage);
-
-		// Заполняем модель считанными данными
 		mLanguage->GetParser().SetLogger(std::make_unique<TextCtrlLogger>(mOutputView->GetTextCtrl()));
+
+		// Заполняем представление считанными данными
 		mTerminalsView->SetItems(GetTerminalsArray(mLanguage->GetLexer()));
 		mActionsView->SetItems(GetActionsArray(mLanguage->GetParser()));
 		mStatesView->SetParserTable(mLanguage->GetParser().GetTable());
 		mGrammarView->SetText(ToText(mLanguage->GetGrammar()));
 
-		// Обновляем представление
+		// Обновляем кнопки
+		mDocument = openFileDialog.GetFilename();
 		mFrame->GetToolBar()->EnableTool(Buttons::Run, true);
 		mFrame->GetToolBar()->EnableTool(Buttons::Info, true);
+		mFrame->GetToolBar()->EnableTool(Buttons::Save, true);
+		mFrame->GetToolBar()->EnableTool(Buttons::SaveAs, true);
 		mFrame->Refresh(true);
+		mHasUnsavedChanges = false;
+		UpdateTitle();
 	}
 }
 
 void LanguageController::OnSaveButtonPress()
 {
-	SerializeLanguage("saved.xml", *mLanguage);
+	if (!mDocument)
+	{
+		OnSaveAsButtonPress();
+		return;
+	}
+
+	SerializeLanguage(*mDocument, *mLanguage);
+	mHasUnsavedChanges = false;
+	UpdateTitle();
 }
 
 void LanguageController::OnSaveAsButtonPress()
@@ -181,7 +250,15 @@ void LanguageController::OnSaveAsButtonPress()
 	if (saveFileDialog.ShowModal() != wxID_CANCEL)
 	{
 		SerializeLanguage(saveFileDialog.GetPath(), *mLanguage);
+		mDocument = saveFileDialog.GetFilename();
+		mHasUnsavedChanges = false;
+		UpdateTitle();
 	}
+}
+
+void LanguageController::OnClearButtonPress()
+{
+	mOutputView->GetTextCtrl()->Clear();
 }
 
 void LanguageController::OnBuildButtonPress()
@@ -199,8 +276,13 @@ void LanguageController::OnBuildButtonPress()
 	// Обновляем представление
 	mFrame->GetToolBar()->EnableTool(Buttons::Run, true);
 	mFrame->GetToolBar()->EnableTool(Buttons::Info, true);
+	mFrame->GetToolBar()->EnableTool(Buttons::Save, true);
+	mFrame->GetToolBar()->EnableTool(Buttons::SaveAs, true);
+	mFrame->Refresh(true);
 
 	wxMessageBox("Parser has been successfully built!", "Success!", wxICON_INFORMATION);
+	mHasUnsavedChanges = true;
+	UpdateTitle();
 }
 
 void LanguageController::OnRunButtonPress()
@@ -263,7 +345,7 @@ void LanguageController::OnRunButtonPress()
 void LanguageController::OnInfoButtonPress()
 {
 	assert(mLanguage->IsInitialized());
-	LanguageInformationDialog dialog(mFrame, mLanguage->GetInfo());
+	LanguageInfoDialog dialog(mFrame, mLanguage->GetInfo());
 	dialog.ShowModal();
 }
 
@@ -305,7 +387,6 @@ void LanguageController::OnEditButtonPress()
 
 void LanguageController::OnTerminalsViewDeselection()
 {
-	std::cout << "Term deselection" << std::endl;
 	mFrame->GetToolBar()->EnableTool(Buttons::Up, false);
 	mFrame->GetToolBar()->EnableTool(Buttons::Down, false);
 	mFrame->GetToolBar()->EnableTool(Buttons::Edit, false);
@@ -314,7 +395,6 @@ void LanguageController::OnTerminalsViewDeselection()
 
 void LanguageController::OnActionsViewDeselection()
 {
-	std::cout << "Action deselection" << std::endl;
 	mFrame->GetToolBar()->EnableTool(Buttons::Up, false);
 	mFrame->GetToolBar()->EnableTool(Buttons::Down, false);
 	mFrame->GetToolBar()->EnableTool(Buttons::Edit, false);
@@ -354,7 +434,11 @@ void LanguageController::OnTerminalEdit(int index)
 	}
 
 	TerminalEditDialog dialog(mFrame, pattern);
-	dialog.ShowModal();
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		mHasUnsavedChanges = true;
+		UpdateTitle();
+	}
 
 	OnTerminalSelection(index);
 }
@@ -373,6 +457,8 @@ void LanguageController::OnActionEdit(int index)
 		if (action.GetType() != newActionType)
 		{
 			action.SetType(newActionType);
+			mHasUnsavedChanges = true;
+			UpdateTitle();
 		}
 	}
 

@@ -4,19 +4,18 @@ namespace Buttons
 {
 	enum ID
 	{
-		New,
+		New = 0,
 		Open,
 		Save,
 		SaveAs,
-		Undo,
-		Redo,
 		Build,
 		Run,
 		Info,
 		Up,
 		Down,
 		Edit,
-		Help
+		Help,
+		Clear
 	};
 }
 

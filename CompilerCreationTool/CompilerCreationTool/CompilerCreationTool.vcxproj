@@ -156,8 +156,8 @@
     <ClInclude Include="EntitiesListboxView.h" />
     <ClInclude Include="Language.h" />
     <ClInclude Include="LanguageController.h" />
-    <ClInclude Include="LanguageInformation.h" />
-    <ClInclude Include="LanguageInformationDialog.h" />
+    <ClInclude Include="LanguageInfo.h" />
+    <ClInclude Include="LanguageInfoDialog.h" />
     <ClInclude Include="LanguageSerialization.h" />
     <ClInclude Include="MainFrame.h" />
     <ClInclude Include="OutputView.h" />
@@ -178,8 +178,8 @@
     <ClCompile Include="EntitiesListboxView.cpp" />
     <ClCompile Include="Language.cpp" />
     <ClCompile Include="LanguageController.cpp" />
-    <ClCompile Include="LanguageInformation.cpp" />
-    <ClCompile Include="LanguageInformationDialog.cpp" />
+    <ClCompile Include="LanguageInfo.cpp" />
+    <ClCompile Include="LanguageInfoDialog.cpp" />
     <ClCompile Include="LanguageSerialization.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainFrame.cpp" />

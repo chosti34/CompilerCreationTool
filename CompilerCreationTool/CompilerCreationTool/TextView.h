@@ -10,6 +10,7 @@ public:
 
 	void SetText(const wxString& text);
 	wxString GetText() const;
+	void Clear();
 
 	int GetCurrentLine() const;
 	int GetCurrentCol() const;

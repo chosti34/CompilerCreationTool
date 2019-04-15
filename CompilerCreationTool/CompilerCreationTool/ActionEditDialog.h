@@ -9,5 +9,5 @@ public:
 	ActionType GetActionTypeSelection() const;
 
 private:
-	wxComboBox* m_combo;
+	wxComboBox* mComboBox;
 };

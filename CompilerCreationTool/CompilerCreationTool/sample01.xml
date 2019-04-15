@@ -21,8 +21,8 @@
     </Grammar>
     <Patterns>
         <Pattern name="Plus" origin="\+" isEnding="false"/>
-        <Pattern name="EOF" origin="EOF" isEnding="true"/>
         <Pattern name="Minus" origin="\-" isEnding="false"/>
+        <Pattern name="EOF" origin="EOF" isEnding="true"/>
         <Pattern name="Float" origin="(0|[1-9])\.[0-9]+" isEnding="false"/>
         <Pattern name="Integer" origin="0|[1-9][0-9]*" isEnding="false"/>
     </Patterns>

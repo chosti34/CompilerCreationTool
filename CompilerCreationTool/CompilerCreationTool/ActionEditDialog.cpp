@@ -4,31 +4,42 @@
 
 namespace
 {
-const wxSize DIALOG_SIZE = { 300, 140 };
 }
 
 ActionEditDialog::ActionEditDialog(wxWindow* parent, const IAction& action)
 	: wxDialog(parent, wxID_ANY, wxT("Edit action '" + action.GetName() + "'"),
-		wxDefaultPosition, DIALOG_SIZE, wxDEFAULT_DIALOG_STYLE)
+		wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
 {
 	wxPanel* panel = new wxPanel(this);
-	wxBoxSizer* vSizer = new wxBoxSizer(wxVERTICAL);
+
+	wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer* panelSizer = new wxBoxSizer(wxHORIZONTAL);
+
+	wxBoxSizer* leftSizer = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer* rightSizer = new wxBoxSizer(wxVERTICAL);
+
+	panelSizer->Add(leftSizer, 1, wxEXPAND);
+	panelSizer->Add(rightSizer, 1, wxEXPAND);
 
 	wxStaticBox* box = new wxStaticBox(panel, wxID_ANY, wxT("Choose function"));
 	wxStaticBoxSizer* staticBoxSizer = new wxStaticBoxSizer(box, wxHORIZONTAL);
 
-	m_combo = new wxComboBox(box, wxID_ANY);
-
+	mComboBox = new wxComboBox(box, wxID_ANY);
 	for (const ActionType& type : GetActionTypesList())
 	{
-		m_combo->AppendString(ToString(type));
+		mComboBox->AppendString(ToString(type));
 	}
 
-	m_combo->SetSelection(GetActionTypeIndex(action.GetType()));
-	m_combo->SetEditable(false);
+	mComboBox->SetSelection(GetActionTypeIndex(action.GetType()));
+	mComboBox->SetEditable(false);
+	staticBoxSizer->Add(mComboBox, 1, wxEXPAND | wxALL, 5);
+	leftSizer->Add(staticBoxSizer, 0, wxEXPAND);
 
-	staticBoxSizer->Add(m_combo, 1, wxEXPAND | wxALL, 5);
-	vSizer->Add(staticBoxSizer, 0, wxEXPAND | wxALL, 5);
+	wxStaticBox* actionsStaticBox = new wxStaticBox(panel, wxID_ANY, "Actions");
+	wxStaticBoxSizer* actionsStaticBoxSizer = new wxStaticBoxSizer(actionsStaticBox, wxHORIZONTAL);
+	wxListBox* listbox = new wxListBox(actionsStaticBox, wxID_ANY);
+	actionsStaticBoxSizer->Add(listbox, 1, wxEXPAND | wxALL, 5);
+	leftSizer->Add(actionsStaticBoxSizer, 1, wxEXPAND);
 
 	wxButton* okButton = new wxButton(panel, wxID_OK, wxT("Ok"));
 	wxButton* cancelButton = new wxButton(panel, wxID_CANCEL, wxT("Cancel"));
@@ -36,15 +47,17 @@ ActionEditDialog::ActionEditDialog(wxWindow* parent, const IAction& action)
 	wxBoxSizer* buttonSizer = new wxBoxSizer(wxHORIZONTAL);
 	buttonSizer->Add(okButton);
 	buttonSizer->Add(cancelButton, 0, wxLEFT, 5);
-	vSizer->Add(buttonSizer, 0, wxALIGN_RIGHT | wxLEFT | wxRIGHT | wxBOTTOM, 5);
 
-	panel->SetSizer(vSizer);
+	mainSizer->Add(panelSizer, 1, wxEXPAND | wxALL, 5);
+	mainSizer->Add(buttonSizer, 1, wxALIGN_RIGHT | wxLEFT | wxRIGHT | wxBOTTOM, 5);
+	panel->SetSizer(mainSizer);
+
 	CentreOnParent();
 }
 
 ActionType ActionEditDialog::GetActionTypeSelection() const
 {
-	const int selection = m_combo->GetSelection();
+	const int selection = mComboBox->GetSelection();
 	const auto& types = GetActionTypesList();
 	assert(size_t(selection) < types.size());
 	return types[selection];

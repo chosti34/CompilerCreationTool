@@ -251,9 +251,10 @@ void MainFrame::OpenAboutDialog()
 
 void MainFrame::OnClose(wxCloseEvent& event)
 {
-	if (mHasUnsavedChangesSignal())
+	boost::optional<bool> hasUnsavedChanges = mHasUnsavedChangesSignal();
+	if (hasUnsavedChanges && *hasUnsavedChanges)
 	{
-		if (wxMessageBox(_("Current content has not been saved! Proceed?"), _("Please confirm"),
+		if (wxMessageBox("Current content has not been saved! Proceed?", "Please confirm",
 			wxICON_QUESTION | wxYES_NO, this) == wxNO)
 		{
 			return;

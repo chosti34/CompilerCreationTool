@@ -34,6 +34,7 @@ public:
 
 	using ButtonPressSignal = Signal<void()>;
 	SignalScopedConnection DoOnButtonPress(Buttons::ID button, ButtonPressSignal::slot_type slot);
+	SignalScopedConnection DoOnHasUnsavedChangesQuery(Signal<bool()>::slot_type slot);
 
 private:
 	void SendButtonPressedSignal(Buttons::ID buttonID);
@@ -41,6 +42,7 @@ private:
 
 private:
 	wxDECLARE_EVENT_TABLE();
+	void OnClose(wxCloseEvent& event);
 	void OnExit(wxCommandEvent& event);
 	void OnAbout(wxCommandEvent& event);
 	void OnSize(wxSizeEvent& event);
@@ -78,4 +80,5 @@ private:
 	wxToolBar* mToolbar;
 
 	std::map<Buttons::ID, ButtonPressSignal> mSignals;
+	Signal<bool()> mHasUnsavedChangesSignal;
 };

@@ -75,6 +75,7 @@ LanguageController::LanguageController(Language* language, MainFrame* frame)
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::Save, std::bind(&LanguageController::OnSaveButtonPress, this)));
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::SaveAs, std::bind(&LanguageController::OnSaveAsButtonPress, this)));
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::Clear, std::bind(&LanguageController::OnClearButtonPress, this)));
+	mConnections.push_back(mFrame->DoOnHasUnsavedChangesQuery([this]() { return mHasUnsavedChanges; }));
 
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::Build, std::bind(&LanguageController::OnBuildButtonPress, this)));
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::Run, std::bind(&LanguageController::OnRunButtonPress, this)));
@@ -157,7 +158,7 @@ void LanguageController::OnNewButtonPress()
 {
 	if (mHasUnsavedChanges)
 	{
-		if (wxMessageBox(_("Current content has not been saved! Proceed?"), _("Please confirm"),
+		if (wxMessageBox("Current content has not been saved! Proceed?", "Please confirm",
 			wxICON_QUESTION | wxYES_NO, mFrame) == wxNO)
 		{
 			return;

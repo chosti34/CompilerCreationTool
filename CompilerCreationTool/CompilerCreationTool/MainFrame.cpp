@@ -229,6 +229,11 @@ SignalScopedConnection MainFrame::DoOnButtonPress(Buttons::ID button,
 	return mSignals[button].connect(slot);
 }
 
+SignalScopedConnection MainFrame::DoOnHasUnsavedChangesQuery(Signal<bool()>::slot_type slot)
+{
+	return mHasUnsavedChangesSignal.connect(slot);
+}
+
 void MainFrame::SendButtonPressedSignal(Buttons::ID buttonID)
 {
 	auto found = mSignals.find(buttonID);
@@ -242,6 +247,19 @@ void MainFrame::OpenAboutDialog()
 		"Tool for building compiler.",
 		"About CompilerCreationTool",
 		wxOK | wxICON_INFORMATION);
+}
+
+void MainFrame::OnClose(wxCloseEvent& event)
+{
+	if (mHasUnsavedChangesSignal())
+	{
+		if (wxMessageBox(_("Current content has not been saved! Proceed?"), _("Please confirm"),
+			wxICON_QUESTION | wxYES_NO, this) == wxNO)
+		{
+			return;
+		}
+	}
+	event.Skip(true);
 }
 
 void MainFrame::OnExit(wxCommandEvent&)
@@ -295,7 +313,7 @@ void MainFrame::OnHelp(wxCommandEvent&)
 	OpenAboutDialog();
 }
 
-void MainFrame::OnClear(wxCommandEvent & event)
+void MainFrame::OnClear(wxCommandEvent&)
 {
 	try
 	{
@@ -420,6 +438,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
 	EVT_MENU(Buttons::Clear, MainFrame::OnClear)
 	EVT_SIZE(MainFrame::OnSize)
+	EVT_CLOSE(MainFrame::OnClose)
 	EVT_TOOL(Buttons::New, MainFrame::OnNew)
 	EVT_TOOL(Buttons::Open, MainFrame::OnOpen)
 	EVT_TOOL(Buttons::Save, MainFrame::OnSave)

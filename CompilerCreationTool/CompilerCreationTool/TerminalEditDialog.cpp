@@ -9,7 +9,7 @@ const wxSize gcDialogSize = { 250, 250 };
 
 TerminalEditDialog::TerminalEditDialog(wxWindow* parent, TokenPattern& pattern)
 	: wxDialog(parent, wxID_ANY, wxT("Edit terminal '" + pattern.GetName() + "'"),
-		wxDefaultPosition, gcDialogSize, wxDEFAULT_DIALOG_STYLE)
+		wxDefaultPosition, gcDialogSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 	, m_pattern(pattern)
 {
 	wxPanel* panel = new wxPanel(this);

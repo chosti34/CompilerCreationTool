@@ -6,8 +6,16 @@ class ActionEditDialog : public wxDialog
 {
 public:
 	ActionEditDialog(wxWindow* parent, const IAction& action);
+
 	ActionType GetActionTypeSelection() const;
+	wxString GetActionMessage() const;
 
 private:
-	wxComboBox* mComboBox;
+	void OnListboxItemSelection(wxCommandEvent& event);
+
+private:
+	wxTextCtrl* mMessageTextCtrl;
+	wxStaticText* mDescriptionText;
+	wxListBox* mActionsListbox;
+	int mDescriptionWrapWidth;
 };

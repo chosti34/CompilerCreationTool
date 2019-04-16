@@ -1,28 +1,42 @@
 #include "stdafx.h"
 #include "Action.h"
 
-Action::Action(const std::string& name, ActionType type)
-	: m_type(type)
-	, m_name(name)
+Action::Action(
+	const std::string& name, ActionType type,
+	std::string message /* = "" */
+)
+	: mType(type)
+	, mName(name)
+	, mMessage(std::move(message))
 {
 }
 
 void Action::SetName(const std::string& name)
 {
-	m_name = name;
+	mName = name;
 }
 
 const std::string& Action::GetName() const
 {
-	return m_name;
+	return mName;
 }
 
 void Action::SetType(ActionType type)
 {
-	m_type = type;
+	mType = type;
 }
 
 ActionType Action::GetType() const
 {
-	return m_type;
+	return mType;
+}
+
+void Action::SetMessage(std::string message)
+{
+	mMessage = std::move(message);
+}
+
+const std::string& Action::GetMessage() const
+{
+	return mMessage;
 }

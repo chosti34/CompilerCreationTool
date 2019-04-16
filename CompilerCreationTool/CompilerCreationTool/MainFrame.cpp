@@ -21,6 +21,9 @@ wxMenuBar* CreateMenuBar()
 	file->Append(wxID_EXIT);
 
 	wxMenu* view = new wxMenu;
+	view->AppendCheckItem(Buttons::Clear + 1, "Log only action's messages",
+		"Check this item if you want to log only action's messages");
+	view->AppendSeparator();
 	view->Append(Buttons::Clear, "Clear", nullptr, "Clear output");
 
 	wxMenu* help = new wxMenu;

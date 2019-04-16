@@ -13,7 +13,10 @@ enum class ActionType
 	CreateBinaryDivNode
 };
 
-const std::vector<ActionType>& GetActionTypesList();
+std::vector<ActionType> const& GetActionTypesList();
 int GetActionTypeIndex(ActionType type);
+
 std::string ToString(ActionType type);
+std::string ToPrettyString(ActionType type);
+std::string GetDescription(ActionType type);
 ActionType ToActionType(const std::string& str);

@@ -99,6 +99,10 @@ void SerializeLanguage(const std::string& filepath, const Language& language)
 		tinyxml2::XMLElement* actionElement = doc.NewElement("Action");
 		actionElement->SetAttribute("name", action.GetName().c_str());
 		actionElement->SetAttribute("type", ToString(action.GetType()).c_str());
+		if (!action.GetMessage().empty())
+		{
+			actionElement->SetAttribute("message", action.GetMessage().c_str());
+		}
 		actionsElement->InsertEndChild(actionElement);
 	}
 
@@ -203,7 +207,11 @@ void UnserializeLanguage(const std::string& filepath, Language& language)
 		status = actionElement->QueryStringAttribute("type", &type);
 		EnsureNoErrors(status, "action element must have 'type' attribute");
 
-		actions.push_back(std::make_unique<Action>(name, ToActionType(type)));
+		const char* message;
+		status = actionElement->QueryStringAttribute("message", &message);
+		const std::string msg = (status == tinyxml2::XML_NO_ATTRIBUTE) ? "" : message;
+
+		actions.push_back(std::make_unique<Action>(name, ToActionType(type), msg));
 		actionElement = actionElement->NextSiblingElement("Action");
 	}
 

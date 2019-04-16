@@ -73,7 +73,7 @@
         <Pattern name="RightParenthesis" origin="\)" isEnding="false"/>
     </Patterns>
     <Actions>
-        <Action name="OnBinaryPlusParse" type="CreateBinaryPlusNode"/>
+        <Action name="OnBinaryPlusParse" type="CreateBinaryPlusNode" message=",as,sajd"/>
         <Action name="OnBinaryMinusParse" type="CreateBinaryMinusNode"/>
         <Action name="OnBinaryMulParse" type="CreateBinaryMulNode"/>
         <Action name="OnBinaryDivParse" type="CreateBinaryDivNode"/>

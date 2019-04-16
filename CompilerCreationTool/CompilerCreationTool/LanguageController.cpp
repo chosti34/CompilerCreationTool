@@ -455,12 +455,13 @@ void LanguageController::OnActionEdit(int index)
 	if (dialog.ShowModal() == wxID_OK)
 	{
 		const ActionType newActionType = dialog.GetActionTypeSelection();
-		if (action.GetType() != newActionType)
-		{
-			action.SetType(newActionType);
-			mHasUnsavedChanges = true;
-			UpdateTitle();
-		}
+		const wxString newMessage = dialog.GetActionMessage();
+
+		action.SetType(newActionType);
+		action.SetMessage(newMessage);
+
+		mHasUnsavedChanges = true;
+		UpdateTitle();
 	}
 
 	OnActionSelection(index);

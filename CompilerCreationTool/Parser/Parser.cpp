@@ -138,15 +138,22 @@ ParseResults Parser::Parse(const std::string& text)
 		{
 			auto found = FindActionIndexByName(state.GetName());
 			assert(found.is_initialized());
-			auto action = cActionMap.find(mActionList[*found]->GetType());
-			assert(action != cActionMap.end());
 
-			LogIfNotNull("Performing action '" + state.GetName() + "'", index);
-			auto& func = action->second;
+			const IAction& action = *mActionList[*found];
+			const ActionType actionType = action.GetType();
+
+			auto it = cActionMap.find(actionType);
+			assert(it != cActionMap.end());
+			auto& func = it->second;
 
 			try
 			{
+				LogIfNotNull("Performing action '" + state.GetName() + "'", index);
 				func();
+				if (!action.GetMessage().empty())
+				{
+					LogIfNotNull(action.GetMessage(), index);
+				}
 			}
 			catch (const std::exception& ex)
 			{

@@ -2,28 +2,49 @@
 #include "TextCtrlLogger.h"
 #include <cassert>
 
+namespace
+{
+void WorkWithTextCtrl(wxTextCtrl& ctrl, std::function<void(wxTextCtrl&)> && fn)
+{
+	ctrl.Freeze();
+	ctrl.SetEditable(true);
+	fn(ctrl);
+	ctrl.SetEditable(false);
+	ctrl.Thaw();
+	ctrl.ShowPosition(ctrl.GetLastPosition());
+}
+}
+
 TextCtrlLogger::TextCtrlLogger(wxTextCtrl* ctrl)
 	: mTextCtrl(ctrl)
+	, mMask(All)
 {
 	assert(mTextCtrl);
 }
 
-void TextCtrlLogger::Log(const std::string& message)
+void TextCtrlLogger::SetMask(int mask)
 {
-	mTextCtrl->Freeze();
-	mTextCtrl->SetEditable(true);
-	mTextCtrl->AppendText(message);
-	mTextCtrl->SetEditable(false);
-	mTextCtrl->Thaw();
-	mTextCtrl->ShowPosition(mTextCtrl->GetLastPosition());
+	mMask = mask;
+}
+
+int TextCtrlLogger::GetMask() const
+{
+	return mMask;
+}
+
+void TextCtrlLogger::Log(const std::string& message, MessageCategory category /* = All */)
+{
+	if (mMask & category)
+	{
+		WorkWithTextCtrl(*mTextCtrl, [&message](wxTextCtrl& ctrl) {
+			ctrl.AppendText(message);
+		});
+	}
 }
 
 void TextCtrlLogger::Clear()
 {
-	mTextCtrl->Freeze();
-	mTextCtrl->SetEditable(true);
-	mTextCtrl->Clear();
-	mTextCtrl->SetEditable(false);
-	mTextCtrl->Thaw();
-	mTextCtrl->ShowPosition(mTextCtrl->GetLastPosition());
+	WorkWithTextCtrl(*mTextCtrl, [](wxTextCtrl& ctrl) {
+		ctrl.Clear();
+	});
 }

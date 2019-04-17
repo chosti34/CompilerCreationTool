@@ -20,6 +20,7 @@ private: // Signal handlers
 	void OnSaveButtonPress();
 	void OnSaveAsButtonPress();
 	void OnClearButtonPress();
+	void OnLogMessageButtonPress();
 
 	void OnBuildButtonPress();
 	void OnRunButtonPress();

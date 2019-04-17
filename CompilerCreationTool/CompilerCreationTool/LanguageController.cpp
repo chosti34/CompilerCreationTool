@@ -18,6 +18,7 @@
 #include <wx/filedlg.h>
 #include <functional>
 
+using namespace std::literals::string_literals;
 
 namespace
 {
@@ -75,6 +76,7 @@ LanguageController::LanguageController(Language* language, MainFrame* frame)
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::Save, std::bind(&LanguageController::OnSaveButtonPress, this)));
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::SaveAs, std::bind(&LanguageController::OnSaveAsButtonPress, this)));
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::Clear, std::bind(&LanguageController::OnClearButtonPress, this)));
+	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::LogMessages, std::bind(&LanguageController::OnLogMessageButtonPress, this)));
 	mConnections.push_back(mFrame->DoOnHasUnsavedChangesQuery([this]() { return mHasUnsavedChanges; }));
 
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::Build, std::bind(&LanguageController::OnBuildButtonPress, this)));
@@ -176,6 +178,7 @@ void LanguageController::OnNewButtonPress()
 	mTreeView->UnsetImage();
 	mOutputView->GetTextCtrl()->Clear();
 
+	mFrame->GetMenuBar()->Enable(Buttons::LogMessages, false);
 	mFrame->GetToolBar()->EnableTool(Buttons::Run, false);
 	mFrame->GetToolBar()->EnableTool(Buttons::Info, false);
 	mFrame->GetToolBar()->EnableTool(Buttons::Down, false);
@@ -219,6 +222,7 @@ void LanguageController::OnOpenButtonPress()
 
 		// Обновляем кнопки
 		mDocument = openFileDialog.GetFilename();
+		mFrame->GetMenuBar()->Enable(Buttons::LogMessages, true);
 		mFrame->GetToolBar()->EnableTool(Buttons::Run, true);
 		mFrame->GetToolBar()->EnableTool(Buttons::Info, true);
 		mFrame->GetToolBar()->EnableTool(Buttons::Save, true);
@@ -262,6 +266,23 @@ void LanguageController::OnClearButtonPress()
 	mOutputView->GetTextCtrl()->Clear();
 }
 
+void LanguageController::OnLogMessageButtonPress()
+{
+	if (!mLanguage->IsInitialized())
+	{
+		throw std::logic_error("parser logger is not initialized");
+	}
+
+	if (mFrame->GetMenuBar()->IsChecked(Buttons::LogMessages))
+	{
+		mLanguage->GetParser().GetLogger()->SetMask(IParserLogger::Action);
+	}
+	else
+	{
+		mLanguage->GetParser().GetLogger()->SetMask(IParserLogger::All);
+	}
+}
+
 void LanguageController::OnBuildButtonPress()
 {
 	// Инициализируем модель
@@ -279,6 +300,7 @@ void LanguageController::OnBuildButtonPress()
 	mFrame->GetToolBar()->EnableTool(Buttons::Info, true);
 	mFrame->GetToolBar()->EnableTool(Buttons::Save, true);
 	mFrame->GetToolBar()->EnableTool(Buttons::SaveAs, true);
+	mFrame->GetMenuBar()->Enable(Buttons::LogMessages, true);
 	mFrame->Refresh(true);
 
 	wxMessageBox("Parser has been successfully built!", "Success!", wxICON_INFORMATION);
@@ -295,8 +317,14 @@ void LanguageController::OnRunButtonPress()
 	assert(logger);
 
 	logger->Log("[" + time_utils::GetCurrentTimeAsString() + "] Parsing started...\n");
+
+	auto nowTime = std::chrono::steady_clock::now();
 	const ParseResults results = parser.Parse(mEditorView->GetText().ToStdString());
-	logger->Log(results.success ? "Successfully parsed!\n" : "Failed to parse...\n");
+	auto endTime = std::chrono::steady_clock::now();
+	auto elapsedTime = std::chrono::duration<double>(endTime - nowTime);
+
+	logger->Log((results.success ? "Successfully parsed!" : "Failed to parse...") +
+		" Elapsed time: "s + string_utils::TrimTrailingZerosAndPeriod(elapsedTime.count()) + " seconds.\n"s);
 
 	if (results.success)
 	{

@@ -21,10 +21,11 @@ wxMenuBar* CreateMenuBar()
 	file->Append(wxID_EXIT);
 
 	wxMenu* view = new wxMenu;
-	view->AppendCheckItem(Buttons::Clear + 1, "Log only action's messages",
+	view->AppendCheckItem(
+		Buttons::LogMessages, "Log only action's messages",
 		"Check this item if you want to log only action's messages");
 	view->AppendSeparator();
-	view->Append(Buttons::Clear, "Clear", nullptr, "Clear output");
+	view->Append(Buttons::Clear, "Clear output", nullptr, "Clear output window's content");
 
 	wxMenu* help = new wxMenu;
 	help->Append(wxID_ABOUT);
@@ -104,13 +105,15 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	: wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, size)
 {
 	// Menubar
-	SetMenuBar(CreateMenuBar());
+	mMenubar = CreateMenuBar();
+	SetMenuBar(mMenubar);
 
 	// Toolbar
 	mToolbar = CreateToolBar(wxTB_FLAT);
 	AddTools(*mToolbar);
 	mToolbar->Realize();
 
+	mMenubar->Enable(Buttons::LogMessages, false);
 	mToolbar->EnableTool(Buttons::Run, false);
 	mToolbar->EnableTool(Buttons::Info, false);
 	mToolbar->EnableTool(Buttons::Up, false);
@@ -226,6 +229,11 @@ wxToolBar* MainFrame::GetToolBar()
 	return mToolbar;
 }
 
+wxMenuBar* MainFrame::GetMenuBar()
+{
+	return mMenubar;
+}
+
 SignalScopedConnection MainFrame::DoOnButtonPress(Buttons::ID button,
 	ButtonPressSignal::slot_type slot)
 {
@@ -326,6 +334,18 @@ void MainFrame::OnClear(wxCommandEvent&)
 	catch (const std::exception& ex)
 	{
 		wxMessageBox("Can't clear output: "s + ex.what() + "."s, "Can't clear output", wxICON_WARNING);
+	}
+}
+
+void MainFrame::OnLogMessages(wxCommandEvent&)
+{
+	try
+	{
+		SendButtonPressedSignal(Buttons::LogMessages);
+	}
+	catch (const std::exception& ex)
+	{
+		wxMessageBox("Can't change logger state: "s + ex.what() + "."s, "Can't set mask", wxICON_WARNING);
 	}
 }
 
@@ -441,6 +461,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(wxID_EXIT, MainFrame::OnExit)
 	EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
 	EVT_MENU(Buttons::Clear, MainFrame::OnClear)
+	EVT_MENU(Buttons::LogMessages, MainFrame::OnLogMessages)
 	EVT_SIZE(MainFrame::OnSize)
 	EVT_CLOSE(MainFrame::OnClose)
 	EVT_TOOL(Buttons::New, MainFrame::OnNew)

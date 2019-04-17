@@ -31,6 +31,7 @@ public:
 
 	wxStatusBar* GetStatusBar();
 	wxToolBar* GetToolBar();
+	wxMenuBar* GetMenuBar();
 
 	using ButtonPressSignal = Signal<void()>;
 	SignalScopedConnection DoOnButtonPress(Buttons::ID button, ButtonPressSignal::slot_type slot);
@@ -62,6 +63,7 @@ private:
 
 	void OnHelp(wxCommandEvent& event);
 	void OnClear(wxCommandEvent& event);
+	void OnLogMessages(wxCommandEvent& event);
 
 private:
 	wxAuiManager mAuiManager;
@@ -78,6 +80,7 @@ private:
 
 	wxStatusBar* mStatusbar;
 	wxToolBar* mToolbar;
+	wxMenuBar* mMenubar;
 
 	std::map<Buttons::ID, ButtonPressSignal> mSignals;
 	Signal<bool()> mHasUnsavedChangesSignal;

@@ -152,7 +152,7 @@ ParseResults Parser::Parse(const std::string& text)
 				func();
 				if (!action.GetMessage().empty())
 				{
-					LogIfNotNull(action.GetMessage(), index);
+					LogIfNotNull(action.GetMessage(), index, IParserLogger::Action);
 				}
 			}
 			catch (const std::exception& ex)
@@ -328,6 +328,7 @@ boost::optional<size_t> Parser::FindActionIndexByName(const std::string& name)
 void Parser::LogIfNotNull(
 	const std::string& message,
 	boost::optional<size_t> state,
+	IParserLogger::MessageCategory category,
 	bool newline
 )
 {
@@ -335,10 +336,5 @@ void Parser::LogIfNotNull(
 	{
 		return;
 	}
-
-	mLogger->Log((state ? "[#" + std::to_string(*state) + "] " : "") + message);
-	if (newline)
-	{
-		mLogger->Log("\n");
-	}
+	mLogger->Log((state ? "[#" + std::to_string(*state) + "] " : "") + message + (newline ? "\n" : ""), category);
 }

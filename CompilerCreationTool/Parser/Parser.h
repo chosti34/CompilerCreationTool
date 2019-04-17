@@ -8,11 +8,6 @@
 class Parser : public IParser<ParseResults>
 {
 public:
-	using ActionPtrList = std::vector<std::unique_ptr<IAction>>;
-	using ParserLoggerPtr = std::unique_ptr<IParserLogger>;
-	using ParserTablePtr = std::unique_ptr<IParserTable>;
-
-public:
 	explicit Parser(std::unique_ptr<IParserTable> && table, ILexer& lexer);
 
 	ParseResults Parse(const std::string& text) override;
@@ -39,12 +34,13 @@ private:
 	void LogIfNotNull(
 		const std::string& message,
 		boost::optional<size_t> state = boost::none,
+		IParserLogger::MessageCategory category = IParserLogger::Regular,
 		bool newline = true
 	);
 
 private:
-	ParserTablePtr mTable;
+	std::unique_ptr<IParserTable> mTable;
 	ILexer& mLexer;
-	ActionPtrList mActionList;
-	ParserLoggerPtr mLogger;
+	std::vector<std::unique_ptr<IAction>> mActionList;
+	std::unique_ptr<IParserLogger> mLogger;
 };

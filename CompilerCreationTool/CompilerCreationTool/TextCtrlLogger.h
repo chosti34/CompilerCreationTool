@@ -5,11 +5,15 @@
 class TextCtrlLogger : public IParserLogger
 {
 public:
-	TextCtrlLogger(wxTextCtrl* ctrl);
+	explicit TextCtrlLogger(wxTextCtrl* ctrl);
 
-	void Log(const std::string& message) override;
+	void SetMask(int mask) override;
+	int GetMask() const override;
+
+	void Log(const std::string& message, MessageCategory category = All) override;
 	void Clear() override;
 
 private:
 	wxTextCtrl* mTextCtrl;
+	int mMask;
 };

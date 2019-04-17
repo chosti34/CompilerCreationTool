@@ -107,6 +107,7 @@ void Language::SetGrammar(std::unique_ptr<grammarlib::IGrammar> && grammar)
 				IAction& oldAction = m_parser->GetAction(*pos);
 				newAction.SetName(oldAction.GetName());
 				newAction.SetType(oldAction.GetType());
+				newAction.SetMessage(oldAction.GetMessage());
 				indices.emplace_back(i, std::min(*pos, parser->GetActionsCount() - 1));
 			}
 		}

@@ -87,7 +87,11 @@ wxString ActionEditDialog::GetActionMessage() const
 
 void ActionEditDialog::OnListboxItemSelection(wxCommandEvent& event)
 {
-	mDescriptionText->SetLabel(GetDescription(GetActionTypesList()[event.GetSelection()]));
+	const int index = event.GetSelection();
+	assert(index != wxNOT_FOUND);
+
+	mDescriptionText->SetLabel(GetDescription(GetActionTypesList()[index]));
 	mDescriptionText->Wrap(mDescriptionWrapWidth);
+	
 	event.Skip(true);
 }

@@ -2,6 +2,7 @@
 
 namespace Buttons
 {
+	// ”никальные идентификаторы дл€ всех кнопок в приложении
 	enum ID
 	{
 		New = 0,
@@ -15,10 +16,13 @@ namespace Buttons
 		Down,
 		Edit,
 		Help,
-		Clear
+		Clear,
+		LogMessages,
+		Count
 	};
 }
 
+// 
 namespace StatusBarFields
 {
 	enum ID

@@ -1,61 +1,95 @@
 #include "pch.h"
 #include "EntitiesListboxView.h"
 
-EntitiesListboxView::EntitiesListboxView(wxWindow* parent)
-	: wxPanel(parent, wxID_ANY, wxDefaultPosition, wxSize(250, 120))
-	, m_listbox(new wxListBox(this, wxID_ANY))
+namespace
 {
-	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
-	sizer->Add(m_listbox, 1, wxEXPAND | wxALL, 3);
-	SetSizer(sizer);
-
-	m_listbox->Bind(wxEVT_LISTBOX, &EntitiesListboxView::OnListboxItemSelection, this);
-	m_listbox->Bind(wxEVT_LISTBOX_DCLICK, &EntitiesListboxView::OnListboxItemDoubleSelection, this);
-	m_listbox->Bind(wxEVT_LEFT_DOWN, &EntitiesListboxView::OnListboxMouseDown, this);
+const unsigned gcBorderSize = 3;
 }
 
-void EntitiesListboxView::SetItems(const wxArrayString& items)
+EntitiesListboxView::EntitiesListboxView(wxWindow* parent, const std::string& leftColumn, const std::string& rightColumn)
+	: wxPanel(parent, wxID_ANY, wxDefaultPosition, wxSize(250, 120))
+	, mLeftColumn(leftColumn)
+	, mRightColumn(rightColumn)
 {
-	m_listbox->Clear();
-	for (const wxString& item : items)
+	mListCtrl = new wxListCtrl(
+		this,
+		wxID_ANY,
+		wxDefaultPosition,
+		wxDefaultSize,
+		wxLC_REPORT | wxLC_SINGLE_SEL | wxVSCROLL | wxHSCROLL);
+
+	wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+	sizer->Add(mListCtrl, 1, wxEXPAND | wxALL, gcBorderSize);
+	SetSizer(sizer);
+
+	mListCtrl->InsertColumn(0, mLeftColumn);
+	mListCtrl->InsertColumn(1, mRightColumn);
+
+	Bind(wxEVT_SIZE, &EntitiesListboxView::OnResize, this);
+	mListCtrl->Bind(wxEVT_LIST_ITEM_SELECTED, &EntitiesListboxView::OnListCtrlItemSelection, this);
+	mListCtrl->Bind(wxEVT_LIST_ITEM_ACTIVATED, &EntitiesListboxView::OnListCtrlItemDoubleSelection, this);
+	mListCtrl->Bind(wxEVT_LEFT_DOWN, &EntitiesListboxView::OnListCtrlMouseDown, this);
+}
+
+void EntitiesListboxView::SetItems(const std::vector<std::pair<std::string, std::string>> &items)
+{
+	mListCtrl->DeleteAllItems();
+	for (const auto& pair : items)
 	{
-		const unsigned backInsertionIndex = m_listbox->GetCount();
-		m_listbox->Insert(item, backInsertionIndex);
+		const long index = mListCtrl->InsertItem(mListCtrl->GetItemCount(), pair.first);
+		mListCtrl->SetItem(index, 1, pair.second);
 	}
+
+	AdjustColumnWidth(mListCtrl->GetClientSize().x);
 }
 
 void EntitiesListboxView::ClearItems()
 {
-	m_listbox->Clear();
+	mListCtrl->DeleteAllItems();
+	const long index = mListCtrl->InsertItem(0, wxEmptyString);
+	mListCtrl->SetItem(index, 1, wxEmptyString);
 }
 
 void EntitiesListboxView::DeselectAll()
 {
-	m_listbox->DeselectAll();
+	for (int i = 0; i < mListCtrl->GetItemCount(); ++i)
+	{
+		mListCtrl->SetItemState(i, 0, wxLIST_STATE_SELECTED);
+	}
 }
 
 int EntitiesListboxView::GetSelection() const
 {
-	return m_listbox->GetSelection();
+	return mListCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
 }
 
 bool EntitiesListboxView::HasSelection() const
 {
-	return m_listbox->GetSelection() != wxNOT_FOUND;
+	return GetSelection() != wxNOT_FOUND;
 }
 
 bool EntitiesListboxView::MoveSelectionUp()
 {
-	const int selection = m_listbox->GetSelection();
-	const int upper = selection - 1;
+	const int selection = GetSelection();
 	assert(selection != wxNOT_FOUND);
+	const int upper = selection - 1;
 
 	if (upper >= 0)
 	{
-		const wxString swapValue = m_listbox->GetString(selection);
-		m_listbox->SetString(selection, m_listbox->GetString(upper));
-		m_listbox->SetString(upper, swapValue);
-		m_listbox->SetSelection(upper);
+		// Swap values
+		std::pair<wxString, wxString> swapValue;
+		swapValue.first = mListCtrl->GetItemText(selection, 0);
+		swapValue.second = mListCtrl->GetItemText(selection, 1);
+
+		mListCtrl->SetItem(selection, 0, mListCtrl->GetItemText(upper, 0));
+		mListCtrl->SetItem(selection, 1, mListCtrl->GetItemText(upper, 1));
+
+		mListCtrl->SetItem(upper, 0, swapValue.first);
+		mListCtrl->SetItem(upper, 1, swapValue.second);
+
+		// Select upper item
+		mListCtrl->SetItemState(upper, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+
 		return true;
 	}
 
@@ -64,16 +98,26 @@ bool EntitiesListboxView::MoveSelectionUp()
 
 bool EntitiesListboxView::MoveSelectionDown()
 {
-	const int selection = m_listbox->GetSelection();
-	const int lower = selection + 1;
+	const int selection = GetSelection();
 	assert(selection != wxNOT_FOUND);
+	const int lower = selection + 1;
 
-	if (lower < int(m_listbox->GetCount()))
+	if (lower < mListCtrl->GetItemCount())
 	{
-		const wxString swapValue = m_listbox->GetString(selection);
-		m_listbox->SetString(selection, m_listbox->GetString(lower));
-		m_listbox->SetString(lower, swapValue);
-		m_listbox->SetSelection(lower);
+		// Swap values
+		std::pair<wxString, wxString> swapValue;
+		swapValue.first = mListCtrl->GetItemText(selection, 0);
+		swapValue.second = mListCtrl->GetItemText(selection, 1);
+
+		mListCtrl->SetItem(selection, 0, mListCtrl->GetItemText(lower, 0));
+		mListCtrl->SetItem(selection, 1, mListCtrl->GetItemText(lower, 1));
+
+		mListCtrl->SetItem(lower, 0, swapValue.first);
+		mListCtrl->SetItem(lower, 1, swapValue.second);
+
+		// Select upper item
+		mListCtrl->SetItemState(lower, wxLIST_STATE_SELECTED, wxLIST_STATE_SELECTED);
+
 		return true;
 	}
 
@@ -95,29 +139,59 @@ SignalScopedConnection EntitiesListboxView::DoOnItemDeselection(Signal<void()>::
 	return m_itemDeselectionSignal.connect(slot);
 }
 
-void EntitiesListboxView::OnListboxItemDoubleSelection(wxCommandEvent& event)
+void EntitiesListboxView::AdjustColumnWidth(int width)
 {
-	const int selection = event.GetInt();
-	assert(m_listbox->GetSelection() == selection);
-	assert(selection != wxNOT_FOUND);
-	m_itemDoubleSelectionSignal(selection);
+	mListCtrl->Freeze();
+
+	for (int i = 0; i < mListCtrl->GetColumnCount(); ++i)
+	{
+		assert(mListCtrl->GetColumnCount() != 0);
+		const float cCoeff = 1.f / mListCtrl->GetColumnCount();
+		mListCtrl->SetColumnWidth(i, cCoeff * width);
+	}
+
+	mListCtrl->Thaw();
+	Refresh(true);
 }
 
-void EntitiesListboxView::OnListboxItemSelection(wxCommandEvent& event)
+void EntitiesListboxView::OnResize(wxSizeEvent& event)
 {
-	assert(m_listbox->GetSelection() == event.GetSelection());
-	assert(m_listbox->GetSelection() != wxNOT_FOUND);
-	m_itemSelectionSignal(event.GetSelection());
+	if (mListCtrl->GetItemCount() != 0)
+	{
+		int width;
+		mListCtrl->GetClientSize(&width, nullptr);
+		AdjustColumnWidth(width);
+	}
+	else
+	{
+		AdjustColumnWidth(mListCtrl->GetSize().x);
+	}
+	event.Skip(true);
 }
 
-void EntitiesListboxView::OnListboxMouseDown(wxMouseEvent& event)
+void EntitiesListboxView::OnListCtrlMouseDown(wxMouseEvent& event)
 {
 	// ≈сли пользователь кликнул по пустой части списка, тогда полностью снимаем все выделени€
 	wxArrayInt selections;
-	if (m_listbox->HitTest(event.GetPosition()) == wxNOT_FOUND)
+	int flags;
+	if (mListCtrl->HitTest(event.GetPosition(), flags) == wxNOT_FOUND)
 	{
-		m_listbox->Deselect(wxNOT_FOUND);
+		DeselectAll();
 		m_itemDeselectionSignal();
 	}
 	event.Skip(true);
+}
+
+void EntitiesListboxView::OnListCtrlItemSelection(wxListEvent&)
+{
+	const int selection = GetSelection();
+	assert(selection != wxNOT_FOUND);
+	m_itemSelectionSignal(selection);
+}
+
+void EntitiesListboxView::OnListCtrlItemDoubleSelection(wxListEvent&)
+{
+	const int selection = GetSelection();
+	assert(selection != wxNOT_FOUND);
+	m_itemDoubleSelectionSignal(selection);
 }

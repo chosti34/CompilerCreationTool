@@ -40,6 +40,7 @@ StatesView::StatesView(wxWindow* parent)
 
 void StatesView::SetParserTable(const IParserTable& table)
 {
+	assert(table.GetStatesCount() != 0);
 	m_list->DeleteAllItems();
 
 	for (size_t i = 0; i < table.GetStatesCount(); ++i)
@@ -57,6 +58,8 @@ void StatesView::SetParserTable(const IParserTable& table)
 		m_list->SetItem(index, 3, GetStateFlagsRepresentation(state));
 		m_list->SetItem(index, 4, isAttribute ? gcNoItem : string_utils::JoinStrings(acceptables));
 	}
+
+	AdjustColumnWidth(m_list->GetClientSize().x);
 }
 
 void StatesView::ClearItems()
@@ -72,14 +75,24 @@ void StatesView::AdjustColumnWidth(int width)
 	{
 		assert(m_list->GetColumnCount() != 0);
 		const float cCoeff = 1.f / m_list->GetColumnCount();
-		m_list->SetColumnWidth(i, cCoeff * (width - gcBorderSize * 2));
+		m_list->SetColumnWidth(i, cCoeff * width);
 	}
 
 	m_list->Thaw();
+	Refresh(true);
 }
 
 void StatesView::OnListResize(wxSizeEvent& event)
 {
-	AdjustColumnWidth(event.GetSize().x);
+	if (m_list->GetItemCount() != 0)
+	{
+		int width;
+		m_list->GetClientSize(&width, nullptr);
+		AdjustColumnWidth(width);
+	}
+	else
+	{
+		AdjustColumnWidth(m_list->GetSize().x);
+	}
 	event.Skip(true);
 }

@@ -1,14 +1,18 @@
 #pragma once
 #include "Signal.h"
 #include <wx/panel.h>
-#include <wx/listbox.h>
+#include <wx/listctrl.h>
 
 class EntitiesListboxView : public wxPanel
 {
 public:
-	explicit EntitiesListboxView(wxWindow* parent);
+	explicit EntitiesListboxView(
+		wxWindow* parent,
+		const std::string& leftColumn,
+		const std::string& rightColumn
+	);
 
-	void SetItems(const wxArrayString& items);
+	void SetItems(const std::vector<std::pair<std::string, std::string>> &items);
 	void ClearItems();
 	void DeselectAll();
 
@@ -23,12 +27,18 @@ public:
 	SignalScopedConnection DoOnItemDeselection(Signal<void()>::slot_type);
 
 private:
-	void OnListboxItemDoubleSelection(wxCommandEvent& event);
-	void OnListboxItemSelection(wxCommandEvent& event);
-	void OnListboxMouseDown(wxMouseEvent& event);
+	void AdjustColumnWidth(int width);
 
 private:
-	wxListBox* m_listbox;
+	void OnResize(wxSizeEvent& event);
+	void OnListCtrlMouseDown(wxMouseEvent& event);
+	void OnListCtrlItemSelection(wxListEvent& event);
+	void OnListCtrlItemDoubleSelection(wxListEvent& event);
+
+private:
+	wxListCtrl* mListCtrl;
+	std::string mLeftColumn;
+	std::string mRightColumn;
 	Signal<void()> m_itemDeselectionSignal;
 	Signal<void(int)> m_itemSelectionSignal;
 	Signal<void(int)> m_itemDoubleSelectionSignal;

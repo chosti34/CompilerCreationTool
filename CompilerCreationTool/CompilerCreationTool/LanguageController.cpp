@@ -25,24 +25,24 @@ namespace
 const std::string gcFrameTitle = "CompilerCreationTool";
 const std::string gcUntitledFilename = "untitled";
 
-wxArrayString GetTerminalsArray(const ILexer& lexer)
+std::vector<std::pair<std::string, std::string>> GetTerminalsArray(const ILexer& lexer)
 {
-	wxArrayString arr;
+	std::vector<std::pair<std::string, std::string>> arr;
 	arr.reserve(lexer.GetPatternsCount());
 	for (std::size_t i = 0; i < lexer.GetPatternsCount(); ++i)
 	{
-		arr.push_back(lexer.GetPattern(i).GetName());
+		arr.emplace_back(lexer.GetPattern(i).GetName(), lexer.GetPattern(i).GetOrigin());
 	}
 	return arr;
 }
 
-wxArrayString GetActionsArray(const IParser<ParseResults>& parser)
+std::vector<std::pair<std::string, std::string>> GetActionsArray(const IParser<ParseResults>& parser)
 {
-	wxArrayString arr;
+	std::vector<std::pair<std::string, std::string>> arr;
 	arr.reserve(parser.GetActionsCount());
 	for (std::size_t i = 0; i < parser.GetActionsCount(); ++i)
 	{
-		arr.push_back(parser.GetAction(i).GetName());
+		arr.emplace_back(parser.GetAction(i).GetName(), ToPrettyString(parser.GetAction(i).GetType()));
 	}
 	return arr;
 }

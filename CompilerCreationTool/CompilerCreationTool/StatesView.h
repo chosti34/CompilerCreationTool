@@ -10,7 +10,6 @@ public:
 
 	void SetParserTable(const IParserTable& table);
 	void ClearItems();
-
 	void AdjustColumnWidth(int width);
 
 private:

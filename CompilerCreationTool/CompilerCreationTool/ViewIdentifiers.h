@@ -5,6 +5,7 @@ namespace Buttons
 	// ”никальные идентификаторы дл€ всех кнопок в приложении
 	enum ID
 	{
+		// ћеню
 		New = 0,
 		Open,
 		Save,
@@ -22,9 +23,9 @@ namespace Buttons
 	};
 }
 
-// 
 namespace StatusBarFields
 {
+	// ”никальные идентификаторы дл€ полей Status-бара
 	enum ID
 	{
 		HelpInfo = 0,

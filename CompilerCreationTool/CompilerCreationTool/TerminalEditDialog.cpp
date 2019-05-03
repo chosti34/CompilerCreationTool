@@ -55,9 +55,7 @@ void TerminalEditDialog::OnOk(wxCommandEvent& event)
 	{
 		wxMessageBox(
 			wxT("Token pattern's regular expression must not allow empty strings!"),
-			wxT("Warning"),
-			wxICON_WARNING
-		);
+			wxT("Warning"), wxICON_WARNING);
 		return;
 	}
 	event.Skip();

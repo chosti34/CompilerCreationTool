@@ -10,13 +10,13 @@ const wxColour gcWarningForegroundColor = wxColour(255, 0, 0);
 }
 
 LanguageInfoDialog::LanguageInfoDialog(wxWindow* parent, const LanguageInfo& info)
-	: wxDialog(parent, wxID_ANY, wxT("Information"))
+	: wxDialog(parent, wxID_ANY, wxT("Information about language"))
 	, m_info(info)
 {
 	wxPanel* panel = new wxPanel(this, wxID_ANY);
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
-	wxStaticBox* box = new wxStaticBox(panel, wxID_ANY, wxT("Language"));
+	wxStaticBox* box = new wxStaticBox(panel, wxID_ANY, wxEmptyString);
 	wxStaticBoxSizer* staticBoxSizer = new wxStaticBoxSizer(box, wxHORIZONTAL);
 
 	wxBoxSizer* leftSizer = new wxBoxSizer(wxVERTICAL);

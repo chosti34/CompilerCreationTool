@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "CtrlHelpers.h"
+#include <wx/stc/stc.h>
 
 void SetupStyledTextCtrlMargins(wxStyledTextCtrl& ctrl)
 {

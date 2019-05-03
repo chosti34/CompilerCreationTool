@@ -9,10 +9,10 @@ public:
 	explicit EntitiesListboxView(
 		wxWindow* parent,
 		const std::string& leftColumn,
-		const std::string& rightColumn
-	);
+		const std::string& rightColumn);
 
 	void SetItems(const std::vector<std::pair<std::string, std::string>> &items);
+	void SetItemValue(int index, const wxString& value);
 	void ClearItems();
 	void DeselectAll();
 

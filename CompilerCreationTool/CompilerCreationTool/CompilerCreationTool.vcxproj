@@ -170,6 +170,7 @@
     <ClInclude Include="TextView.h" />
     <ClInclude Include="TreeView.h" />
     <ClInclude Include="ViewIdentifiers.h" />
+    <ClInclude Include="XpmImages.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ActionEditDialog.cpp" />
@@ -195,6 +196,7 @@
     <ClCompile Include="TextCtrlLogger.cpp" />
     <ClCompile Include="TextView.cpp" />
     <ClCompile Include="TreeView.cpp" />
+    <ClCompile Include="XpmImages.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AST\AST.vcxproj">

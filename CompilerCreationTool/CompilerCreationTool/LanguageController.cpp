@@ -465,6 +465,7 @@ void LanguageController::OnTerminalEdit(int index)
 	TerminalEditDialog dialog(mFrame, pattern);
 	if (dialog.ShowModal() == wxID_OK)
 	{
+		mTerminalsView->SetItemValue(index, pattern.GetOrigin());
 		mHasUnsavedChanges = true;
 		UpdateTitle();
 	}
@@ -488,6 +489,7 @@ void LanguageController::OnActionEdit(int index)
 		action.SetType(newActionType);
 		action.SetMessage(newMessage);
 
+		mActionsView->SetItemValue(index, ToPrettyString(action.GetType()));
 		mHasUnsavedChanges = true;
 		UpdateTitle();
 	}

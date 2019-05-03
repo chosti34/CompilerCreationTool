@@ -43,6 +43,15 @@ void EntitiesListboxView::SetItems(const std::vector<std::pair<std::string, std:
 	AdjustColumnWidth(mListCtrl->GetClientSize().x);
 }
 
+void EntitiesListboxView::SetItemValue(int index, const wxString& value)
+{
+	if (index >= mListCtrl->GetItemCount())
+	{
+		throw std::out_of_range("index must be less than items count");
+	}
+	mListCtrl->SetItem(index, 1, value);
+}
+
 void EntitiesListboxView::ClearItems()
 {
 	mListCtrl->DeleteAllItems();

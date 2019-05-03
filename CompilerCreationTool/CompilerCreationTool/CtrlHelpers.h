@@ -1,4 +1,4 @@
 #pragma once
-#include <wx/stc/stc.h>
 
+class wxStyledTextCtrl;
 void SetupStyledTextCtrlMargins(wxStyledTextCtrl& ctrl);

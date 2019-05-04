@@ -10,7 +10,17 @@ enum class ActionType
 	CreateBinaryPlusNode,
 	CreateBinaryMinusNode,
 	CreateBinaryMulNode,
-	CreateBinaryDivNode
+	CreateBinaryDivNode,
+	CreateBinaryLessNode,
+	CreateBinaryOrNode,
+	CreateBinaryAndNode,
+	CreateUnaryMinusNode,
+	CreateUnaryPlusNode,
+	CreateUnaryNegationNode,
+	CreateIdentifier,
+	CreateTrueNode,
+	CreateFalseNode,
+	CreateStringLiteralNode
 };
 
 std::vector<ActionType> const& GetActionTypesList();

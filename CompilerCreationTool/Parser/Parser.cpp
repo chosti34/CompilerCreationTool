@@ -85,6 +85,32 @@ public:
 		mExpressionsStack.push_back(std::make_unique<BinaryExpressionAST>(std::move(left), std::move(right), op));
 	}
 
+	void DoCreateUnaryNode(UnaryExpressionAST::Operator op)
+	{
+		if (mExpressionsStack.empty())
+		{
+			mHasErrors = true;
+			throw std::runtime_error("expressions stack must contain atleast 1 element");
+		}
+		auto expression = Pop(mExpressionsStack);
+		mExpressionsStack.push_back(std::make_unique<UnaryExpressionAST>(std::move(expression), op));
+	}
+
+	void DoCreateIdentifierNode()
+	{
+		mExpressionsStack.push_back(std::make_unique<IdentifierExpressionAST>(mCurrentToken.value));
+	}
+
+	void DoCreateBooleanNode(bool value)
+	{
+		mExpressionsStack.push_back(std::make_unique<LiteralExpressionAST>(value));
+	}
+
+	void DoCreateStringLiteralNode()
+	{
+		mExpressionsStack.push_back(std::make_unique<LiteralExpressionAST>(mCurrentToken.value));
+	}
+
 private:
 	const Token& mCurrentToken;
 	std::vector<std::unique_ptr<IExpressionAST>> mExpressionsStack;
@@ -117,7 +143,17 @@ ParseResults Parser::Parse(const std::string& text)
 		{ ActionType::CreateBinaryPlusNode, std::bind(&ActionExecutor::DoCreateBinaryNode, &executor, BinaryExpressionAST::Plus) },
 		{ ActionType::CreateBinaryMinusNode, std::bind(&ActionExecutor::DoCreateBinaryNode, &executor, BinaryExpressionAST::Minus) },
 		{ ActionType::CreateBinaryMulNode, std::bind(&ActionExecutor::DoCreateBinaryNode, &executor, BinaryExpressionAST::Mul) },
-		{ ActionType::CreateBinaryDivNode, std::bind(&ActionExecutor::DoCreateBinaryNode, &executor, BinaryExpressionAST::Div) }
+		{ ActionType::CreateBinaryDivNode, std::bind(&ActionExecutor::DoCreateBinaryNode, &executor, BinaryExpressionAST::Div) },
+		{ ActionType::CreateBinaryLessNode, std::bind(&ActionExecutor::DoCreateBinaryNode, &executor, BinaryExpressionAST::Less) },
+		{ ActionType::CreateBinaryOrNode, std::bind(&ActionExecutor::DoCreateBinaryNode, &executor, BinaryExpressionAST::Or) },
+		{ ActionType::CreateBinaryAndNode, std::bind(&ActionExecutor::DoCreateBinaryNode, &executor, BinaryExpressionAST::And) },
+		{ ActionType::CreateUnaryMinusNode, std::bind(&ActionExecutor::DoCreateUnaryNode, &executor, UnaryExpressionAST::Minus) },
+		{ ActionType::CreateUnaryPlusNode, std::bind(&ActionExecutor::DoCreateUnaryNode, &executor, UnaryExpressionAST::Plus) },
+		{ ActionType::CreateUnaryNegationNode, std::bind(&ActionExecutor::DoCreateUnaryNode, &executor, UnaryExpressionAST::Negation) },
+		{ ActionType::CreateIdentifier, std::bind(&ActionExecutor::DoCreateIdentifierNode, &executor) },
+		{ ActionType::CreateTrueNode, std::bind(&ActionExecutor::DoCreateBooleanNode, &executor, true) },
+		{ ActionType::CreateFalseNode, std::bind(&ActionExecutor::DoCreateBooleanNode, &executor, false) },
+		{ ActionType::CreateStringLiteralNode, std::bind(&ActionExecutor::DoCreateStringLiteralNode, &executor) }
 	};
 
 	try

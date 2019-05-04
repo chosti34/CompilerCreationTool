@@ -7,13 +7,13 @@ class IExpressionAST
 {
 public:
 	virtual ~IExpressionAST() = default;
-	virtual void Accept(INodeVisitor& visitor) const = 0;
+	virtual void Accept(IExpressionNodeVisitor& visitor) const = 0;
 };
 
 class LiteralExpressionAST : public IExpressionAST
 {
 public:
-	using Value = boost::variant<int, double>;
+	using Value = boost::variant<int, double, bool, std::string>;
 
 	explicit LiteralExpressionAST(const Value& value)
 		: mValue(value)
@@ -25,7 +25,7 @@ public:
 		return mValue;
 	}
 
-	void Accept(INodeVisitor& visitor) const override
+	void Accept(IExpressionNodeVisitor& visitor) const override
 	{
 		visitor.Visit(*this);
 	}
@@ -42,7 +42,10 @@ public:
 		Plus,
 		Minus,
 		Mul,
-		Div
+		Div,
+		Less,
+		Or,
+		And
 	};
 
 	explicit BinaryExpressionAST(
@@ -71,7 +74,7 @@ public:
 		return mOperator;
 	}
 
-	void Accept(INodeVisitor& visitor) const override
+	void Accept(IExpressionNodeVisitor& visitor) const override
 	{
 		visitor.Visit(*this);
 	}
@@ -80,6 +83,64 @@ private:
 	std::unique_ptr<IExpressionAST> mLeft;
 	std::unique_ptr<IExpressionAST> mRight;
 	Operator mOperator;
+};
+
+class UnaryExpressionAST : public IExpressionAST
+{
+public:
+	enum Operator
+	{
+		Plus,
+		Minus,
+		Negation
+	};
+
+	explicit UnaryExpressionAST(std::unique_ptr<IExpressionAST> && expression, Operator op)
+		: mExpression(std::move(expression))
+		, mOperator(op)
+	{
+	}
+
+	const IExpressionAST& GetExpression() const
+	{
+		return *mExpression;
+	}
+
+	Operator GetOperator() const
+	{
+		return mOperator;
+	}
+
+	void Accept(IExpressionNodeVisitor& visitor) const override
+	{
+		visitor.Visit(*this);
+	}
+
+private:
+	std::unique_ptr<IExpressionAST> mExpression;
+	Operator mOperator;
+};
+
+class IdentifierExpressionAST : public IExpressionAST
+{
+public:
+	explicit IdentifierExpressionAST(const std::string& name)
+		: mName(name)
+	{
+	}
+
+	const std::string& GetName() const
+	{
+		return mName;
+	}
+
+	void Accept(IExpressionNodeVisitor& visitor) const
+	{
+		visitor.Visit(*this);
+	}
+
+private:
+	std::string mName;
 };
 
 inline std::string ToString(BinaryExpressionAST::Operator op)
@@ -94,8 +155,30 @@ inline std::string ToString(BinaryExpressionAST::Operator op)
 		return "*";
 	case BinaryExpressionAST::Div:
 		return "/";
+	case BinaryExpressionAST::Less:
+		return "<";
+	case BinaryExpressionAST::Or:
+		return "||";
+	case BinaryExpressionAST::And:
+		return "&&";
 	default:
 		assert(false);
 		throw std::logic_error("can't cast undefined binary expression operator to string");
+	}
+}
+
+inline std::string ToString(UnaryExpressionAST::Operator op)
+{
+	switch (op)
+	{
+	case UnaryExpressionAST::Plus:
+		return "+";
+	case UnaryExpressionAST::Minus:
+		return "-";
+	case UnaryExpressionAST::Negation:
+		return "!";
+	default:
+		assert(false);
+		throw std::logic_error("can't cast undefined unary expression operator to string");
 	}
 }

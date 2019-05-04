@@ -9,7 +9,8 @@ namespace
 const std::vector<TokenPattern> gcPredefinedPatterns = {
 	{ "Identifier", "([A-Za-z_])([A-Za-z0-9])*" },
 	{ "Integer", "0|[1-9][0-9]*" },
-	{ "Float", "(0|[1-9])\\.[0-9]+" }
+	{ "Float", "(0|[1-9])\\.[0-9]+" },
+	{ "String literal", R"(\"([^\\\"]|\\.)*\")" }
 };
 
 bool RegexAllowsEmptyString(const std::regex& regex)
@@ -21,8 +22,7 @@ bool RegexAllowsEmptyString(const std::regex& regex)
 TokenPattern::TokenPattern(
 	const std::string& name,
 	const std::string& origin,
-	bool isEnding
-)
+	bool isEnding)
 	: m_name(name)
 	, m_origin(origin)
 	, m_regex(origin)

@@ -4,15 +4,25 @@
 
 namespace
 {
-std::string ToString(const boost::variant<int, double> &variant)
+std::string ToString(const LiteralExpressionAST::Value& variant)
 {
 	if (variant.type() == typeid(int))
 	{
-		return std::to_string(boost::get<int>(variant));
+		return "Int: " + std::to_string(boost::get<int>(variant));
 	}
 	else if (variant.type() == typeid(double))
 	{
-		return string_utils::TrimTrailingZerosAndPeriod(boost::get<double>(variant));
+		return "Float: " + string_utils::TrimTrailingZerosAndPeriod(boost::get<double>(variant));
+	}
+	else if (variant.type() == typeid(bool))
+	{
+		return "Boolean: " + boost::get<bool>(variant) ? "true" : "false";
+	}
+	else if (variant.type() == typeid(std::string))
+	{
+		std::string str = boost::get<std::string>(variant);
+		assert(str.size() >= 2);
+		return "String: " + str.substr(1, str.size() - 2);
 	}
 	assert(false);
 	throw std::logic_error("can't get string representation of undefined variant");
@@ -38,7 +48,7 @@ void ASTGraphvizVisualizer::Visualize(const IExpressionAST& expression)
 void ASTGraphvizVisualizer::Visit(const LiteralExpressionAST& literal)
 {
 	mOutput << mIndex << " [";
-	mOutput << "shape=\"circle\" label=\"Literal (" + ToString(literal.GetValue()) + ")\"];" << std::endl;
+	mOutput << "shape=\"circle\" label=\"" + ToString(literal.GetValue()) + "\"];" << std::endl;
 	mChildren.push_back(mIndex++);
 }
 
@@ -47,7 +57,7 @@ void ASTGraphvizVisualizer::Visit(const BinaryExpressionAST& binary)
 	const size_t parent = mIndex;
 
 	mOutput << mIndex++ << " [";
-	mOutput << "shape=\"circle\" label=\"Binary (" << ToString(binary.GetOperator()) << ")\"];" << std::endl;
+	mOutput << "shape=\"circle\" label=\"" << ToString(binary.GetOperator()) << "\"];" << std::endl;
 
 	binary.GetLeft().Accept(*this);
 	binary.GetRight().Accept(*this);
@@ -61,4 +71,27 @@ void ASTGraphvizVisualizer::Visit(const BinaryExpressionAST& binary)
 	mOutput << parent << "->" << left << " [label=\" \"];" << std::endl;
 	mOutput << parent << "->" << right << " [label=\" \"];" << std::endl;
 	mChildren.push_back(parent);
+}
+
+void ASTGraphvizVisualizer::Visit(const UnaryExpressionAST& unary)
+{
+	const size_t that = mIndex;
+
+	mOutput << mIndex++ << "[";
+	mOutput << "shape=\"circle\" label=\"Unary (" << ToString(unary.GetOperator()) << ")\"];" << std::endl;
+
+	unary.GetExpression().Accept(*this);
+
+	size_t child = mChildren.back();
+	mChildren.pop_back();
+
+	mOutput << that << "->" << child << " [label=\" \"];" << std::endl;
+	mChildren.push_back(that);
+}
+
+void ASTGraphvizVisualizer::Visit(const IdentifierExpressionAST& identifier)
+{
+	mOutput << mIndex << "[";
+	mOutput << "shape=\"circle\" label=\"Identifier (" << identifier.GetName() << ")\"];" << std::endl;
+	mChildren.push_back(mIndex++);
 }

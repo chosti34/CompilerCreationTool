@@ -13,7 +13,17 @@ const std::vector<ActionType> gcActionTypes = {
 	ActionType::CreateBinaryPlusNode,
 	ActionType::CreateBinaryMinusNode,
 	ActionType::CreateBinaryMulNode,
-	ActionType::CreateBinaryDivNode
+	ActionType::CreateBinaryDivNode,
+	ActionType::CreateBinaryLessNode,
+	ActionType::CreateBinaryOrNode,
+	ActionType::CreateBinaryAndNode,
+	ActionType::CreateUnaryMinusNode,
+	ActionType::CreateUnaryPlusNode,
+	ActionType::CreateUnaryNegationNode,
+	ActionType::CreateIdentifier,
+	ActionType::CreateTrueNode,
+	ActionType::CreateFalseNode,
+	ActionType::CreateStringLiteralNode
 };
 
 const std::unordered_map<ActionType, std::string> gcActionStringMap = {
@@ -23,7 +33,17 @@ const std::unordered_map<ActionType, std::string> gcActionStringMap = {
 	{ ActionType::CreateBinaryPlusNode, "CreateBinaryPlusNode" },
 	{ ActionType::CreateBinaryMinusNode, "CreateBinaryMinusNode" },
 	{ ActionType::CreateBinaryMulNode, "CreateBinaryMulNode" },
-	{ ActionType::CreateBinaryDivNode, "CreateBinaryDivNode" }
+	{ ActionType::CreateBinaryDivNode, "CreateBinaryDivNode" },
+	{ ActionType::CreateBinaryLessNode, "CreateBinaryLessNode" },
+	{ ActionType::CreateBinaryOrNode, "CreateBinaryOrNode" },
+	{ ActionType::CreateBinaryAndNode, "CreateBinaryAndNode" },
+	{ ActionType::CreateUnaryMinusNode, "CreateUnaryMinusNode" },
+	{ ActionType::CreateUnaryPlusNode, "CreateUnaryPlusNode" },
+	{ ActionType::CreateUnaryNegationNode, "CreateUnaryNegationNode" },
+	{ ActionType::CreateIdentifier, "CreateIdentifier" },
+	{ ActionType::CreateTrueNode, "CreateTrueNode" },
+	{ ActionType::CreateFalseNode, "CreateFalseNode" },
+	{ ActionType::CreateStringLiteralNode, "CreateStringLiteralNode" }
 };
 
 const std::unordered_map<ActionType, std::string> gcActionPrettyStringMap = {
@@ -33,7 +53,17 @@ const std::unordered_map<ActionType, std::string> gcActionPrettyStringMap = {
 	{ ActionType::CreateBinaryPlusNode, "Create binary plus node" },
 	{ ActionType::CreateBinaryMinusNode, "Create binary minus node" },
 	{ ActionType::CreateBinaryMulNode, "Create binary mul node" },
-	{ ActionType::CreateBinaryDivNode, "Create binary div node" }
+	{ ActionType::CreateBinaryDivNode, "Create binary div node" },
+	{ ActionType::CreateBinaryLessNode, "Create binary less node" },
+	{ ActionType::CreateBinaryOrNode, "Create binary or node" },
+	{ ActionType::CreateBinaryAndNode, "Create binary and node" },
+	{ ActionType::CreateUnaryMinusNode, "Create unary minus node" },
+	{ ActionType::CreateUnaryPlusNode, "Create unary plus node" },
+	{ ActionType::CreateUnaryNegationNode, "Create unary negation node" },
+	{ ActionType::CreateIdentifier, "Create identifier node" },
+	{ ActionType::CreateTrueNode, "Create boolean true node" },
+	{ ActionType::CreateFalseNode, "Create boolean false node" },
+	{ ActionType::CreateStringLiteralNode, "Create string literal node" }
 };
 
 const std::unordered_map<ActionType, std::string> gcActionDescriptionMap = {
@@ -43,7 +73,17 @@ const std::unordered_map<ActionType, std::string> gcActionDescriptionMap = {
 	{ ActionType::CreateBinaryPlusNode, "Pop two last expressions from the expression stack, create binary plus node from them, then push it to the stack" },
 	{ ActionType::CreateBinaryMinusNode, "Pop two last expressions from the expression stack, create binary minus node from them, then push it to the stack" },
 	{ ActionType::CreateBinaryMulNode, "Pop two last expressions from the expression stack, create binary mul node from them, then push it to the stack" },
-	{ ActionType::CreateBinaryDivNode, "Pop two last expressions from the expression stack, create binary div node from them, then push it to the stack" }
+	{ ActionType::CreateBinaryDivNode, "Pop two last expressions from the expression stack, create binary div node from them, then push it to the stack" },
+	{ ActionType::CreateBinaryLessNode, "Pop two last expressions from the expression stack, create binary less node from them, then push it to the stack" },
+	{ ActionType::CreateBinaryOrNode, "Pop two last expressions from the expression stack, create binary or node from them, then push it to the stack" },
+	{ ActionType::CreateBinaryAndNode, "Pop two last expressions from the expression stack, create binary and node from them, then push it to the stack" },
+	{ ActionType::CreateUnaryMinusNode, "Pops expression from the stack, create unary minus expression and push it to the stack" },
+	{ ActionType::CreateUnaryPlusNode, "Pops expression from the stack, create unary plus expression and push it to the stack" },
+	{ ActionType::CreateUnaryNegationNode, "Pops expression from the stack, create unary negation expression and push it to the stack" },
+	{ ActionType::CreateIdentifier, "Create identifier node with name of current token, then push it to the stack" },
+	{ ActionType::CreateTrueNode, "Create boolean true node and push it to the stack" },
+	{ ActionType::CreateFalseNode, "Create boolean false node and push it to the stack" },
+	{ ActionType::CreateStringLiteralNode, "Create string literal node from current token, then push it to the stack" }
 };
 }
 

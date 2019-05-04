@@ -199,6 +199,12 @@ void EntitiesListboxView::OnListCtrlItemSelection(wxListEvent&)
 void EntitiesListboxView::OnListCtrlItemDoubleSelection(wxListEvent&)
 {
 	const int selection = GetSelection();
-	assert(selection != wxNOT_FOUND);
-	m_itemDoubleSelectionSignal(selection);
+	if (selection != wxNOT_FOUND)
+	{
+		m_itemDoubleSelectionSignal(selection);
+	}
+	else
+	{
+		std::cerr << "Assertion failed: selection is wxNOT_FOUND (EntitiesListboxView.cpp, 209)" << std::endl;
+	}
 }

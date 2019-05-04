@@ -35,7 +35,7 @@ StatesView::StatesView(wxWindow* parent)
 	sizer->Add(m_list, 1, wxEXPAND | wxALL, gcBorderSize);
 	SetSizer(sizer);
 
-	Bind(wxEVT_SIZE, &StatesView::OnListResize, this);
+	Bind(wxEVT_SIZE, &StatesView::OnResize, this);
 }
 
 void StatesView::SetParserTable(const IParserTable& table)
@@ -82,7 +82,7 @@ void StatesView::AdjustColumnWidth(int width)
 	Refresh(true);
 }
 
-void StatesView::OnListResize(wxSizeEvent& event)
+void StatesView::OnResize(wxSizeEvent& event)
 {
 	if (m_list->GetItemCount() != 0)
 	{

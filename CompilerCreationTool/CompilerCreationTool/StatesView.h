@@ -13,7 +13,7 @@ public:
 	void AdjustColumnWidth(int width);
 
 private:
-	void OnListResize(wxSizeEvent& event);
+	void OnResize(wxSizeEvent& event);
 
 private:
 	wxListView* m_list;

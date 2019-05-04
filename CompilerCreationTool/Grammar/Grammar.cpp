@@ -46,12 +46,19 @@ bool HasSymbol(const IGrammarProduction& production, const IGrammarSymbol& symbo
 	}
 	return false;
 }
-}
 
-//bool Grammar::IsNormalized() const
-//{
-//	return mNormalized;
-//}
+bool HasSymbolInRightPart(const IGrammarProduction& production, const std::string& symbol)
+{
+	for (size_t i = 0; i < production.GetSymbolsCount(); ++i)
+	{
+		if (production.GetSymbol(i).GetName() == symbol)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+}
 
 // Делаем все альтернативны нетерминала соседними по индексу в массиве правил грамматики
 void Grammar::NormalizeIndices()
@@ -126,11 +133,6 @@ bool Grammar::IsEmpty() const
 	return mProductions.empty();
 }
 
-//const std::string& Grammar::GetText() const
-//{
-//	return mText;
-//}
-
 const std::string& Grammar::GetStartSymbol() const
 {
 	if (mProductions.empty())
@@ -158,6 +160,11 @@ void Grammar::TryInsertFirstProduction(std::unique_ptr<IGrammarProduction> && pr
 {
 	assert(IsEmpty());
 
+	if (HasSymbolInRightPart(*production, production->GetLeftPart()))
+	{
+		throw std::runtime_error("start symbol '" + production->GetLeftPart() + "' can't be placed in right part");
+	}
+
 	if (!production->EndsWith(GrammarSymbolType::Terminal))
 	{
 		throw std::runtime_error("grammar's first production must end with terminal, " +
@@ -178,6 +185,11 @@ void Grammar::TryInsertProduction(std::unique_ptr<IGrammarProduction> && product
 {
 	assert(!IsEmpty());
 
+	if (HasSymbolInRightPart(*production, GetStartSymbol()))
+	{
+		throw std::runtime_error("start symbol '" + GetStartSymbol() + "' can't be placed in right part");
+	}
+
 	if (production->GetLeftPart() == GetStartSymbol())
 	{
 		if (!production->EndsWith(GrammarSymbolType::Terminal))
@@ -196,11 +208,13 @@ void Grammar::TryInsertProduction(std::unique_ptr<IGrammarProduction> && product
 				production->GetBackSymbol().GetName() + "' can't be repeated");
 		}
 	}
-	else if (HasSymbol(*production, mProductions.front()->GetBackSymbol()))
+	else
 	{
-		throw std::runtime_error(
-			"grammar's ending symbol can't be located at production #" + std::to_string(GetProductionsCount())
-		);
+		if (HasSymbol(*production, mProductions.front()->GetBackSymbol()))
+		{
+			throw std::runtime_error(
+				"grammar's ending symbol can't be located at production #" + std::to_string(GetProductionsCount()));
+		}
 	}
 
 	mProductions.push_back(std::move(production));

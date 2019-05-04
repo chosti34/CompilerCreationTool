@@ -239,13 +239,14 @@ bool ExistsEpsilonProduction(const IGrammar& grammar, const std::string& nonterm
 	return false;
 }
 
-bool NonterminalHasEmptiness(const IGrammar& grammar, const std::string& nonterminal)
+bool NonterminalHasEmptinessHelper(const IGrammar& grammar, const std::string& nonterminal, std::set<std::string> &visited)
 {
 	if (ExistsEpsilonProduction(grammar, nonterminal))
 	{
 		return true;
 	}
 
+	visited.insert(nonterminal);
 	const auto indices = GatherProductionIndices(grammar, [&nonterminal](const IGrammarProduction& production) -> bool {
 		return production.GetLeftPart() == nonterminal && ProductionConsistsOfNonterminals(production);
 	});
@@ -261,16 +262,20 @@ bool NonterminalHasEmptiness(const IGrammar& grammar, const std::string& nonterm
 			const IGrammarSymbol& entity = production.GetSymbol(i);
 			assert(entity.GetType() == GrammarSymbolType::Nonterminal);
 
-			if (!NonterminalHasEmptiness(grammar, entity.GetName()))
+			if (visited.find(nonterminal) == visited.end() && !NonterminalHasEmptinessHelper(grammar, entity.GetName(), visited))
 			{
 				return false;
 			}
 		}
-
-		return true;
 	}
 
-	return false;
+	return true;
+}
+
+bool NonterminalHasEmptiness(const IGrammar& grammar, const std::string& nonterminal)
+{
+	std::set<std::string> visited;
+	return NonterminalHasEmptinessHelper(grammar, nonterminal, visited);
 }
 
 std::set<std::pair<int, int>> GatherNonterminalOccurrences(const IGrammar& grammar, const std::string& nonterminal)

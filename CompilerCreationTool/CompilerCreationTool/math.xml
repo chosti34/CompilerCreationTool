@@ -5,7 +5,43 @@
             <Symbol name="EOF" type="Terminal"/>
         </Production>
         <Production left="Expression">
+            <Symbol name="OrExpr" type="Nonterminal"/>
+        </Production>
+        <Production left="OrExpr">
+            <Symbol name="AndExpr" type="Nonterminal"/>
+            <Symbol name="OrExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="OrExprTail">
+            <Symbol name="Or" type="Terminal"/>
+            <Symbol name="AndExpr" type="Nonterminal" attribute="OnBinaryOrParse"/>
+            <Symbol name="OrExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="OrExprTail">
+            <Symbol name="#Eps#" type="Epsilon"/>
+        </Production>
+        <Production left="AndExpr">
+            <Symbol name="LessExpr" type="Nonterminal"/>
+            <Symbol name="AndExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="AndExprTail">
+            <Symbol name="And" type="Terminal"/>
+            <Symbol name="LessExpr" type="Nonterminal" attribute="OnBinaryAndParse"/>
+            <Symbol name="AndExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="AndExprTail">
+            <Symbol name="#Eps#" type="Epsilon"/>
+        </Production>
+        <Production left="LessExpr">
             <Symbol name="AddSubExpr" type="Nonterminal"/>
+            <Symbol name="LessExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="LessExprTail">
+            <Symbol name="Less" type="Terminal"/>
+            <Symbol name="AddSubExpr" type="Nonterminal" attribute="OnBinaryLessParse"/>
+            <Symbol name="LessExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="LessExprTail">
+            <Symbol name="#Eps#" type="Epsilon"/>
         </Production>
         <Production left="AddSubExpr">
             <Symbol name="MulDivExpr" type="Nonterminal"/>
@@ -59,27 +95,59 @@
             <Symbol name="Minus" type="Terminal"/>
             <Symbol name="AtomExpr" type="Nonterminal" attribute="OnUnaryMinusParse"/>
         </Production>
+        <Production left="AtomExpr">
+            <Symbol name="Plus" type="Terminal"/>
+            <Symbol name="AtomExpr" type="Nonterminal" attribute="OnUnaryPlusParse"/>
+        </Production>
+        <Production left="AtomExpr">
+            <Symbol name="Negation" type="Terminal"/>
+            <Symbol name="AtomExpr" type="Nonterminal" attribute="OnUnaryNegationParse"/>
+        </Production>
+        <Production left="AtomExpr">
+            <Symbol name="True" type="Terminal" attribute="OnTrueParse"/>
+        </Production>
+        <Production left="AtomExpr">
+            <Symbol name="False" type="Terminal" attribute="OnFalseParse"/>
+        </Production>
+        <Production left="AtomExpr">
+            <Symbol name="StringLiteral" type="Terminal" attribute="OnStringLiteralParse"/>
+        </Production>
     </Grammar>
     <Patterns>
         <Pattern name="EOF" origin="EOF" isEnding="true"/>
         <Pattern name="Plus" origin="\+" isEnding="false"/>
         <Pattern name="Minus" origin="\-" isEnding="false"/>
         <Pattern name="Mul" origin="\*" isEnding="false"/>
-        <Pattern name="Div" origin="\/" isEnding="false"/>
-        <Pattern name="Identifier" origin="origin" isEnding="false"/>
+        <Pattern name="Or" origin="\|\|" isEnding="false"/>
+        <Pattern name="And" origin="\&amp;\&amp;" isEnding="false"/>
+        <Pattern name="Less" origin="\&lt;" isEnding="false"/>
         <Pattern name="FloatConstant" origin="(0|[1-9])\.[0-9]+" isEnding="false"/>
         <Pattern name="IntegerConstant" origin="0|[1-9][0-9]*" isEnding="false"/>
         <Pattern name="LeftParenthesis" origin="\(" isEnding="false"/>
+        <Pattern name="Div" origin="\/" isEnding="false"/>
+        <Pattern name="Negation" origin="\!" isEnding="false"/>
+        <Pattern name="Identifier" origin="([A-Za-z_])([A-Za-z0-9])*" isEnding="false"/>
         <Pattern name="RightParenthesis" origin="\)" isEnding="false"/>
+        <Pattern name="True" origin="True" isEnding="false"/>
+        <Pattern name="False" origin="False" isEnding="false"/>
+        <Pattern name="StringLiteral" origin="\&quot;([^\\\&quot;]|\\.)*\&quot;" isEnding="false"/>
     </Patterns>
     <Actions>
         <Action name="OnBinaryPlusParse" type="CreateBinaryPlusNode" message="какое-то сообщение"/>
         <Action name="OnBinaryMinusParse" type="CreateBinaryMinusNode"/>
         <Action name="OnBinaryMulParse" type="CreateBinaryMulNode"/>
-        <Action name="OnBinaryDivParse" type="CreateBinaryDivNode"/>
-        <Action name="OnIdentifierParse" type="None"/>
-        <Action name="OnIntegerConstantParse" type="CreateIntegerNumberNode"/>
+        <Action name="OnBinaryOrParse" type="CreateBinaryOrNode"/>
+        <Action name="OnBinaryAndParse" type="CreateBinaryAndNode"/>
+        <Action name="OnBinaryLessParse" type="CreateBinaryLessNode"/>
         <Action name="OnFloatConstantParse" type="CreateFloatNumberNode"/>
-        <Action name="OnUnaryMinusParse" type="None"/>
+        <Action name="OnUnaryMinusParse" type="CreateUnaryMinusNode"/>
+        <Action name="OnUnaryPlusParse" type="CreateUnaryPlusNode"/>
+        <Action name="OnBinaryDivParse" type="CreateBinaryDivNode"/>
+        <Action name="OnIdentifierParse" type="CreateIdentifier"/>
+        <Action name="OnIntegerConstantParse" type="CreateIntegerNumberNode"/>
+        <Action name="OnUnaryNegationParse" type="CreateUnaryNegationNode"/>
+        <Action name="OnTrueParse" type="CreateTrueNode"/>
+        <Action name="OnFalseParse" type="CreateFalseNode"/>
+        <Action name="OnStringLiteralParse" type="CreateStringLiteralNode"/>
     </Actions>
 </Language>

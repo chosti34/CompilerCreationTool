@@ -3,7 +3,7 @@
 #include "../AST/NodeVisitor.h"
 #include <fstream>
 
-class ASTGraphvizVisualizer : public INodeVisitor
+class ASTGraphvizVisualizer : public IExpressionNodeVisitor
 {
 public:
 	explicit ASTGraphvizVisualizer(const std::string& filepath);
@@ -14,6 +14,8 @@ public:
 private:
 	void Visit(const LiteralExpressionAST& literal) override;
 	void Visit(const BinaryExpressionAST& binary) override;
+	void Visit(const UnaryExpressionAST& unary) override;
+	void Visit(const IdentifierExpressionAST& identifier) override;
 
 private:
 	std::ofstream mOutput;

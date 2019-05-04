@@ -364,11 +364,13 @@ void LanguageController::OnRunButtonPress()
 			}
 			else
 			{
+				mTreeView->UnsetImage();
 				logger->Log("Can't draw AST...\n");
 			}
 		}
 		else
 		{
+			mTreeView->UnsetImage();
 			logger->Log("Install Graphviz package to draw AST...\n");
 		}
 	}

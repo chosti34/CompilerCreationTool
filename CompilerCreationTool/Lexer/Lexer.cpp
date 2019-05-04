@@ -19,6 +19,11 @@ bool SearchAndSaveMatch(
 	return std::regex_search(text.c_str() + fromPosition, match, regex, flags);
 }
 
+bool IsSpace(char ch)
+{
+	return std::isspace(unsigned char(ch));
+}
+
 bool IsNewlineCharacter(char ch)
 {
 	return ch == '\n' || ch == '\r' || ch == '\r\n';
@@ -29,7 +34,7 @@ Token Lexer::GetNextToken()
 {
 	while (mPosition < mText.length())
 	{
-		if (std::isspace(mText[mPosition]))
+		if (IsSpace(mText[mPosition]))
 		{
 			SkipWhitespaces();
 			continue;
@@ -144,7 +149,7 @@ size_t Lexer::GetPatternsCount() const
 
 void Lexer::SkipWhitespaces()
 {
-	while (mPosition < mText.length() && std::isspace(mText[mPosition]))
+	while (mPosition < mText.length() && IsSpace(mText[mPosition]))
 	{
 		++mColumn;
 		if (IsNewlineCharacter(mText[mPosition]))

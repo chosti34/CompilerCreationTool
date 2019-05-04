@@ -4,6 +4,7 @@
 #include <wx/artprov.h>
 #include <wx/aui/auibar.h>
 #include <wx/aui/dockart.h>
+#include <wx/aboutdlg.h>
 
 using namespace std::literals::string_literals;
 
@@ -22,9 +23,9 @@ wxMenuBar* CreateMenuBar()
 	file->Append(wxID_EXIT);
 
 	wxMenu* edit = new wxMenu;
-	edit->Append(0, "Move item up");
-	edit->Append(1, "Move item down");
-	edit->Append(2, "Item settings...");
+	edit->Append(Buttons::Up, "Move item up");
+	edit->Append(Buttons::Down, "Move item down");
+	edit->Append(Buttons::Edit, "Item settings...");
 
 	wxMenu* view = new wxMenu;
 	view->AppendCheckItem(
@@ -35,9 +36,9 @@ wxMenuBar* CreateMenuBar()
 	view->Append(Buttons::Clear, "Clear output", nullptr, "Clear output window's content");
 
 	wxMenu* language = new wxMenu;
-	language->Append(0, "Build");
-	language->Append(1, "Run");
-	language->Append(2, "Get info");
+	language->Append(Buttons::Build, "Build");
+	language->Append(Buttons::Run, "Run");
+	language->Append(Buttons::Info, "Get info");
 
 	wxMenu* help = new wxMenu;
 	help->Append(wxID_ABOUT);
@@ -114,6 +115,8 @@ void AddTools(wxToolBar& toolbar)
 MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	: wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, size)
 {
+	SetIcon(wxIcon(gcAppIcon));
+
 	// Menubar
 	mMenubar = CreateMenuBar();
 	SetMenuBar(mMenubar);
@@ -124,6 +127,11 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	mToolbar->Realize();
 
 	mMenubar->Enable(Buttons::LogMessages, false);
+	mMenubar->Enable(Buttons::Run, false);
+	mMenubar->Enable(Buttons::Info, false);
+	mMenubar->Enable(Buttons::Up, false);
+	mMenubar->Enable(Buttons::Down, false);
+	mMenubar->Enable(Buttons::Edit, false);
 	mToolbar->EnableTool(Buttons::Run, false);
 	mToolbar->EnableTool(Buttons::Info, false);
 	mToolbar->EnableTool(Buttons::Up, false);
@@ -260,10 +268,12 @@ void MainFrame::SendButtonPressedSignal(Buttons::ID buttonID)
 
 void MainFrame::OpenAboutDialog()
 {
-	wxMessageBox(
-		"Tool for building compiler.",
-		"About CompilerCreationTool",
-		wxOK | wxICON_INFORMATION);
+	wxAboutDialogInfo info;
+	info.SetName("CompilerCreationTool");
+	info.SetVersion("1.0.0");
+	info.SetDescription("Create your own minimal compiler in just a few clicks!");
+	info.SetCopyright("(C) 2019, Timur Karimov <chosti34@gmail.com>");
+	wxAboutBox(info, this);
 }
 
 void MainFrame::OnClose(wxCloseEvent& event)
@@ -460,16 +470,24 @@ void MainFrame::OnItemEdit(wxCommandEvent&)
 }
 
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
+	EVT_SIZE(MainFrame::OnSize)
+	EVT_CLOSE(MainFrame::OnClose)
 	EVT_MENU(wxID_NEW, MainFrame::OnNew)
 	EVT_MENU(wxID_OPEN, MainFrame::OnOpen)
 	EVT_MENU(wxID_SAVE, MainFrame::OnSave)
 	EVT_MENU(wxID_SAVEAS, MainFrame::OnSaveAs)
 	EVT_MENU(wxID_EXIT, MainFrame::OnExit)
 	EVT_MENU(wxID_ABOUT, MainFrame::OnAbout)
+
+	EVT_MENU(Buttons::Up, MainFrame::OnItemUp)
+	EVT_MENU(Buttons::Down, MainFrame::OnItemDown)
+	EVT_MENU(Buttons::Edit, MainFrame::OnItemEdit)
+	EVT_MENU(Buttons::Build, MainFrame::OnBuild)
+	EVT_MENU(Buttons::Run, MainFrame::OnRun)
+	EVT_MENU(Buttons::Info, MainFrame::OnInfo)
 	EVT_MENU(Buttons::Clear, MainFrame::OnClear)
 	EVT_MENU(Buttons::LogMessages, MainFrame::OnLogMessages)
-	EVT_SIZE(MainFrame::OnSize)
-	EVT_CLOSE(MainFrame::OnClose)
+
 	EVT_TOOL(Buttons::New, MainFrame::OnNew)
 	EVT_TOOL(Buttons::Open, MainFrame::OnOpen)
 	EVT_TOOL(Buttons::Save, MainFrame::OnSave)

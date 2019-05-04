@@ -15,6 +15,11 @@ namespace
 const std::string ARROW_SYMBOL = "->";
 const std::string EPSILON_SYMBOL = "#Eps#";
 
+bool IsSpace(char ch)
+{
+	return std::isspace(unsigned char(ch));
+}
+
 // Terminals and non terminals can't contain this characters
 bool IsSpecialCharacter(char ch)
 {
@@ -60,7 +65,7 @@ void ReadWhile(
 bool ReadAs(const std::string& text, size_t& offset, const std::string& what)
 {
 	size_t offsetCopy = offset;
-	SkipWhile(text, offsetCopy, std::isspace);
+	SkipWhile(text, offsetCopy, IsSpace);
 	if (MatchSafely(text, offsetCopy, what))
 	{
 		offset = offsetCopy;
@@ -72,11 +77,12 @@ bool ReadAs(const std::string& text, size_t& offset, const std::string& what)
 bool ReadChars(const std::string& text, size_t& offset, std::string& chars)
 {
 	size_t offsetCopy = offset;
-	SkipWhile(text, offsetCopy, std::isspace);
+	SkipWhile(text, offsetCopy, IsSpace);
 
 	std::string characters;
 	ReadWhile(text, characters, offsetCopy, [](char ch) {
-		return std::isalnum(ch) || (std::ispunct(ch) && !IsSpecialCharacter(ch));
+		const unsigned char converted = unsigned char(ch);
+		return std::isalnum(converted) || (std::ispunct(converted) && !IsSpecialCharacter(converted));
 	});
 
 	if (!characters.empty())
@@ -96,7 +102,7 @@ bool ReadCharsEx(
 	const std::string& suffix)
 {
 	size_t offsetCopy = offset;
-	SkipWhile(text, offsetCopy, std::isspace);
+	SkipWhile(text, offsetCopy, IsSpace);
 
 	if (!MatchSafely(text, offsetCopy, prefix))
 	{
@@ -197,7 +203,7 @@ std::unique_ptr<IGrammarProduction> GrammarProductionFactory::CreateProduction(c
 		}
 		else
 		{
-			SkipWhile(line, offset, std::isspace);
+			SkipWhile(line, offset, IsSpace);
 			if (offset >= line.length())
 			{
 				break;

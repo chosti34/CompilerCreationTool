@@ -55,8 +55,6 @@ void EntitiesListboxView::SetItemValue(int index, const wxString& value)
 void EntitiesListboxView::ClearItems()
 {
 	mListCtrl->DeleteAllItems();
-	const long index = mListCtrl->InsertItem(0, wxEmptyString);
-	mListCtrl->SetItem(index, 1, wxEmptyString);
 }
 
 void EntitiesListboxView::DeselectAll()

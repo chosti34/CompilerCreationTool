@@ -179,6 +179,11 @@ void LanguageController::OnNewButtonPress()
 	mOutputView->GetTextCtrl()->Clear();
 
 	mFrame->GetMenuBar()->Enable(Buttons::LogMessages, false);
+	mFrame->GetMenuBar()->Enable(Buttons::Run, false);
+	mFrame->GetMenuBar()->Enable(Buttons::Info, false);
+	mFrame->GetMenuBar()->Enable(Buttons::Up, false);
+	mFrame->GetMenuBar()->Enable(Buttons::Down, false);
+	mFrame->GetMenuBar()->Enable(Buttons::Edit, false);
 	mFrame->GetToolBar()->EnableTool(Buttons::Run, false);
 	mFrame->GetToolBar()->EnableTool(Buttons::Info, false);
 	mFrame->GetToolBar()->EnableTool(Buttons::Down, false);
@@ -223,6 +228,8 @@ void LanguageController::OnOpenButtonPress()
 		// Обновляем кнопки
 		mDocument = openFileDialog.GetFilename();
 		mFrame->GetMenuBar()->Enable(Buttons::LogMessages, true);
+		mFrame->GetMenuBar()->Enable(Buttons::Run, true);
+		mFrame->GetMenuBar()->Enable(Buttons::Info, true);
 		mFrame->GetToolBar()->EnableTool(Buttons::Run, true);
 		mFrame->GetToolBar()->EnableTool(Buttons::Info, true);
 		mFrame->GetToolBar()->EnableTool(Buttons::Save, true);
@@ -296,6 +303,8 @@ void LanguageController::OnBuildButtonPress()
 	mStatesView->SetParserTable(mLanguage->GetParser().GetTable());
 
 	// Обновляем представление
+	mFrame->GetMenuBar()->Enable(Buttons::Run, true);
+	mFrame->GetMenuBar()->Enable(Buttons::Info, true);
 	mFrame->GetToolBar()->EnableTool(Buttons::Run, true);
 	mFrame->GetToolBar()->EnableTool(Buttons::Info, true);
 	mFrame->GetToolBar()->EnableTool(Buttons::Save, true);
@@ -380,6 +389,7 @@ void LanguageController::OnInfoButtonPress()
 
 void LanguageController::OnUpButtonPress()
 {
+	assert(mTerminalsView->HasSelection() || mActionsView->HasSelection());
 	if (mTerminalsView->HasSelection() && mTerminalsView->MoveSelectionUp())
 	{
 		SwapTerminalPositions(mTerminalsView->GetSelection(), mTerminalsView->GetSelection() + 1);
@@ -392,6 +402,7 @@ void LanguageController::OnUpButtonPress()
 
 void LanguageController::OnDownButtonPress()
 {
+	assert(mTerminalsView->HasSelection() || mActionsView->HasSelection());
 	if (mTerminalsView->HasSelection() && mTerminalsView->MoveSelectionDown())
 	{
 		SwapTerminalPositions(mTerminalsView->GetSelection(), mTerminalsView->GetSelection() - 1);
@@ -404,6 +415,7 @@ void LanguageController::OnDownButtonPress()
 
 void LanguageController::OnEditButtonPress()
 {
+	assert(mTerminalsView->HasSelection() || mActionsView->HasSelection());
 	if (mTerminalsView->HasSelection())
 	{
 		OnTerminalEdit(mTerminalsView->GetSelection());
@@ -416,6 +428,9 @@ void LanguageController::OnEditButtonPress()
 
 void LanguageController::OnTerminalsViewDeselection()
 {
+	mFrame->GetMenuBar()->Enable(Buttons::Up, false);
+	mFrame->GetMenuBar()->Enable(Buttons::Down, false);
+	mFrame->GetMenuBar()->Enable(Buttons::Edit, false);
 	mFrame->GetToolBar()->EnableTool(Buttons::Up, false);
 	mFrame->GetToolBar()->EnableTool(Buttons::Down, false);
 	mFrame->GetToolBar()->EnableTool(Buttons::Edit, false);
@@ -424,6 +439,9 @@ void LanguageController::OnTerminalsViewDeselection()
 
 void LanguageController::OnActionsViewDeselection()
 {
+	mFrame->GetMenuBar()->Enable(Buttons::Up, false);
+	mFrame->GetMenuBar()->Enable(Buttons::Down, false);
+	mFrame->GetMenuBar()->Enable(Buttons::Edit, false);
 	mFrame->GetToolBar()->EnableTool(Buttons::Up, false);
 	mFrame->GetToolBar()->EnableTool(Buttons::Down, false);
 	mFrame->GetToolBar()->EnableTool(Buttons::Edit, false);
@@ -433,6 +451,9 @@ void LanguageController::OnActionsViewDeselection()
 void LanguageController::OnTerminalSelection(int)
 {
 	mActionsView->DeselectAll();
+	mFrame->GetMenuBar()->Enable(Buttons::Up, true);
+	mFrame->GetMenuBar()->Enable(Buttons::Down, true);
+	mFrame->GetMenuBar()->Enable(Buttons::Edit, true);
 	mFrame->GetToolBar()->EnableTool(Buttons::Up, true);
 	mFrame->GetToolBar()->EnableTool(Buttons::Down, true);
 	mFrame->GetToolBar()->EnableTool(Buttons::Edit, true);
@@ -441,6 +462,9 @@ void LanguageController::OnTerminalSelection(int)
 void LanguageController::OnActionSelection(int)
 {
 	mTerminalsView->DeselectAll();
+	mFrame->GetMenuBar()->Enable(Buttons::Up, true);
+	mFrame->GetMenuBar()->Enable(Buttons::Down, true);
+	mFrame->GetMenuBar()->Enable(Buttons::Edit, true);
 	mFrame->GetToolBar()->EnableTool(Buttons::Up, true);
 	mFrame->GetToolBar()->EnableTool(Buttons::Down, true);
 	mFrame->GetToolBar()->EnableTool(Buttons::Edit, true);
@@ -455,7 +479,7 @@ void LanguageController::OnTerminalEdit(int index)
 	if (pattern.IsEnding())
 	{
 		using namespace std::string_literals;
-		const wxString cTitle = wxT("Information About Terminal '" + pattern.GetName() + "'");
+		const wxString cTitle = wxT("Information about terminal '" + pattern.GetName() + "'");
 		const wxString cMessage = "'"s + pattern.GetName() +
 			"' is grammar's ending terminal - you cannot edit it."s;
 		wxMessageBox(cMessage, cTitle, wxOK | wxICON_WARNING);

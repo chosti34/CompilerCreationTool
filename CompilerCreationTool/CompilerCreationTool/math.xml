@@ -66,14 +66,14 @@
         <Pattern name="Minus" origin="\-" isEnding="false"/>
         <Pattern name="Mul" origin="\*" isEnding="false"/>
         <Pattern name="Div" origin="\/" isEnding="false"/>
-        <Pattern name="Identifier" origin="([A-Za-z_])([A-Za-z0-9])*" isEnding="false"/>
+        <Pattern name="Identifier" origin="origin" isEnding="false"/>
         <Pattern name="FloatConstant" origin="(0|[1-9])\.[0-9]+" isEnding="false"/>
         <Pattern name="IntegerConstant" origin="0|[1-9][0-9]*" isEnding="false"/>
         <Pattern name="LeftParenthesis" origin="\(" isEnding="false"/>
         <Pattern name="RightParenthesis" origin="\)" isEnding="false"/>
     </Patterns>
     <Actions>
-        <Action name="OnBinaryPlusParse" type="CreateBinaryPlusNode" message=",as,sajd"/>
+        <Action name="OnBinaryPlusParse" type="CreateBinaryPlusNode" message="какое-то сообщение"/>
         <Action name="OnBinaryMinusParse" type="CreateBinaryMinusNode"/>
         <Action name="OnBinaryMulParse" type="CreateBinaryMulNode"/>
         <Action name="OnBinaryDivParse" type="CreateBinaryDivNode"/>

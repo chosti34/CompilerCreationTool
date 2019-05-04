@@ -29,7 +29,10 @@ TokenPattern::TokenPattern(
 	, m_isEnding(isEnding)
 {
 	// Пользователь не может создать TokenPattern в runtime, поэтому используется assert
-	assert(!RegexAllowsEmptyString(m_regex));
+	if (RegexAllowsEmptyString(m_regex))
+	{
+		throw std::runtime_error("token pattern must not allow empty strings");
+	}
 }
 
 void TokenPattern::SetName(const std::string& name)

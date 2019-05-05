@@ -167,12 +167,45 @@ void ASTGraphvizStatementVisualizer::Visit(const IfStatementAST& ifStatement)
 
 void ASTGraphvizStatementVisualizer::Visit(const WhileStatementAST& whileStatement)
 {
+	const std::size_t statementIndex = mIndex;
+
+	mOutput << mIndex++ << " [";
+	mOutput << "shape=\"circle\" label=\"While\"]" << std::endl;
+
+	const std::size_t expressionIndex = mIndex;
+	ASTGraphvizExpressionVisualizer expressionVisualizer(mOutput, mIndex);
+	expressionVisualizer.Visualize(whileStatement.GetExpression());
+	mOutput << statementIndex << "->" << expressionIndex << " [label=\" condition\"];" << std::endl;
+
+	const std::size_t bodyIndex = mIndex;
+	whileStatement.GetStatement().Accept(*this);
+	mOutput << statementIndex << "->" << bodyIndex << " [label=\" body\"];" << std::endl;
 }
 
 void ASTGraphvizStatementVisualizer::Visit(const PrintStatementAST& print)
 {
+	const std::size_t statementIndex = mIndex;
+
+	mOutput << mIndex++ << " [";
+	mOutput << "shape=\"circle\" label=\"Print\"]" << std::endl;
+
+	const std::size_t expressionIndex = mIndex;
+	ASTGraphvizExpressionVisualizer expressionVisualizer(mOutput, mIndex);
+	expressionVisualizer.Visualize(print.GetExpression());
+	mOutput << statementIndex << "->" << expressionIndex << " [label=\" \"];" << std::endl;
 }
 
 void ASTGraphvizStatementVisualizer::Visit(const CompositeStatementAST& composite)
 {
+	const std::size_t statementIndex = mIndex;
+
+	mOutput << mIndex++ << " [";
+	mOutput << "shape=\"circle\" label=\"Statement List\"]" << std::endl;
+
+	for (std::size_t i = 0; i < composite.GetStatementsCount(); ++i)
+	{
+		const std::size_t currentIndex = mIndex;
+		composite.GetStatement(i).Accept(*this);
+		mOutput << statementIndex << "->" << currentIndex << " [label=\" \"];" << std::endl;
+	}
 }

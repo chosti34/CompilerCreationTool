@@ -36,10 +36,16 @@ const std::vector<ActionType> gcActionTypes = {
 	ActionType::CreateAssignNode,
 	ActionType::CreateIfStatementNode,
 	ActionType::SaveOptionalElseStatement,
+	ActionType::CreateWhileStatementNode,
+	ActionType::CreatePrintStatementNode,
+	ActionType::AllocateNewComposite,
+	ActionType::OnCompositePartParse,
+	ActionType::MoveCompositeToStatement
 };
 
 const std::unordered_map<ActionType, std::string> gcActionStringMap = {
 	{ ActionType::None, "None" },
+
 	{ ActionType::CreateIntegerNumberNode, "CreateIntegerNumberNode" },
 	{ ActionType::CreateFloatNumberNode, "CreateFloatNumberNode" },
 	{ ActionType::CreateBinaryPlusNode, "CreateBinaryPlusNode" },
@@ -67,6 +73,12 @@ const std::unordered_map<ActionType, std::string> gcActionStringMap = {
 	{ ActionType::CreateAssignNode, "CreateAssignNode" },
 	{ ActionType::CreateIfStatementNode, "CreateIfStatementNode" },
 	{ ActionType::SaveOptionalElseStatement, "SaveOptionalElseStatement" },
+	{ ActionType::CreateWhileStatementNode, "CreateWhileStatementNode" },
+	{ ActionType::CreatePrintStatementNode, "CreatePrintStatementNode" },
+	{ ActionType::AllocateNewComposite, "AllocateNewComposite" },
+	{ ActionType::OnCompositePartParse, "OnCompositePartParse" },
+	{ ActionType::MoveCompositeToStatement, "MoveCompositeToStatement" },
+
 };
 
 const std::unordered_map<ActionType, std::string> gcActionPrettyStringMap = {
@@ -98,6 +110,11 @@ const std::unordered_map<ActionType, std::string> gcActionPrettyStringMap = {
 	{ ActionType::CreateAssignNode, "Create assign node" },
 	{ ActionType::CreateIfStatementNode, "Create if statement node" },
 	{ ActionType::SaveOptionalElseStatement, "Save optional else statement" },
+	{ ActionType::CreateWhileStatementNode, "Create while statement node" },
+	{ ActionType::CreatePrintStatementNode, "Create print statement node" },
+	{ ActionType::AllocateNewComposite, "Allocate new composite" },
+	{ ActionType::OnCompositePartParse, "On composite part parse" },
+	{ ActionType::MoveCompositeToStatement, "Move composite to statement" },
 };
 
 const std::unordered_map<ActionType, std::string> gcActionDescriptionMap = {
@@ -129,6 +146,11 @@ const std::unordered_map<ActionType, std::string> gcActionDescriptionMap = {
 	{ ActionType::CreateAssignNode, "Create assign node and push it to the stack" },
 	{ ActionType::CreateIfStatementNode, "Pop then statement, else clause statement (if created) and expression, then create if statement node from them, and push it to the stack" },
 	{ ActionType::SaveOptionalElseStatement, "Pop if statement from the stack, attach else clause to it and push it back" },
+	{ ActionType::CreateWhileStatementNode, "Pop statement and expression, create while statement and push it to the stack" },
+	{ ActionType::CreatePrintStatementNode, "Pop expression from the stack, create print statement node with expression and push it to the stack" },
+	{ ActionType::AllocateNewComposite, "Allocate space for new composite statement" },
+	{ ActionType::OnCompositePartParse, "Pop last parsed statement and push it to lastly allocated space for composite" },
+	{ ActionType::MoveCompositeToStatement, "Pop all statements from allocated space, make composite statement from them and push it to the stack" },
 };
 }
 

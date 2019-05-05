@@ -242,10 +242,83 @@ public:
 		mStatementsStack.push_back(std::move(ifStatement));
 	}
 
+	void DoCreateWhileStatementNode()
+	{
+		if (mExpressionsStack.empty())
+		{
+			mHasErrors = true;
+			throw std::runtime_error("while statement requires one statement in stack");
+		}
+
+		if (mStatementsStack.empty())
+		{
+			mHasErrors = true;
+			throw std::runtime_error("while statement requires one expression in stack");
+		}
+
+		auto expression = Pop(mExpressionsStack);
+		auto statement = Pop(mStatementsStack);
+
+		mStatementsStack.push_back(std::make_unique<WhileStatementAST>(std::move(expression), std::move(statement)));
+	}
+
+	void DoCreatePrintStatementNode()
+	{
+		if (mExpressionsStack.empty())
+		{
+			mHasErrors = true;
+			throw std::runtime_error("print statement requires one expression in stack");
+		}
+
+		auto expression = Pop(mExpressionsStack);
+		mStatementsStack.push_back(std::make_unique<PrintStatementAST>(std::move(expression)));
+	}
+
+	void DoAllocateNewComposite()
+	{
+		mCompositeStatements.emplace_back();
+	}
+
+	void DoOnCompositePartParse()
+	{
+		if (mStatementsStack.empty())
+		{
+			mHasErrors = true;
+			throw std::runtime_error("composite part requires atleast one statement");
+		}
+
+		if (mCompositeStatements.empty())
+		{
+			mHasErrors = true;
+			throw std::runtime_error("composite part requires allocated space for composite statement");
+		}
+
+		auto statement = Pop(mStatementsStack);
+		mCompositeStatements.back().push_back(std::move(statement));
+	}
+
+	void DoMoveCompositeToStatement()
+	{
+		if (mCompositeStatements.empty())
+		{
+			mHasErrors = true;
+			throw std::runtime_error("can't move composite because no space allocated for it");
+		}
+
+		auto composite = std::make_unique<CompositeStatementAST>();
+		for (auto& statement : mCompositeStatements.back())
+		{
+			composite->AddStatement(std::move(statement));
+		}
+		mCompositeStatements.pop_back();
+		mStatementsStack.push_back(std::move(composite));
+	}
+
 private:
 	const Token& mCurrentToken;
 	std::vector<std::unique_ptr<IExpressionAST>> mExpressionsStack;
 	std::vector<std::unique_ptr<IStatementAST>> mStatementsStack;
+	std::vector<std::vector<std::unique_ptr<IStatementAST>>> mCompositeStatements;
 	std::unique_ptr<IExpressionAST> mOptionalAssignExpression;
 	std::vector<ExpressionType> mExpressionTypesStack;
 	IParserLogger* mLogger;
@@ -298,7 +371,12 @@ ParseResults Parser::Parse(const std::string& text)
 		{ ActionType::SaveOptionalAssignExpression, std::bind(&ActionExecutor::DoCreateOptionalAssignNode, &executor) },
 		{ ActionType::CreateAssignNode, std::bind(&ActionExecutor::DoCreateAssignNode, &executor) },
 		{ ActionType::CreateIfStatementNode, std::bind(&ActionExecutor::DoCreateIfStatementNode, &executor) },
-		{ ActionType::SaveOptionalElseStatement, std::bind(&ActionExecutor::DoSaveOptionalElseClause, &executor) }
+		{ ActionType::SaveOptionalElseStatement, std::bind(&ActionExecutor::DoSaveOptionalElseClause, &executor) },
+		{ ActionType::CreateWhileStatementNode, std::bind(&ActionExecutor::DoCreateWhileStatementNode, &executor) },
+		{ ActionType::CreatePrintStatementNode, std::bind(&ActionExecutor::DoCreatePrintStatementNode, &executor) },
+		{ ActionType::AllocateNewComposite, std::bind(&ActionExecutor::DoAllocateNewComposite, &executor) },
+		{ ActionType::OnCompositePartParse, std::bind(&ActionExecutor::DoOnCompositePartParse, &executor) },
+		{ ActionType::MoveCompositeToStatement, std::bind(&ActionExecutor::DoMoveCompositeToStatement, &executor) }
 	};
 
 	try

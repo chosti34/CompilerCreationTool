@@ -32,7 +32,12 @@ enum class ActionType
 	SaveOptionalAssignExpression,
 	CreateAssignNode,
 	CreateIfStatementNode,
-	SaveOptionalElseStatement
+	SaveOptionalElseStatement,
+	CreateWhileStatementNode,
+	CreatePrintStatementNode,
+	AllocateNewComposite,
+	OnCompositePartParse,
+	MoveCompositeToStatement
 };
 
 std::vector<ActionType> const& GetActionTypesList();

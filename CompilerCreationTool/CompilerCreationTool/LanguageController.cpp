@@ -228,6 +228,8 @@ void LanguageController::OnOpenButtonPress()
 		mActionsView->SetItems(GetActionsArray(mLanguage->GetParser()));
 		mStatesView->SetParserTable(mLanguage->GetParser().GetTable());
 		mGrammarView->SetText(ToText(mLanguage->GetGrammar()));
+		mTreeView->UnsetImage();
+		mEditorView->Clear();
 
 		// Обновляем кнопки
 		mDocument = openFileDialog.GetPath();

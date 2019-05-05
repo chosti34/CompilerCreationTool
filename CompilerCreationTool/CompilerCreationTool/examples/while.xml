@@ -1,0 +1,40 @@
+<Language>
+    <Grammar>
+        <Production left="S">
+            <Symbol name="WhileStatement" type="Nonterminal"/>
+            <Symbol name="EOF" type="Terminal"/>
+        </Production>
+        <Production left="WhileStatement">
+            <Symbol name="While" type="Terminal"/>
+            <Symbol name="LeftParenthesis" type="Terminal"/>
+            <Symbol name="Expression" type="Nonterminal"/>
+            <Symbol name="RightParenthesis" type="Terminal"/>
+            <Symbol name="Statement" type="Nonterminal" attribute="OnWhileStatementParse"/>
+        </Production>
+        <Production left="Expression">
+            <Symbol name="Int" type="Terminal" attribute="OnIntegerParse"/>
+        </Production>
+        <Production left="Statement">
+            <Symbol name="Print" type="Terminal"/>
+            <Symbol name="LeftParenthesis" type="Terminal"/>
+            <Symbol name="Expression" type="Nonterminal"/>
+            <Symbol name="RightParenthesis" type="Terminal" attribute="OnPrintStatementParse"/>
+        </Production>
+        <Production left="Statement">
+            <Symbol name="WhileStatement" type="Nonterminal"/>
+        </Production>
+    </Grammar>
+    <Patterns>
+        <Pattern name="EOF" origin="EOF" isEnding="true"/>
+        <Pattern name="While" origin="while" isEnding="false"/>
+        <Pattern name="LeftParenthesis" origin="\(" isEnding="false"/>
+        <Pattern name="RightParenthesis" origin="\)" isEnding="false"/>
+        <Pattern name="Int" origin="0|[1-9][0-9]*" isEnding="false"/>
+        <Pattern name="Print" origin="print" isEnding="false"/>
+    </Patterns>
+    <Actions>
+        <Action name="OnWhileStatementParse" type="CreateWhileStatementNode"/>
+        <Action name="OnIntegerParse" type="CreateIntegerNumberNode"/>
+        <Action name="OnPrintStatementParse" type="CreatePrintStatementNode"/>
+    </Actions>
+</Language>

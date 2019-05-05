@@ -1,0 +1,220 @@
+<Language>
+    <Grammar>
+        <Production left="S">
+            <Symbol name="Statement" type="Nonterminal"/>
+            <Symbol name="EOF" type="Terminal"/>
+        </Production>
+        <Production left="Statement">
+            <Symbol name="WhileStatement" type="Nonterminal"/>
+        </Production>
+        <Production left="Statement">
+            <Symbol name="IfStatement" type="Nonterminal"/>
+        </Production>
+        <Production left="Statement">
+            <Symbol name="PrintStatement" type="Nonterminal"/>
+        </Production>
+        <Production left="Statement">
+            <Symbol name="CompositeStatement" type="Nonterminal"/>
+        </Production>
+        <Production left="WhileStatement">
+            <Symbol name="While" type="Terminal"/>
+            <Symbol name="LeftParenthesis" type="Terminal"/>
+            <Symbol name="Expression" type="Nonterminal"/>
+            <Symbol name="RightParenthesis" type="Terminal"/>
+            <Symbol name="Statement" type="Nonterminal" attribute="OnWhileStatementParse"/>
+        </Production>
+        <Production left="IfStatement">
+            <Symbol name="If" type="Terminal"/>
+            <Symbol name="LeftParenthesis" type="Terminal"/>
+            <Symbol name="Expression" type="Nonterminal"/>
+            <Symbol name="RightParenthesis" type="Terminal"/>
+            <Symbol name="Statement" type="Nonterminal" attribute="OnIfStatementParse"/>
+            <Symbol name="OptionalElse" type="Nonterminal"/>
+        </Production>
+        <Production left="OptionalElse">
+            <Symbol name="Else" type="Terminal"/>
+            <Symbol name="Statement" type="Nonterminal" attribute="OnOptionalElseParsed"/>
+        </Production>
+        <Production left="OptionalElse">
+            <Symbol name="#Eps#" type="Epsilon"/>
+        </Production>
+        <Production left="PrintStatement">
+            <Symbol name="Print" type="Terminal"/>
+            <Symbol name="LeftParenthesis" type="Terminal"/>
+            <Symbol name="Expression" type="Nonterminal"/>
+            <Symbol name="RightParenthesis" type="Terminal" attribute="OnPrintStatementParse"/>
+            <Symbol name="Dotcomma" type="Terminal"/>
+        </Production>
+        <Production left="CompositeStatement">
+            <Symbol name="LeftCurly" type="Terminal" attribute="AllocateSpaceForComposite"/>
+            <Symbol name="StatementList" type="Nonterminal" attribute="MoveCompositeToStatement"/>
+            <Symbol name="RightCurly" type="Terminal"/>
+        </Production>
+        <Production left="StatementList">
+            <Symbol name="Statement" type="Nonterminal" attribute="OnCompositePartParse"/>
+            <Symbol name="StatementList" type="Nonterminal"/>
+        </Production>
+        <Production left="StatementList">
+            <Symbol name="#Eps#" type="Epsilon"/>
+        </Production>
+        <Production left="Expression">
+            <Symbol name="OrExpr" type="Nonterminal"/>
+        </Production>
+        <Production left="OrExpr">
+            <Symbol name="AndExpr" type="Nonterminal"/>
+            <Symbol name="OrExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="OrExprTail">
+            <Symbol name="Or" type="Terminal"/>
+            <Symbol name="AndExpr" type="Nonterminal" attribute="OnBinaryOrParse"/>
+            <Symbol name="OrExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="OrExprTail">
+            <Symbol name="#Eps#" type="Epsilon"/>
+        </Production>
+        <Production left="AndExpr">
+            <Symbol name="LessExpr" type="Nonterminal"/>
+            <Symbol name="AndExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="AndExprTail">
+            <Symbol name="And" type="Terminal"/>
+            <Symbol name="LessExpr" type="Nonterminal" attribute="OnBinaryAndParse"/>
+            <Symbol name="AndExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="AndExprTail">
+            <Symbol name="#Eps#" type="Epsilon"/>
+        </Production>
+        <Production left="LessExpr">
+            <Symbol name="AddSubExpr" type="Nonterminal"/>
+            <Symbol name="LessExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="LessExprTail">
+            <Symbol name="Less" type="Terminal"/>
+            <Symbol name="AddSubExpr" type="Nonterminal" attribute="OnBinaryLessParse"/>
+            <Symbol name="LessExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="LessExprTail">
+            <Symbol name="#Eps#" type="Epsilon"/>
+        </Production>
+        <Production left="AddSubExpr">
+            <Symbol name="MulDivExpr" type="Nonterminal"/>
+            <Symbol name="AddSubExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="AddSubExprTail">
+            <Symbol name="Plus" type="Terminal"/>
+            <Symbol name="MulDivExpr" type="Nonterminal" attribute="OnBinaryPlusParse"/>
+            <Symbol name="AddSubExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="AddSubExprTail">
+            <Symbol name="Minus" type="Terminal"/>
+            <Symbol name="MulDivExpr" type="Nonterminal" attribute="OnBinaryMinusParse"/>
+            <Symbol name="AddSubExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="AddSubExprTail">
+            <Symbol name="#Eps#" type="Epsilon"/>
+        </Production>
+        <Production left="MulDivExpr">
+            <Symbol name="AtomExpr" type="Nonterminal"/>
+            <Symbol name="MulDivExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="MulDivExprTail">
+            <Symbol name="Mul" type="Terminal"/>
+            <Symbol name="AtomExpr" type="Nonterminal" attribute="OnBinaryMulParse"/>
+            <Symbol name="MulDivExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="MulDivExprTail">
+            <Symbol name="Div" type="Terminal"/>
+            <Symbol name="AtomExpr" type="Nonterminal" attribute="OnBinaryDivParse"/>
+            <Symbol name="MulDivExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="MulDivExprTail">
+            <Symbol name="#Eps#" type="Epsilon"/>
+        </Production>
+        <Production left="AtomExpr">
+            <Symbol name="Identifier" type="Terminal" attribute="OnIdentifierParse"/>
+        </Production>
+        <Production left="AtomExpr">
+            <Symbol name="IntegerConstant" type="Terminal" attribute="OnIntegerConstantParse"/>
+        </Production>
+        <Production left="AtomExpr">
+            <Symbol name="FloatConstant" type="Terminal" attribute="OnFloatConstantParse"/>
+        </Production>
+        <Production left="AtomExpr">
+            <Symbol name="LeftParenthesis" type="Terminal"/>
+            <Symbol name="Expression" type="Nonterminal"/>
+            <Symbol name="RightParenthesis" type="Terminal"/>
+        </Production>
+        <Production left="AtomExpr">
+            <Symbol name="Minus" type="Terminal"/>
+            <Symbol name="AtomExpr" type="Nonterminal" attribute="OnUnaryMinusParse"/>
+        </Production>
+        <Production left="AtomExpr">
+            <Symbol name="Plus" type="Terminal"/>
+            <Symbol name="AtomExpr" type="Nonterminal" attribute="OnUnaryPlusParse"/>
+        </Production>
+        <Production left="AtomExpr">
+            <Symbol name="Negation" type="Terminal"/>
+            <Symbol name="AtomExpr" type="Nonterminal" attribute="OnUnaryNegationParse"/>
+        </Production>
+        <Production left="AtomExpr">
+            <Symbol name="True" type="Terminal" attribute="OnTrueParse"/>
+        </Production>
+        <Production left="AtomExpr">
+            <Symbol name="False" type="Terminal" attribute="OnFalseParse"/>
+        </Production>
+        <Production left="AtomExpr">
+            <Symbol name="StringLiteral" type="Terminal" attribute="OnStringLiteralParse"/>
+        </Production>
+    </Grammar>
+    <Patterns>
+        <Pattern name="EOF" origin="EOF" isEnding="true"/>
+        <Pattern name="While" origin="while" isEnding="false"/>
+        <Pattern name="LeftParenthesis" origin="\(" isEnding="false"/>
+        <Pattern name="RightParenthesis" origin="\)" isEnding="false"/>
+        <Pattern name="If" origin="if" isEnding="false"/>
+        <Pattern name="Else" origin="else" isEnding="false"/>
+        <Pattern name="Print" origin="print" isEnding="false"/>
+        <Pattern name="LeftCurly" origin="\{" isEnding="false"/>
+        <Pattern name="Dotcomma" origin="\;" isEnding="false"/>
+        <Pattern name="Or" origin="Or" isEnding="false"/>
+        <Pattern name="RightCurly" origin="\}" isEnding="false"/>
+        <Pattern name="And" origin="\&amp;\&amp;" isEnding="false"/>
+        <Pattern name="Less" origin="\&lt;" isEnding="false"/>
+        <Pattern name="Plus" origin="\+" isEnding="false"/>
+        <Pattern name="Minus" origin="\-" isEnding="false"/>
+        <Pattern name="Mul" origin="\*" isEnding="false"/>
+        <Pattern name="Div" origin="\/" isEnding="false"/>
+        <Pattern name="IntegerConstant" origin="0|[1-9][0-9]*" isEnding="false"/>
+        <Pattern name="FloatConstant" origin="(0|[1-9])\.[0-9]+" isEnding="false"/>
+        <Pattern name="Negation" origin="\!" isEnding="false"/>
+        <Pattern name="True" origin="True" isEnding="false"/>
+        <Pattern name="False" origin="False" isEnding="false"/>
+        <Pattern name="StringLiteral" origin="\&quot;([^\\\&quot;]|\\.)*\&quot;" isEnding="false"/>
+        <Pattern name="Identifier" origin="([A-Za-z_])([A-Za-z0-9])*" isEnding="false"/>
+    </Patterns>
+    <Actions>
+        <Action name="OnWhileStatementParse" type="CreateWhileStatementNode"/>
+        <Action name="OnIfStatementParse" type="CreateIfStatementNode"/>
+        <Action name="OnOptionalElseParsed" type="SaveOptionalElseStatement"/>
+        <Action name="OnPrintStatementParse" type="CreatePrintStatementNode"/>
+        <Action name="AllocateSpaceForComposite" type="AllocateNewComposite"/>
+        <Action name="MoveCompositeToStatement" type="MoveCompositeToStatement"/>
+        <Action name="OnCompositePartParse" type="OnCompositePartParse"/>
+        <Action name="OnBinaryOrParse" type="CreateBinaryOrNode"/>
+        <Action name="OnBinaryAndParse" type="CreateBinaryAndNode"/>
+        <Action name="OnBinaryLessParse" type="CreateBinaryLessNode"/>
+        <Action name="OnBinaryPlusParse" type="CreateBinaryPlusNode"/>
+        <Action name="OnBinaryMinusParse" type="CreateBinaryMinusNode"/>
+        <Action name="OnBinaryMulParse" type="CreateBinaryMulNode"/>
+        <Action name="OnBinaryDivParse" type="CreateBinaryDivNode"/>
+        <Action name="OnIdentifierParse" type="CreateIdentifier"/>
+        <Action name="OnIntegerConstantParse" type="CreateIntegerNumberNode"/>
+        <Action name="OnFloatConstantParse" type="CreateFloatNumberNode"/>
+        <Action name="OnUnaryMinusParse" type="CreateUnaryMinusNode"/>
+        <Action name="OnUnaryPlusParse" type="CreateUnaryPlusNode"/>
+        <Action name="OnUnaryNegationParse" type="CreateUnaryNegationNode"/>
+        <Action name="OnTrueParse" type="CreateTrueNode"/>
+        <Action name="OnFalseParse" type="CreateFalseNode"/>
+        <Action name="OnStringLiteralParse" type="CreateStringLiteralNode"/>
+    </Actions>
+</Language>

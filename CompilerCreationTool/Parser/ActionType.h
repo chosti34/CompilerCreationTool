@@ -5,6 +5,7 @@
 enum class ActionType
 {
 	None,
+	// Expressions
 	CreateIntegerNumberNode,
 	CreateFloatNumberNode,
 	CreateBinaryPlusNode,
@@ -20,7 +21,18 @@ enum class ActionType
 	CreateIdentifier,
 	CreateTrueNode,
 	CreateFalseNode,
-	CreateStringLiteralNode
+	CreateStringLiteralNode,
+	// Types
+	CreateIntTypeNode,
+	CreateFloatTypeNode,
+	CreateBoolTypeNode,
+	CreateStringTypeNode,
+	// Statements
+	CreateVariableDeclarationNode,
+	SaveOptionalAssignExpression,
+	CreateAssignNode,
+	CreateIfStatementNode,
+	SaveOptionalElseStatement
 };
 
 std::vector<ActionType> const& GetActionTypesList();

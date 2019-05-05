@@ -126,10 +126,10 @@
         <Pattern name="LeftParenthesis" origin="\(" isEnding="false"/>
         <Pattern name="Div" origin="\/" isEnding="false"/>
         <Pattern name="Negation" origin="\!" isEnding="false"/>
-        <Pattern name="Identifier" origin="([A-Za-z_])([A-Za-z0-9])*" isEnding="false"/>
-        <Pattern name="RightParenthesis" origin="\)" isEnding="false"/>
         <Pattern name="True" origin="True" isEnding="false"/>
         <Pattern name="False" origin="False" isEnding="false"/>
+        <Pattern name="Identifier" origin="([A-Za-z_])([A-Za-z0-9])*" isEnding="false"/>
+        <Pattern name="RightParenthesis" origin="\)" isEnding="false"/>
         <Pattern name="StringLiteral" origin="\&quot;([^\\\&quot;]|\\.)*\&quot;" isEnding="false"/>
     </Patterns>
     <Actions>

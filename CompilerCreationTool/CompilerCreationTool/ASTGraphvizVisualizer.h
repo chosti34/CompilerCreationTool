@@ -1,14 +1,12 @@
 #pragma once
 #include "../AST/AST.h"
 #include "../AST/NodeVisitor.h"
-#include <fstream>
+#include <ostream>
 
-class ASTGraphvizVisualizer : public IExpressionNodeVisitor
+class ASTGraphvizExpressionVisualizer : public IExpressionNodeVisitor
 {
 public:
-	explicit ASTGraphvizVisualizer(const std::string& filepath);
-	~ASTGraphvizVisualizer();
-
+	explicit ASTGraphvizExpressionVisualizer(std::ostream& os, size_t& index);
 	void Visualize(const IExpressionAST& expression);
 
 private:
@@ -18,7 +16,28 @@ private:
 	void Visit(const IdentifierExpressionAST& identifier) override;
 
 private:
-	std::ofstream mOutput;
-	size_t mIndex = 0;
+	std::ostream& mOutput;
+	size_t& mIndex;
 	std::vector<size_t> mChildren;
+};
+
+
+class ASTGraphvizStatementVisualizer : public IStatementNodeVisitor
+{
+public:
+	explicit ASTGraphvizStatementVisualizer(std::ostream& os, size_t& index);
+	void Visualize(const IStatementAST& statement);
+
+private:
+	void Visit(const VariableDeclarationAST& declaration) override;
+	void Visit(const AssignStatementAST& assign) override;
+	void Visit(const IfStatementAST& ifStatement) override;
+	void Visit(const WhileStatementAST& whileStatement) override;
+	void Visit(const PrintStatementAST& print) override;
+	void Visit(const CompositeStatementAST& composite) override;
+
+private:
+	std::ostream& mOutput;
+	std::size_t& mIndex;
+	std::vector<std::size_t> mChildren;
 };

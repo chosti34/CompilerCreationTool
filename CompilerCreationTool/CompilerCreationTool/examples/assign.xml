@@ -1,0 +1,32 @@
+<Language>
+    <Grammar>
+        <Production left="S">
+            <Symbol name="Assign" type="Nonterminal"/>
+            <Symbol name="EOF" type="Terminal"/>
+        </Production>
+        <Production left="Assign">
+            <Symbol name="Identifier" type="Nonterminal"/>
+            <Symbol name="Assign" type="Terminal"/>
+            <Symbol name="Expression" type="Nonterminal" attribute="OnAssignParse"/>
+            <Symbol name="Dotcomma" type="Terminal"/>
+        </Production>
+        <Production left="Identifier">
+            <Symbol name="Identifier" type="Terminal" attribute="OnIdentifierParse"/>
+        </Production>
+        <Production left="Expression">
+            <Symbol name="Int" type="Terminal" attribute="OnIntegerParse"/>
+        </Production>
+    </Grammar>
+    <Patterns>
+        <Pattern name="EOF" origin="EOF" isEnding="true"/>
+        <Pattern name="Assign" origin="\=" isEnding="false"/>
+        <Pattern name="Int" origin="0|[1-9][0-9]*" isEnding="false"/>
+        <Pattern name="Identifier" origin="([A-Za-z_])([A-Za-z0-9])*" isEnding="false"/>
+        <Pattern name="Dotcomma" origin="\;" isEnding="false"/>
+    </Patterns>
+    <Actions>
+        <Action name="OnAssignParse" type="CreateAssignNode"/>
+        <Action name="OnIdentifierParse" type="CreateIdentifier"/>
+        <Action name="OnIntegerParse" type="CreateIntegerNumberNode"/>
+    </Actions>
+</Language>

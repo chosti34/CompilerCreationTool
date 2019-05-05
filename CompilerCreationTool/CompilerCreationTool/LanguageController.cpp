@@ -15,8 +15,10 @@
 #include "../Utils/time_utils.h"
 #include "../Utils/string_utils.h"
 
+#include <boost/filesystem.hpp>
 #include <wx/filedlg.h>
 #include <functional>
+#include <fstream>
 
 using namespace std::literals::string_literals;
 
@@ -146,9 +148,11 @@ void LanguageController::SwapActionPositions(int from, int to)
 
 void LanguageController::UpdateTitle()
 {
+	namespace fs = boost::filesystem;
+
 	if (mDocument)
 	{
-		mFrame->SetTitle((mHasUnsavedChanges ? "*" : "") + *mDocument + " - " + gcFrameTitle);
+		mFrame->SetTitle((mHasUnsavedChanges ? "*" : "") + fs::path(*mDocument).filename().string() + " - " + gcFrameTitle);
 	}
 	else
 	{
@@ -226,7 +230,7 @@ void LanguageController::OnOpenButtonPress()
 		mGrammarView->SetText(ToText(mLanguage->GetGrammar()));
 
 		// Обновляем кнопки
-		mDocument = openFileDialog.GetFilename();
+		mDocument = openFileDialog.GetPath();
 		mFrame->GetMenuBar()->Enable(Buttons::LogMessages, true);
 		mFrame->GetMenuBar()->Enable(Buttons::Run, true);
 		mFrame->GetMenuBar()->Enable(Buttons::Info, true);
@@ -262,7 +266,7 @@ void LanguageController::OnSaveAsButtonPress()
 	if (saveFileDialog.ShowModal() != wxID_CANCEL)
 	{
 		SerializeLanguage(saveFileDialog.GetPath(), *mLanguage);
-		mDocument = saveFileDialog.GetFilename();
+		mDocument = saveFileDialog.GetPath();
 		mHasUnsavedChanges = false;
 		UpdateTitle();
 	}
@@ -344,13 +348,27 @@ void LanguageController::OnRunButtonPress()
 		wxMessageBox("Your code doesn't match your grammar...", "Failure...", wxICON_WARNING);
 	}
 
-	if (results.success && results.expression)
+	if (results.success && (results.expression || results.statement))
 	{
+		std::ofstream output("ast.dot");
+		size_t index = 0;
+		output << "digraph {" << std::endl;
+
+		if (results.expression)
 		{
-			// Implicitly close file 'ast.dot'
-			ASTGraphvizVisualizer visualizer("ast.dot");
+			assert(!results.statement);
+			ASTGraphvizExpressionVisualizer visualizer(output, index);
 			visualizer.Visualize(*results.expression);
 		}
+		else if (results.statement)
+		{
+			assert(!results.expression);
+			ASTGraphvizStatementVisualizer visualizer(output, index);
+			visualizer.Visualize(*results.statement);
+		}
+
+		output << "}" << std::endl;
+		output.close();
 
 		if (command_utils::RunCommand(L"dot", L"-T png -o ast.png ast.dot"))
 		{

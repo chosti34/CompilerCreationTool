@@ -1,0 +1,61 @@
+<Language>
+    <Grammar>
+        <Production left="S">
+            <Symbol name="IfStatement" type="Nonterminal"/>
+            <Symbol name="EOF" type="Terminal"/>
+        </Production>
+        <Production left="IfStatement">
+            <Symbol name="If" type="Terminal"/>
+            <Symbol name="LeftParenthesis" type="Terminal"/>
+            <Symbol name="Expression" type="Nonterminal"/>
+            <Symbol name="RightParenthesis" type="Terminal"/>
+            <Symbol name="Statement" type="Nonterminal" attribute="OnIfStatementParse"/>
+            <Symbol name="OptionalElse" type="Nonterminal"/>
+        </Production>
+        <Production left="OptionalElse">
+            <Symbol name="Else" type="Terminal"/>
+            <Symbol name="Statement" type="Nonterminal" attribute="OnOptionalElseParse"/>
+        </Production>
+        <Production left="OptionalElse">
+            <Symbol name="#Eps#" type="Epsilon"/>
+        </Production>
+        <Production left="Expression">
+            <Symbol name="True" type="Terminal" attribute="OnTrueParse"/>
+        </Production>
+        <Production left="Expression">
+            <Symbol name="False" type="Terminal" attribute="OnFalseParse"/>
+        </Production>
+        <Production left="Statement">
+            <Symbol name="IfStatement" type="Nonterminal"/>
+        </Production>
+        <Production left="Statement">
+            <Symbol name="Identifier" type="Nonterminal"/>
+            <Symbol name="Assign" type="Terminal"/>
+            <Symbol name="Expression" type="Nonterminal"/>
+            <Symbol name="Dotcomma" type="Terminal" attribute="OnAssignParse"/>
+        </Production>
+        <Production left="Identifier">
+            <Symbol name="Identifier" type="Terminal" attribute="OnIdentifierParse"/>
+        </Production>
+    </Grammar>
+    <Patterns>
+        <Pattern name="EOF" origin="EOF" isEnding="true"/>
+        <Pattern name="If" origin="if" isEnding="false"/>
+        <Pattern name="LeftParenthesis" origin="\(" isEnding="false"/>
+        <Pattern name="RightParenthesis" origin="\)" isEnding="false"/>
+        <Pattern name="Else" origin="else" isEnding="false"/>
+        <Pattern name="True" origin="true" isEnding="false"/>
+        <Pattern name="Dotcomma" origin="\;" isEnding="false"/>
+        <Pattern name="Assign" origin="\=" isEnding="false"/>
+        <Pattern name="False" origin="false" isEnding="false"/>
+        <Pattern name="Identifier" origin="([A-Za-z_])([A-Za-z0-9])*" isEnding="false"/>
+    </Patterns>
+    <Actions>
+        <Action name="OnIfStatementParse" type="CreateIfStatementNode"/>
+        <Action name="OnOptionalElseParse" type="SaveOptionalElseStatement"/>
+        <Action name="OnTrueParse" type="CreateTrueNode"/>
+        <Action name="OnFalseParse" type="CreateFalseNode"/>
+        <Action name="OnAssignParse" type="CreateAssignNode"/>
+        <Action name="OnIdentifierParse" type="CreateIdentifier"/>
+    </Actions>
+</Language>

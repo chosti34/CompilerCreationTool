@@ -22,6 +22,19 @@ T Pop(std::vector<T>& vect)
 	return std::move(value);
 }
 
+template <typename Derived, typename Base>
+std::unique_ptr<Derived> DowncastUniquePtr(std::unique_ptr<Base> && base)
+{
+	std::unique_ptr<Derived> derived = nullptr;
+	if (Derived* ptr = dynamic_cast<Derived*>(base.get()))
+	{
+		base.release();
+		derived.reset(ptr);
+		return std::move(derived);
+	}
+	return nullptr;
+}
+
 class ActionExecutor
 {
 public:
@@ -32,11 +45,20 @@ public:
 	{
 	}
 
-	std::unique_ptr<IExpressionAST> GetExpressionRoot()
+	std::unique_ptr<IExpressionAST> GetExpression()
 	{
-		if (mExpressionsStack.size() == 1 && !mHasErrors)
+		if (!mHasErrors && mExpressionsStack.size() == 1 && mStatementsStack.empty())
 		{
 			return Pop(mExpressionsStack);
+		}
+		return nullptr;
+	}
+
+	std::unique_ptr<IStatementAST> GetStatement()
+	{
+		if (!mHasErrors && mStatementsStack.size() == 1 && mExpressionsStack.empty())
+		{
+			return Pop(mStatementsStack);
 		}
 		return nullptr;
 	}
@@ -111,9 +133,121 @@ public:
 		mExpressionsStack.push_back(std::make_unique<LiteralExpressionAST>(mCurrentToken.value));
 	}
 
+	void DoCreateExpressionType(ExpressionType::Value value)
+	{
+		mExpressionTypesStack.push_back(ExpressionType(value));
+	}
+
+	void DoCreateVariableDeclarationNode()
+	{
+		if (mExpressionsStack.empty())
+		{
+			mHasErrors = true;
+			throw std::runtime_error("expression stack must contain identifier");
+		}
+
+		if (mExpressionTypesStack.empty())
+		{
+			mHasErrors = true;
+			throw std::runtime_error("types stack must contain atleast one element");
+		}
+
+		auto identifier = DowncastUniquePtr<IdentifierExpressionAST>(Pop(mExpressionsStack));
+		if (!identifier)
+		{
+			mHasErrors = true;
+			throw std::runtime_error("expression stack must contain identifier");
+		}
+
+		auto type = Pop(mExpressionTypesStack);
+
+		auto declaration = std::make_unique<VariableDeclarationAST>(std::move(identifier), type);
+		if (mOptionalAssignExpression)
+		{
+			declaration->SetExpression(std::move(mOptionalAssignExpression));
+			mOptionalAssignExpression = nullptr;
+		}
+
+		mStatementsStack.push_back(std::move(declaration));
+	}
+
+	void DoCreateOptionalAssignNode()
+	{
+		if (mExpressionsStack.empty())
+		{
+			mHasErrors = true;
+			throw std::runtime_error("expression stack must contain atleast one element");
+		}
+
+		mOptionalAssignExpression = Pop(mExpressionsStack);
+	}
+
+	void DoCreateAssignNode()
+	{
+		if (mExpressionsStack.size() < 2)
+		{
+			mHasErrors = true;
+			throw std::runtime_error("expression stack must contain atleast two elements");
+		}
+
+		auto expression = Pop(mExpressionsStack);
+		auto identifier = DowncastUniquePtr<IdentifierExpressionAST>(Pop(mExpressionsStack));
+		if (!identifier)
+		{
+			mHasErrors = true;
+			throw std::runtime_error("assign statement requires identifier");
+		}
+
+		mStatementsStack.push_back(std::make_unique<AssignStatementAST>(std::move(identifier), std::move(expression)));
+	}
+
+	void DoCreateIfStatementNode()
+	{
+		if (mExpressionsStack.empty())
+		{
+			mHasErrors = true;
+			throw std::runtime_error("if statement requires one expression in stack");
+		}
+
+		if (mStatementsStack.empty())
+		{
+			mHasErrors = true;
+			throw std::runtime_error("if statement requires one statement in stack");
+		}
+
+		auto expression = Pop(mExpressionsStack);
+		auto then = Pop(mStatementsStack);
+
+		mStatementsStack.push_back(std::make_unique<IfStatementAST>(std::move(expression), std::move(then)));
+	}
+
+	void DoSaveOptionalElseClause()
+	{
+		if (mStatementsStack.size() < 2)
+		{
+			mHasErrors = true;
+			throw std::runtime_error("optional else clause requires atleast two elements in statements stack");
+		}
+
+		auto elseClause = Pop(mStatementsStack);
+		auto ifStatement = DowncastUniquePtr<IfStatementAST>(Pop(mStatementsStack));
+
+		if (!ifStatement)
+		{
+			mHasErrors = true;
+			throw std::runtime_error("optional else clause need place for insertion");
+		}
+
+		ifStatement->SetElseClause(std::move(elseClause));
+		mStatementsStack.push_back(std::move(ifStatement));
+	}
+
 private:
 	const Token& mCurrentToken;
 	std::vector<std::unique_ptr<IExpressionAST>> mExpressionsStack;
+	std::vector<std::unique_ptr<IStatementAST>> mStatementsStack;
+	std::unique_ptr<IExpressionAST> mOptionalAssignExpression;
+	std::vector<ExpressionType> mExpressionTypesStack;
 	IParserLogger* mLogger;
 	bool mHasErrors;
 };
@@ -153,7 +287,18 @@ ParseResults Parser::Parse(const std::string& text)
 		{ ActionType::CreateIdentifier, std::bind(&ActionExecutor::DoCreateIdentifierNode, &executor) },
 		{ ActionType::CreateTrueNode, std::bind(&ActionExecutor::DoCreateBooleanNode, &executor, true) },
 		{ ActionType::CreateFalseNode, std::bind(&ActionExecutor::DoCreateBooleanNode, &executor, false) },
-		{ ActionType::CreateStringLiteralNode, std::bind(&ActionExecutor::DoCreateStringLiteralNode, &executor) }
+		{ ActionType::CreateStringLiteralNode, std::bind(&ActionExecutor::DoCreateStringLiteralNode, &executor) },
+
+		{ ActionType::CreateIntTypeNode, std::bind(&ActionExecutor::DoCreateExpressionType, &executor, ExpressionType::Int) },
+		{ ActionType::CreateFloatTypeNode, std::bind(&ActionExecutor::DoCreateExpressionType, &executor, ExpressionType::Float) },
+		{ ActionType::CreateBoolTypeNode, std::bind(&ActionExecutor::DoCreateExpressionType, &executor, ExpressionType::Bool) },
+		{ ActionType::CreateStringTypeNode, std::bind(&ActionExecutor::DoCreateExpressionType, &executor, ExpressionType::String) },
+
+		{ ActionType::CreateVariableDeclarationNode, std::bind(&ActionExecutor::DoCreateVariableDeclarationNode, &executor) },
+		{ ActionType::SaveOptionalAssignExpression, std::bind(&ActionExecutor::DoCreateOptionalAssignNode, &executor) },
+		{ ActionType::CreateAssignNode, std::bind(&ActionExecutor::DoCreateAssignNode, &executor) },
+		{ ActionType::CreateIfStatementNode, std::bind(&ActionExecutor::DoCreateIfStatementNode, &executor) },
+		{ ActionType::SaveOptionalElseStatement, std::bind(&ActionExecutor::DoSaveOptionalElseClause, &executor) }
 	};
 
 	try
@@ -220,10 +365,11 @@ ParseResults Parser::Parse(const std::string& text)
 		if (state.GetFlag(StateFlag::End))
 		{
 			assert(addresses.empty());
-			return { true, executor.GetExpressionRoot() };
+			return ParseResults{ true, executor.GetExpression(), executor.GetStatement() };
 		}
 		if (state.GetFlag(StateFlag::Push))
 		{
+			LogIfNotNull("Push index #" + std::to_string(index + 1) + " to the stack", index);
 			addresses.push_back(index + 1);
 		}
 		if (state.GetFlag(StateFlag::Shift))
@@ -241,6 +387,7 @@ ParseResults Parser::Parse(const std::string& text)
 
 		if (auto next = state.GetNextAddress())
 		{
+			LogIfNotNull("Changing state index to #" + std::to_string(*next), index);
 			index = *next;
 		}
 		else
@@ -248,6 +395,7 @@ ParseResults Parser::Parse(const std::string& text)
 			assert(!addresses.empty());
 			index = addresses.back();
 			addresses.pop_back();
+			LogIfNotNull("Pop index #" + std::to_string(index) + " from the stack", index);
 		}
 	}
 

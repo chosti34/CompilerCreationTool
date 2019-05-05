@@ -1,5 +1,6 @@
 #pragma once
 #include "NodeVisitor.h"
+#include "ExpressionType.h"
 #include <boost/variant.hpp>
 #include <string>
 
@@ -182,3 +183,209 @@ inline std::string ToString(UnaryExpressionAST::Operator op)
 		throw std::logic_error("can't cast undefined unary expression operator to string");
 	}
 }
+
+class IStatementAST
+{
+public:
+	virtual ~IStatementAST() = default;
+	virtual void Accept(IStatementNodeVisitor& visitor) const = 0;
+};
+
+class VariableDeclarationAST : public IStatementAST
+{
+public:
+	VariableDeclarationAST(std::unique_ptr<IdentifierExpressionAST> && identifier, const ExpressionType& type)
+		: mIdentifier(std::move(identifier))
+		, mType(type)
+	{
+	}
+
+	void SetExpression(std::unique_ptr<IExpressionAST> && expression)
+	{
+		mExpression = std::move(expression);
+	}
+
+	const IExpressionAST* GetExpression() const
+	{
+		return mExpression.get();
+	}
+
+	const IdentifierExpressionAST& GetIdentifier() const
+	{
+		return *mIdentifier;
+	}
+
+	const ExpressionType& GetType() const
+	{
+		return mType;
+	}
+
+	void Accept(IStatementNodeVisitor& visitor) const override
+	{
+		visitor.Visit(*this);
+	}
+
+private:
+	std::unique_ptr<IdentifierExpressionAST> mIdentifier;
+	std::unique_ptr<IExpressionAST> mExpression; // can be nullptr
+	ExpressionType mType;
+};
+
+class AssignStatementAST : public IStatementAST
+{
+public:
+	AssignStatementAST(
+		std::unique_ptr<IdentifierExpressionAST> && identifier,
+		std::unique_ptr<IExpressionAST> && expression
+	)
+		: mIdentifier(std::move(identifier))
+		, mExpression(std::move(expression))
+	{
+	}
+
+	const IdentifierExpressionAST& GetIdentifier() const
+	{
+		return *mIdentifier;
+	}
+
+	const IExpressionAST& GetExpression() const
+	{
+		return *mExpression;
+	}
+
+	void Accept(IStatementNodeVisitor& visitor) const override
+	{
+		visitor.Visit(*this);
+	}
+
+private:
+	std::unique_ptr<IdentifierExpressionAST> mIdentifier;
+	std::unique_ptr<IExpressionAST> mExpression;
+};
+
+class IfStatementAST : public IStatementAST
+{
+public:
+	IfStatementAST(
+		std::unique_ptr<IExpressionAST> && expression,
+		std::unique_ptr<IStatementAST> && then,
+		std::unique_ptr<IStatementAST> && elif = nullptr
+	)
+		: mExpression(std::move(expression))
+		, mThen(std::move(then))
+		, mElse(std::move(elif))
+	{
+	}
+
+	const IExpressionAST& GetExpression() const
+	{
+		return *mExpression;
+	}
+
+	const IStatementAST& GetThenStatement() const
+	{
+		return *mThen;
+	}
+
+	const IStatementAST* GetElseStatement() const
+	{
+		return mElse.get();
+	}
+
+	void SetElseClause(std::unique_ptr<IStatementAST> && elseClause)
+	{
+		mElse = std::move(elseClause);
+	}
+
+	void Accept(IStatementNodeVisitor& visitor) const override
+	{
+		visitor.Visit(*this);
+	}
+
+private:
+	std::unique_ptr<IExpressionAST> mExpression;
+	std::unique_ptr<IStatementAST> mThen;
+	std::unique_ptr<IStatementAST> mElse; // can be nullptr
+};
+
+class WhileStatementAST : public IStatementAST
+{
+public:
+	WhileStatementAST(std::unique_ptr<IExpressionAST> && expression, std::unique_ptr<IStatementAST> && statement)
+		: mExpression(std::move(expression))
+		, mStatement(std::move(statement))
+	{
+	}
+
+	const IExpressionAST& GetExpression() const
+	{
+		return *mExpression;
+	}
+
+	const IStatementAST& GetStatement() const
+	{
+		return *mStatement;
+	}
+
+	void Accept(IStatementNodeVisitor& visitor) const override
+	{
+		visitor.Visit(*this);
+	}
+
+private:
+	std::unique_ptr<IExpressionAST> mExpression;
+	std::unique_ptr<IStatementAST> mStatement;
+};
+
+class PrintStatementAST : public IStatementAST
+{
+public:
+	explicit PrintStatementAST(std::unique_ptr<IExpressionAST> && expression)
+		: mExpression(std::move(expression))
+	{
+	}
+
+	const IExpressionAST& GetExpression() const
+	{
+		return *mExpression;
+	}
+
+	void Accept(IStatementNodeVisitor& visitor) const override
+	{
+		visitor.Visit(*this);
+	}
+
+private:
+	std::unique_ptr<IExpressionAST> mExpression;
+};
+
+class CompositeStatementAST : public IStatementAST
+{
+public:
+	std::size_t GetStatementsCount() const
+	{
+		return mStatements.size();
+	}
+
+	void AddStatement(std::unique_ptr<IStatementAST> && statement)
+	{
+		mStatements.push_back(std::move(statement));
+	}
+
+	const IStatementAST& GetStatement(std::size_t index) const
+	{
+		if (index > mStatements.size())
+		{
+			throw std::runtime_error("index must be less than statements count");
+		}
+		return *mStatements[index];
+	}
+
+	void Accept(IStatementNodeVisitor& visitor) const override
+	{
+		visitor.Visit(*this);
+	}
+
+private:
+	std::vector<std::unique_ptr<IStatementAST>> mStatements;
+};

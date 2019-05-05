@@ -1,0 +1,54 @@
+<Language>
+    <Grammar>
+        <Production left="S">
+            <Symbol name="VariableDeclaration" type="Nonterminal"/>
+            <Symbol name="EOF" type="Terminal"/>
+        </Production>
+        <Production left="VariableDeclaration">
+            <Symbol name="var" type="Terminal"/>
+            <Symbol name="Identifier" type="Nonterminal"/>
+            <Symbol name="Colon" type="Terminal"/>
+            <Symbol name="Type" type="Nonterminal"/>
+            <Symbol name="OptionalAssign" type="Nonterminal"/>
+            <Symbol name="Dotcomma" type="Terminal" attribute="OnVariableDeclarationParse"/>
+        </Production>
+        <Production left="Identifier">
+            <Symbol name="Identifier" type="Terminal" attribute="OnIdentifierParse"/>
+        </Production>
+        <Production left="Expr">
+            <Symbol name="Int" type="Terminal" attribute="OnIntegerParse"/>
+        </Production>
+        <Production left="OptionalAssign">
+            <Symbol name="Assign" type="Terminal"/>
+            <Symbol name="Expr" type="Nonterminal" attribute="OnOptionalAssignParse"/>
+        </Production>
+        <Production left="OptionalAssign">
+            <Symbol name="#Eps#" type="Epsilon"/>
+        </Production>
+        <Production left="Type">
+            <Symbol name="IntegerType" type="Terminal" attribute="OnIntegerTypeParse"/>
+        </Production>
+        <Production left="Type">
+            <Symbol name="FloatType" type="Terminal" attribute="OnFloatTypeParse"/>
+        </Production>
+    </Grammar>
+    <Patterns>
+        <Pattern name="EOF" origin="EOF" isEnding="true"/>
+        <Pattern name="Colon" origin="\:" isEnding="false"/>
+        <Pattern name="var" origin="var" isEnding="false"/>
+        <Pattern name="Dotcomma" origin="\;" isEnding="false"/>
+        <Pattern name="Assign" origin="\=" isEnding="false"/>
+        <Pattern name="IntegerType" origin="Int" isEnding="false"/>
+        <Pattern name="FloatType" origin="Float" isEnding="false"/>
+        <Pattern name="Identifier" origin="([A-Za-z_])([A-Za-z0-9])*" isEnding="false"/>
+        <Pattern name="Int" origin="0|[1-9][0-9]*" isEnding="false"/>
+    </Patterns>
+    <Actions>
+        <Action name="OnVariableDeclarationParse" type="CreateVariableDeclarationNode"/>
+        <Action name="OnIdentifierParse" type="CreateIdentifier"/>
+        <Action name="OnIntegerParse" type="CreateIntegerNumberNode"/>
+        <Action name="OnOptionalAssignParse" type="CreateOptionalAssignNode"/>
+        <Action name="OnIntegerTypeParse" type="CreateIntTypeNode"/>
+        <Action name="OnFloatTypeParse" type="CreateFloatTypeNode"/>
+    </Actions>
+</Language>

@@ -262,14 +262,17 @@ bool NonterminalHasEmptinessHelper(const IGrammar& grammar, const std::string& n
 			const IGrammarSymbol& entity = production.GetSymbol(i);
 			assert(entity.GetType() == GrammarSymbolType::Nonterminal);
 
-			if (visited.find(nonterminal) == visited.end() && !NonterminalHasEmptinessHelper(grammar, entity.GetName(), visited))
+			if (visited.find(nonterminal) == visited.end() &&
+				!NonterminalHasEmptinessHelper(grammar, entity.GetName(), visited))
 			{
 				return false;
 			}
 		}
+
+		return true;
 	}
 
-	return true;
+	return false;
 }
 
 bool NonterminalHasEmptiness(const IGrammar& grammar, const std::string& nonterminal)

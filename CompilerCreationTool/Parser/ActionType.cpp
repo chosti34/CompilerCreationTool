@@ -8,6 +8,7 @@ namespace
 {
 const std::vector<ActionType> gcActionTypes = {
 	ActionType::None,
+
 	ActionType::CreateIntegerNumberNode,
 	ActionType::CreateFloatNumberNode,
 	ActionType::CreateBinaryPlusNode,
@@ -23,7 +24,18 @@ const std::vector<ActionType> gcActionTypes = {
 	ActionType::CreateIdentifier,
 	ActionType::CreateTrueNode,
 	ActionType::CreateFalseNode,
-	ActionType::CreateStringLiteralNode
+	ActionType::CreateStringLiteralNode,
+
+	ActionType::CreateIntTypeNode,
+	ActionType::CreateFloatTypeNode,
+	ActionType::CreateBoolTypeNode,
+	ActionType::CreateStringTypeNode,
+
+	ActionType::CreateVariableDeclarationNode,
+	ActionType::SaveOptionalAssignExpression,
+	ActionType::CreateAssignNode,
+	ActionType::CreateIfStatementNode,
+	ActionType::SaveOptionalElseStatement,
 };
 
 const std::unordered_map<ActionType, std::string> gcActionStringMap = {
@@ -43,7 +55,18 @@ const std::unordered_map<ActionType, std::string> gcActionStringMap = {
 	{ ActionType::CreateIdentifier, "CreateIdentifier" },
 	{ ActionType::CreateTrueNode, "CreateTrueNode" },
 	{ ActionType::CreateFalseNode, "CreateFalseNode" },
-	{ ActionType::CreateStringLiteralNode, "CreateStringLiteralNode" }
+	{ ActionType::CreateStringLiteralNode, "CreateStringLiteralNode" },
+
+	{ ActionType::CreateIntTypeNode, "CreateIntTypeNode" },
+	{ ActionType::CreateFloatTypeNode, "CreateFloatTypeNode" },
+	{ ActionType::CreateBoolTypeNode, "CreateBoolTypeNode" },
+	{ ActionType::CreateStringTypeNode, "CreateStringTypeNode" },
+
+	{ ActionType::CreateVariableDeclarationNode, "CreateVariableDeclarationNode" },
+	{ ActionType::SaveOptionalAssignExpression, "SaveOptionalAssignExpression" },
+	{ ActionType::CreateAssignNode, "CreateAssignNode" },
+	{ ActionType::CreateIfStatementNode, "CreateIfStatementNode" },
+	{ ActionType::SaveOptionalElseStatement, "SaveOptionalElseStatement" },
 };
 
 const std::unordered_map<ActionType, std::string> gcActionPrettyStringMap = {
@@ -63,7 +86,18 @@ const std::unordered_map<ActionType, std::string> gcActionPrettyStringMap = {
 	{ ActionType::CreateIdentifier, "Create identifier node" },
 	{ ActionType::CreateTrueNode, "Create boolean true node" },
 	{ ActionType::CreateFalseNode, "Create boolean false node" },
-	{ ActionType::CreateStringLiteralNode, "Create string literal node" }
+	{ ActionType::CreateStringLiteralNode, "Create string literal node" },
+
+	{ ActionType::CreateIntTypeNode, "Create int type node" },
+	{ ActionType::CreateFloatTypeNode, "Create float type node" },
+	{ ActionType::CreateBoolTypeNode, "Create bool type node" },
+	{ ActionType::CreateStringTypeNode, "Create string type node" },
+
+	{ ActionType::CreateVariableDeclarationNode, "Create variable declaration node" },
+	{ ActionType::SaveOptionalAssignExpression, "Save optional assign expression" },
+	{ ActionType::CreateAssignNode, "Create assign node" },
+	{ ActionType::CreateIfStatementNode, "Create if statement node" },
+	{ ActionType::SaveOptionalElseStatement, "Save optional else statement" },
 };
 
 const std::unordered_map<ActionType, std::string> gcActionDescriptionMap = {
@@ -83,7 +117,18 @@ const std::unordered_map<ActionType, std::string> gcActionDescriptionMap = {
 	{ ActionType::CreateIdentifier, "Create identifier node with name of current token, then push it to the stack" },
 	{ ActionType::CreateTrueNode, "Create boolean true node and push it to the stack" },
 	{ ActionType::CreateFalseNode, "Create boolean false node and push it to the stack" },
-	{ ActionType::CreateStringLiteralNode, "Create string literal node from current token, then push it to the stack" }
+	{ ActionType::CreateStringLiteralNode, "Create string literal node from current token, then push it to the stack" },
+
+	{ ActionType::CreateIntTypeNode, "Create int type node and push it to the type stack" },
+	{ ActionType::CreateFloatTypeNode, "Create float type node and push it to the stack" },
+	{ ActionType::CreateBoolTypeNode, "Create bool type node and push it to the stack" },
+	{ ActionType::CreateStringTypeNode, "Create string type node and push it to the stack" },
+
+	{ ActionType::CreateVariableDeclarationNode, "Pop identifier, type, and optional assign expression (if created), create declaration statement and push it to the stack" },
+	{ ActionType::SaveOptionalAssignExpression, "Save last created expression for declaration optional assign" },
+	{ ActionType::CreateAssignNode, "Create assign node and push it to the stack" },
+	{ ActionType::CreateIfStatementNode, "Pop then statement, else clause statement (if created) and expression, then create if statement node from them, and push it to the stack" },
+	{ ActionType::SaveOptionalElseStatement, "Pop if statement from the stack, attach else clause to it and push it back" },
 };
 }
 

@@ -1,7 +1,17 @@
 digraph {
-0 [shape="circle" label="+"];
-1 [shape="circle" label="Float: 3.14"];
-2 [shape="circle" label="Int: 4"];
-0->1 [label=" "];
-0->2 [label=" "];
+0 [shape="circle" label="If"]
+1 [shape="circle" label="Boolean: true"];
+0->1 [label=" condition"];
+2 [shape="circle" label="Assign"]
+3 [shape="circle" label="Identifier (n)"];
+2->3 [label=" "];
+4 [shape="circle" label="Boolean: true"];
+2->4 [label=" "];
+0->2 [label=" then"];
+5 [shape="circle" label="Assign"]
+6 [shape="circle" label="Identifier (n)"];
+5->6 [label=" "];
+7 [shape="circle" label="Boolean: false"];
+5->7 [label=" "];
+0->5 [label=" else"];
 }

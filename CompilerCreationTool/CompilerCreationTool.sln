@@ -15,6 +15,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Lexer", "Lexer\Lexer.vcxpro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AST", "AST\AST.vcxproj", "{BCE3D120-9E71-4717-B36B-01C26BDC39CC}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Codegen", "Codegen\Codegen.vcxproj", "{635FABB2-D2FF-4537-9176-EFB4427D68F5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -71,6 +73,14 @@ Global
 		{BCE3D120-9E71-4717-B36B-01C26BDC39CC}.Release|x64.Build.0 = Release|x64
 		{BCE3D120-9E71-4717-B36B-01C26BDC39CC}.Release|x86.ActiveCfg = Release|Win32
 		{BCE3D120-9E71-4717-B36B-01C26BDC39CC}.Release|x86.Build.0 = Release|Win32
+		{635FABB2-D2FF-4537-9176-EFB4427D68F5}.Debug|x64.ActiveCfg = Debug|x64
+		{635FABB2-D2FF-4537-9176-EFB4427D68F5}.Debug|x64.Build.0 = Debug|x64
+		{635FABB2-D2FF-4537-9176-EFB4427D68F5}.Debug|x86.ActiveCfg = Debug|Win32
+		{635FABB2-D2FF-4537-9176-EFB4427D68F5}.Debug|x86.Build.0 = Debug|Win32
+		{635FABB2-D2FF-4537-9176-EFB4427D68F5}.Release|x64.ActiveCfg = Release|x64
+		{635FABB2-D2FF-4537-9176-EFB4427D68F5}.Release|x64.Build.0 = Release|x64
+		{635FABB2-D2FF-4537-9176-EFB4427D68F5}.Release|x86.ActiveCfg = Release|Win32
+		{635FABB2-D2FF-4537-9176-EFB4427D68F5}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -47,7 +47,7 @@
         <Action name="OnVariableDeclarationParse" type="CreateVariableDeclarationNode"/>
         <Action name="OnIdentifierParse" type="CreateIdentifier"/>
         <Action name="OnIntegerParse" type="CreateIntegerNumberNode"/>
-        <Action name="OnOptionalAssignParse" type="CreateOptionalAssignNode"/>
+        <Action name="OnOptionalAssignParse" type="SaveOptionalAssignExpression"/>
         <Action name="OnIntegerTypeParse" type="CreateIntTypeNode"/>
         <Action name="OnFloatTypeParse" type="CreateFloatTypeNode"/>
     </Actions>

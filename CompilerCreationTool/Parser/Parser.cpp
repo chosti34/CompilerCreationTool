@@ -352,6 +352,7 @@ ParseResults Parser::Parse(const std::string& text)
 		{ ActionType::CreateBinaryMulNode, std::bind(&ActionExecutor::DoCreateBinaryNode, &executor, BinaryExpressionAST::Mul) },
 		{ ActionType::CreateBinaryDivNode, std::bind(&ActionExecutor::DoCreateBinaryNode, &executor, BinaryExpressionAST::Div) },
 		{ ActionType::CreateBinaryLessNode, std::bind(&ActionExecutor::DoCreateBinaryNode, &executor, BinaryExpressionAST::Less) },
+		{ ActionType::CreateBinaryEqualsNode, std::bind(&ActionExecutor::DoCreateBinaryNode, &executor, BinaryExpressionAST::Equals) },
 		{ ActionType::CreateBinaryOrNode, std::bind(&ActionExecutor::DoCreateBinaryNode, &executor, BinaryExpressionAST::Or) },
 		{ ActionType::CreateBinaryAndNode, std::bind(&ActionExecutor::DoCreateBinaryNode, &executor, BinaryExpressionAST::And) },
 		{ ActionType::CreateUnaryMinusNode, std::bind(&ActionExecutor::DoCreateUnaryNode, &executor, UnaryExpressionAST::Minus) },

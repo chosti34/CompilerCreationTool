@@ -16,6 +16,45 @@
         <Production left="Statement">
             <Symbol name="CompositeStatement" type="Nonterminal"/>
         </Production>
+        <Production left="Statement">
+            <Symbol name="AssignStatement" type="Nonterminal"/>
+        </Production>
+        <Production left="Statement">
+            <Symbol name="VariableDeclarationStatement" type="Nonterminal"/>
+        </Production>
+        <Production left="AssignStatement">
+            <Symbol name="Identifier" type="Nonterminal"/>
+            <Symbol name="Assign" type="Terminal"/>
+            <Symbol name="Expression" type="Nonterminal" attribute="CreateAssignExpression"/>
+            <Symbol name="Dotcomma" type="Terminal"/>
+        </Production>
+        <Production left="VariableDeclarationStatement">
+            <Symbol name="Var" type="Terminal"/>
+            <Symbol name="Identifier" type="Nonterminal"/>
+            <Symbol name="Colon" type="Terminal"/>
+            <Symbol name="Type" type="Nonterminal"/>
+            <Symbol name="OptionalAssign" type="Nonterminal" attribute="CreateDeclaration"/>
+            <Symbol name="Dotcomma" type="Terminal"/>
+        </Production>
+        <Production left="OptionalAssign">
+            <Symbol name="Assign" type="Terminal"/>
+            <Symbol name="Expression" type="Nonterminal" attribute="SaveOptionalAssign"/>
+        </Production>
+        <Production left="OptionalAssign">
+            <Symbol name="#Eps#" type="Epsilon"/>
+        </Production>
+        <Production left="Type">
+            <Symbol name="Int" type="Terminal" attribute="CreateIntType"/>
+        </Production>
+        <Production left="Type">
+            <Symbol name="Float" type="Terminal" attribute="CreateFloatType"/>
+        </Production>
+        <Production left="Type">
+            <Symbol name="Bool" type="Terminal" attribute="CreateBoolType"/>
+        </Production>
+        <Production left="Type">
+            <Symbol name="String" type="Terminal" attribute="CreateStringType"/>
+        </Production>
         <Production left="WhileStatement">
             <Symbol name="While" type="Terminal"/>
             <Symbol name="LeftParenthesis" type="Terminal"/>
@@ -131,7 +170,7 @@
             <Symbol name="#Eps#" type="Epsilon"/>
         </Production>
         <Production left="AtomExpr">
-            <Symbol name="Identifier" type="Terminal" attribute="OnIdentifierParse"/>
+            <Symbol name="Identifier" type="Nonterminal"/>
         </Production>
         <Production left="AtomExpr">
             <Symbol name="IntegerConstant" type="Terminal" attribute="OnIntegerConstantParse"/>
@@ -165,56 +204,73 @@
         <Production left="AtomExpr">
             <Symbol name="StringLiteral" type="Terminal" attribute="OnStringLiteralParse"/>
         </Production>
+        <Production left="Identifier">
+            <Symbol name="Identifier" type="Terminal" attribute="OnIdentifierParse"/>
+        </Production>
     </Grammar>
     <Patterns>
         <Pattern name="EOF" origin="EOF" isEnding="true"/>
+        <Pattern name="Float" origin="Float" isEnding="false"/>
+        <Pattern name="Or" origin="\|\|" isEnding="false"/>
+        <Pattern name="Bool" origin="Bool" isEnding="false"/>
+        <Pattern name="String" origin="String" isEnding="false"/>
         <Pattern name="While" origin="while" isEnding="false"/>
-        <Pattern name="LeftParenthesis" origin="\(" isEnding="false"/>
-        <Pattern name="RightParenthesis" origin="\)" isEnding="false"/>
+        <Pattern name="Assign" origin="\=" isEnding="false"/>
+        <Pattern name="Var" origin="var" isEnding="false"/>
+        <Pattern name="Colon" origin="\:" isEnding="false"/>
+        <Pattern name="Int" origin="Int" isEnding="false"/>
         <Pattern name="If" origin="if" isEnding="false"/>
         <Pattern name="Else" origin="else" isEnding="false"/>
-        <Pattern name="Print" origin="print" isEnding="false"/>
-        <Pattern name="LeftCurly" origin="\{" isEnding="false"/>
-        <Pattern name="Dotcomma" origin="\;" isEnding="false"/>
-        <Pattern name="Or" origin="Or" isEnding="false"/>
+        <Pattern name="LeftParenthesis" origin="\(" isEnding="false"/>
+        <Pattern name="RightParenthesis" origin="\)" isEnding="false"/>
         <Pattern name="RightCurly" origin="\}" isEnding="false"/>
         <Pattern name="And" origin="\&amp;\&amp;" isEnding="false"/>
+        <Pattern name="Print" origin="print" isEnding="false"/>
+        <Pattern name="Dotcomma" origin="\;" isEnding="false"/>
+        <Pattern name="LeftCurly" origin="\{" isEnding="false"/>
         <Pattern name="Less" origin="\&lt;" isEnding="false"/>
         <Pattern name="Plus" origin="\+" isEnding="false"/>
         <Pattern name="Minus" origin="\-" isEnding="false"/>
         <Pattern name="Mul" origin="\*" isEnding="false"/>
-        <Pattern name="Div" origin="\/" isEnding="false"/>
-        <Pattern name="IntegerConstant" origin="0|[1-9][0-9]*" isEnding="false"/>
-        <Pattern name="FloatConstant" origin="(0|[1-9])\.[0-9]+" isEnding="false"/>
         <Pattern name="Negation" origin="\!" isEnding="false"/>
         <Pattern name="True" origin="True" isEnding="false"/>
         <Pattern name="False" origin="False" isEnding="false"/>
+        <Pattern name="Div" origin="\/" isEnding="false"/>
+        <Pattern name="IntegerConstant" origin="0|[1-9][0-9]*" isEnding="false"/>
+        <Pattern name="FloatConstant" origin="(0|[1-9])\.[0-9]+" isEnding="false"/>
         <Pattern name="StringLiteral" origin="\&quot;([^\\\&quot;]|\\.)*\&quot;" isEnding="false"/>
         <Pattern name="Identifier" origin="([A-Za-z_])([A-Za-z0-9])*" isEnding="false"/>
     </Patterns>
     <Actions>
+        <Action name="CreateBoolType" type="CreateBoolTypeNode"/>
+        <Action name="CreateStringType" type="CreateStringTypeNode"/>
         <Action name="OnWhileStatementParse" type="CreateWhileStatementNode"/>
         <Action name="OnIfStatementParse" type="CreateIfStatementNode"/>
         <Action name="OnOptionalElseParsed" type="SaveOptionalElseStatement"/>
+        <Action name="CreateAssignExpression" type="CreateAssignNode"/>
+        <Action name="CreateDeclaration" type="CreateVariableDeclarationNode"/>
+        <Action name="SaveOptionalAssign" type="SaveOptionalAssignExpression"/>
+        <Action name="CreateIntType" type="CreateIntTypeNode"/>
+        <Action name="CreateFloatType" type="CreateFloatTypeNode"/>
         <Action name="OnPrintStatementParse" type="CreatePrintStatementNode"/>
-        <Action name="AllocateSpaceForComposite" type="AllocateNewComposite"/>
-        <Action name="MoveCompositeToStatement" type="MoveCompositeToStatement"/>
-        <Action name="OnCompositePartParse" type="OnCompositePartParse"/>
-        <Action name="OnBinaryOrParse" type="CreateBinaryOrNode"/>
+        <Action name="OnBinaryMinusParse" type="CreateBinaryMinusNode"/>
         <Action name="OnBinaryAndParse" type="CreateBinaryAndNode"/>
         <Action name="OnBinaryLessParse" type="CreateBinaryLessNode"/>
         <Action name="OnBinaryPlusParse" type="CreateBinaryPlusNode"/>
-        <Action name="OnBinaryMinusParse" type="CreateBinaryMinusNode"/>
-        <Action name="OnBinaryMulParse" type="CreateBinaryMulNode"/>
-        <Action name="OnBinaryDivParse" type="CreateBinaryDivNode"/>
-        <Action name="OnIdentifierParse" type="CreateIdentifier"/>
-        <Action name="OnIntegerConstantParse" type="CreateIntegerNumberNode"/>
-        <Action name="OnFloatConstantParse" type="CreateFloatNumberNode"/>
-        <Action name="OnUnaryMinusParse" type="CreateUnaryMinusNode"/>
-        <Action name="OnUnaryPlusParse" type="CreateUnaryPlusNode"/>
+        <Action name="MoveCompositeToStatement" type="MoveCompositeToStatement"/>
+        <Action name="OnCompositePartParse" type="OnCompositePartParse"/>
+        <Action name="OnBinaryOrParse" type="CreateBinaryOrNode"/>
+        <Action name="AllocateSpaceForComposite" type="AllocateNewComposite"/>
         <Action name="OnUnaryNegationParse" type="CreateUnaryNegationNode"/>
         <Action name="OnTrueParse" type="CreateTrueNode"/>
+        <Action name="OnUnaryMinusParse" type="CreateUnaryMinusNode"/>
+        <Action name="OnUnaryPlusParse" type="CreateUnaryPlusNode"/>
+        <Action name="OnIntegerConstantParse" type="CreateIntegerNumberNode"/>
+        <Action name="OnFloatConstantParse" type="CreateFloatNumberNode"/>
+        <Action name="OnBinaryMulParse" type="CreateBinaryMulNode"/>
+        <Action name="OnBinaryDivParse" type="CreateBinaryDivNode"/>
         <Action name="OnFalseParse" type="CreateFalseNode"/>
         <Action name="OnStringLiteralParse" type="CreateStringLiteralNode"/>
+        <Action name="OnIdentifierParse" type="CreateIdentifier"/>
     </Actions>
 </Language>

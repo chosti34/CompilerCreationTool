@@ -13,6 +13,7 @@ enum class ActionType
 	CreateBinaryMulNode,
 	CreateBinaryDivNode,
 	CreateBinaryLessNode,
+	CreateBinaryEqualsNode,
 	CreateBinaryOrNode,
 	CreateBinaryAndNode,
 	CreateUnaryMinusNode,

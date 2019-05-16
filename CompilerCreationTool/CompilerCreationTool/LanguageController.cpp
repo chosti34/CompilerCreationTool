@@ -14,11 +14,13 @@
 #include "../Utils/command_utils.h"
 #include "../Utils/time_utils.h"
 #include "../Utils/string_utils.h"
+#include "../Codegen/CodegenVisitor.h"
 
 #include <boost/filesystem.hpp>
 #include <wx/filedlg.h>
 #include <functional>
 #include <fstream>
+#include <sstream>
 
 using namespace std::literals::string_literals;
 
@@ -341,15 +343,6 @@ void LanguageController::OnRunButtonPress()
 	logger->Log((results.success ? "Successfully parsed!" : "Failed to parse...") +
 		" Elapsed time: "s + string_utils::TrimTrailingZerosAndPeriod(elapsedTime.count()) + " seconds.\n"s);
 
-	if (results.success)
-	{
-		wxMessageBox("Your code has been succesfully parsed!", "Success!", wxICON_INFORMATION);
-	}
-	else
-	{
-		wxMessageBox("Your code doesn't match your grammar...", "Failure...", wxICON_WARNING);
-	}
-
 	if (results.success && (results.expression || results.statement))
 	{
 		std::ofstream output("ast.dot");
@@ -380,18 +373,45 @@ void LanguageController::OnRunButtonPress()
 			if (img.IsOk())
 			{
 				mTreeView->SetImage(img);
-				logger->Log("AST has been drawn!\n");
+				logger->Log("-- AST has been drawn! --\n");
 			}
 			else
 			{
 				mTreeView->UnsetImage();
-				logger->Log("Can't draw AST...\n");
+				logger->Log("-- Can't draw AST... --\n");
 			}
 		}
 		else
 		{
 			mTreeView->UnsetImage();
-			logger->Log("Install Graphviz package to draw AST...\n");
+			logger->Log("-- Install Graphviz package to draw AST... --\n");
+		}
+
+		try
+		{
+			CodegenContext context;
+			Codegen codegen(context);
+
+			if (results.expression)
+			{
+				codegen.Generate(*results.expression);
+			}
+			else if (results.statement)
+			{
+				codegen.Generate(*results.statement);
+			}
+
+			std::ostringstream strm;
+			llvm::Module& llvmModule = context.GetUtils().GetModule();
+			llvm::raw_os_ostream os(strm);
+			llvmModule.print(os, nullptr);
+
+			logger->Log("LLVM generated code:\n");
+			logger->Log(strm.str());
+		}
+		catch (const std::exception& ex)
+		{
+			logger->Log("Can't generate LLVM code, reason: " + std::string(ex.what()) + ".\n");
 		}
 	}
 	else
@@ -400,6 +420,15 @@ void LanguageController::OnRunButtonPress()
 	}
 
 	logger->Log("=========================\n");
+
+	if (results.success)
+	{
+		wxMessageBox("Your code has been succesfully parsed!", "Success!", wxICON_INFORMATION);
+	}
+	else
+	{
+		wxMessageBox("Your code doesn't match your grammar...", "Failure...", wxICON_WARNING);
+	}
 }
 
 void LanguageController::OnInfoButtonPress()

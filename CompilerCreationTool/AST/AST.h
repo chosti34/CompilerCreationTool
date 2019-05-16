@@ -3,6 +3,7 @@
 #include "ExpressionType.h"
 #include <boost/variant.hpp>
 #include <string>
+#include <vector>
 
 class IExpressionAST
 {
@@ -45,6 +46,7 @@ public:
 		Mul,
 		Div,
 		Less,
+		Equals,
 		Or,
 		And
 	};
@@ -158,6 +160,8 @@ inline std::string ToString(BinaryExpressionAST::Operator op)
 		return "/";
 	case BinaryExpressionAST::Less:
 		return "<";
+	case BinaryExpressionAST::Equals:
+		return "==";
 	case BinaryExpressionAST::Or:
 		return "||";
 	case BinaryExpressionAST::And:

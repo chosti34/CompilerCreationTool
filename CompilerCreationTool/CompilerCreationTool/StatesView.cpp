@@ -56,7 +56,9 @@ void StatesView::SetParserTable(const IParserTable& table)
 		m_list->SetItem(index, 1, name);
 		m_list->SetItem(index, 2, address ? std::to_string(*address) : gcNoItem);
 		m_list->SetItem(index, 3, GetStateFlagsRepresentation(state));
-		m_list->SetItem(index, 4, isAttribute ? gcNoItem : string_utils::JoinStrings(acceptables));
+
+		const std::string acceptablesString = string_utils::JoinStrings(acceptables);
+		m_list->SetItem(index, 4, isAttribute ? gcNoItem : (acceptablesString.empty() ? gcNoItem : acceptablesString));
 	}
 
 	AdjustColumnWidth(m_list->GetClientSize().x);

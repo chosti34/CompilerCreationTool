@@ -15,24 +15,24 @@ void WorkWithTextCtrl(wxTextCtrl& ctrl, std::function<void(wxTextCtrl&)> && fn)
 }
 }
 
-TextCtrlLogger::TextCtrlLogger(wxTextCtrl* ctrl)
+TextCtrlParserLogger::TextCtrlParserLogger(wxTextCtrl* ctrl)
 	: mTextCtrl(ctrl)
 	, mMask(All)
 {
 	assert(mTextCtrl);
 }
 
-void TextCtrlLogger::SetMask(int mask)
+void TextCtrlParserLogger::SetMask(int mask)
 {
 	mMask = mask;
 }
 
-int TextCtrlLogger::GetMask() const
+int TextCtrlParserLogger::GetMask() const
 {
 	return mMask;
 }
 
-void TextCtrlLogger::Log(const std::string& message, MessageCategory category /* = All */)
+void TextCtrlParserLogger::Log(const std::string& message, MessageCategory category /* = All */)
 {
 	if (mMask & category)
 	{
@@ -42,9 +42,22 @@ void TextCtrlLogger::Log(const std::string& message, MessageCategory category /*
 	}
 }
 
-void TextCtrlLogger::Clear()
+void TextCtrlParserLogger::Clear()
 {
 	WorkWithTextCtrl(*mTextCtrl, [](wxTextCtrl& ctrl) {
 		ctrl.Clear();
+	});
+}
+
+TextCtrlCodegenLogger::TextCtrlCodegenLogger(wxTextCtrl* ctrl)
+	: mTextCtrl(ctrl)
+{
+	assert(ctrl);
+}
+
+void TextCtrlCodegenLogger::Log(const std::string& message)
+{
+	WorkWithTextCtrl(*mTextCtrl, [&message](wxTextCtrl& ctrl) {
+		ctrl.AppendText(message);
 	});
 }

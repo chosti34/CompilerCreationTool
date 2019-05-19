@@ -72,6 +72,7 @@ LanguageController::LanguageController(Language* language, MainFrame* frame)
 	, mOutputView(mFrame->GetOutputView())
 	, mDocument(boost::none)
 	, mHasUnsavedChanges(false)
+	, mNeedCodegen(false)
 {
 	namespace ph = std::placeholders;
 
@@ -81,6 +82,7 @@ LanguageController::LanguageController(Language* language, MainFrame* frame)
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::SaveAs, std::bind(&LanguageController::OnSaveAsButtonPress, this)));
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::Clear, std::bind(&LanguageController::OnClearButtonPress, this)));
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::LogMessages, std::bind(&LanguageController::OnLogMessageButtonPress, this)));
+	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::EnableCodegen, std::bind(&LanguageController::OnEnableCodegenButtonPress, this)));
 	mConnections.push_back(mFrame->DoOnHasUnsavedChangesQuery([this]() { return mHasUnsavedChanges; }));
 
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::Build, std::bind(&LanguageController::OnBuildButtonPress, this)));
@@ -185,6 +187,9 @@ void LanguageController::OnNewButtonPress()
 	mOutputView->GetTextCtrl()->Clear();
 
 	mFrame->GetMenuBar()->Enable(Buttons::LogMessages, false);
+	mFrame->GetMenuBar()->Check(Buttons::LogMessages, false);
+	mFrame->GetMenuBar()->Enable(Buttons::EnableCodegen, false);
+	mFrame->GetMenuBar()->Check(Buttons::EnableCodegen, false);
 	mFrame->GetMenuBar()->Enable(Buttons::Run, false);
 	mFrame->GetMenuBar()->Enable(Buttons::Info, false);
 	mFrame->GetMenuBar()->Enable(Buttons::Up, false);
@@ -201,6 +206,7 @@ void LanguageController::OnNewButtonPress()
 
 	mDocument = boost::none;
 	mHasUnsavedChanges = false;
+	mNeedCodegen = false;
 	UpdateTitle();
 }
 
@@ -223,7 +229,7 @@ void LanguageController::OnOpenButtonPress()
 	{
 		// Инициализируем модель
 		UnserializeLanguage(openFileDialog.GetPath(), *mLanguage);
-		mLanguage->GetParser().SetLogger(std::make_unique<TextCtrlLogger>(mOutputView->GetTextCtrl()));
+		mLanguage->GetParser().SetLogger(std::make_unique<TextCtrlParserLogger>(mOutputView->GetTextCtrl()));
 
 		// Заполняем представление считанными данными
 		mTerminalsView->SetItems(GetTerminalsArray(mLanguage->GetLexer()));
@@ -236,6 +242,9 @@ void LanguageController::OnOpenButtonPress()
 		// Обновляем кнопки
 		mDocument = openFileDialog.GetPath();
 		mFrame->GetMenuBar()->Enable(Buttons::LogMessages, true);
+		mFrame->GetMenuBar()->Check(Buttons::LogMessages, false);
+		mFrame->GetMenuBar()->Enable(Buttons::EnableCodegen, true);
+		mFrame->GetMenuBar()->Check(Buttons::EnableCodegen, false);
 		mFrame->GetMenuBar()->Enable(Buttons::Run, true);
 		mFrame->GetMenuBar()->Enable(Buttons::Info, true);
 		mFrame->GetToolBar()->EnableTool(Buttons::Run, true);
@@ -244,6 +253,7 @@ void LanguageController::OnOpenButtonPress()
 		mFrame->GetToolBar()->EnableTool(Buttons::SaveAs, true);
 		mFrame->Refresh(true);
 		mHasUnsavedChanges = false;
+		mNeedCodegen = false;
 		UpdateTitle();
 	}
 }
@@ -298,6 +308,12 @@ void LanguageController::OnLogMessageButtonPress()
 	}
 }
 
+void LanguageController::OnEnableCodegenButtonPress()
+{
+	assert(mLanguage->IsInitialized());
+	mNeedCodegen = mFrame->GetMenuBar()->IsChecked(Buttons::EnableCodegen);
+}
+
 void LanguageController::OnBuildButtonPress()
 {
 	// Инициализируем модель
@@ -305,7 +321,7 @@ void LanguageController::OnBuildButtonPress()
 	mLanguage->SetGrammar(builder->CreateGrammar(mGrammarView->GetText()));
 
 	// Заполняем модель данными по умолчанию
-	mLanguage->GetParser().SetLogger(std::make_unique<TextCtrlLogger>(mOutputView->GetTextCtrl()));
+	mLanguage->GetParser().SetLogger(std::make_unique<TextCtrlParserLogger>(mOutputView->GetTextCtrl()));
 	mTerminalsView->SetItems(GetTerminalsArray(mLanguage->GetLexer()));
 	mActionsView->SetItems(GetActionsArray(mLanguage->GetParser()));
 	mStatesView->SetParserTable(mLanguage->GetParser().GetTable());
@@ -318,10 +334,14 @@ void LanguageController::OnBuildButtonPress()
 	mFrame->GetToolBar()->EnableTool(Buttons::Save, true);
 	mFrame->GetToolBar()->EnableTool(Buttons::SaveAs, true);
 	mFrame->GetMenuBar()->Enable(Buttons::LogMessages, true);
+	mFrame->GetMenuBar()->Check(Buttons::LogMessages, false);
+	mFrame->GetMenuBar()->Enable(Buttons::EnableCodegen, true);
+	mFrame->GetMenuBar()->Check(Buttons::LogMessages, false);
 	mFrame->Refresh(true);
 
 	wxMessageBox("Parser has been successfully built!", "Success!", wxICON_INFORMATION);
 	mHasUnsavedChanges = true;
+	mNeedCodegen = false;
 	UpdateTitle();
 }
 
@@ -335,10 +355,10 @@ void LanguageController::OnRunButtonPress()
 
 	logger->Log("[" + time_utils::GetCurrentTimeAsString() + "] Parsing started...\n");
 
-	auto nowTime = std::chrono::steady_clock::now();
+	const auto nowTime = std::chrono::steady_clock::now();
 	const ParseResults results = parser.Parse(mEditorView->GetText().ToStdString());
-	auto endTime = std::chrono::steady_clock::now();
-	auto elapsedTime = std::chrono::duration<double>(endTime - nowTime);
+	const auto endTime = std::chrono::steady_clock::now();
+	const auto elapsedTime = std::chrono::duration<double>(endTime - nowTime);
 
 	logger->Log((results.success ? "Successfully parsed!" : "Failed to parse...") +
 		" Elapsed time: "s + string_utils::TrimTrailingZerosAndPeriod(elapsedTime.count()) + " seconds.\n"s);
@@ -387,31 +407,35 @@ void LanguageController::OnRunButtonPress()
 			logger->Log("-- Install Graphviz package to draw AST... --\n");
 		}
 
-		try
+		if (mNeedCodegen)
 		{
-			CodegenContext context;
-			Codegen codegen(context);
-
-			if (results.expression)
+			try
 			{
-				codegen.Generate(*results.expression);
+				CodegenContext context;
+				Codegen codegen(context, std::make_unique<TextCtrlCodegenLogger>(mOutputView->GetTextCtrl()));
+
+				if (results.expression)
+				{
+					codegen.Generate(*results.expression);
+				}
+				else if (results.statement)
+				{
+					codegen.Generate(*results.statement);
+				}
+
+				std::ostringstream strm;
+				llvm::Module& llvmModule = context.GetUtils().GetModule();
+				llvm::raw_os_ostream os(strm);
+				llvmModule.print(os, nullptr);
+
+				logger->Log("---------------------------------\n");
+				logger->Log("LLVM code has been generated:\n");
+				logger->Log(strm.str());
 			}
-			else if (results.statement)
+			catch (const std::exception& ex)
 			{
-				codegen.Generate(*results.statement);
+				logger->Log("Can't generate LLVM code, reason: " + std::string(ex.what()) + ".\n");
 			}
-
-			std::ostringstream strm;
-			llvm::Module& llvmModule = context.GetUtils().GetModule();
-			llvm::raw_os_ostream os(strm);
-			llvmModule.print(os, nullptr);
-
-			logger->Log("LLVM generated code:\n");
-			logger->Log(strm.str());
-		}
-		catch (const std::exception& ex)
-		{
-			logger->Log("Can't generate LLVM code, reason: " + std::string(ex.what()) + ".\n");
 		}
 	}
 	else
@@ -420,7 +444,6 @@ void LanguageController::OnRunButtonPress()
 	}
 
 	logger->Log("=========================\n");
-
 	if (results.success)
 	{
 		wxMessageBox("Your code has been succesfully parsed!", "Success!", wxICON_INFORMATION);

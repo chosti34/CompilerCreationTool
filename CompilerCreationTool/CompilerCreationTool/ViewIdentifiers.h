@@ -19,6 +19,7 @@ namespace Buttons
 		Help,
 		Clear,
 		LogMessages,
+		EnableCodegen,
 		Count
 	};
 }

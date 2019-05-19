@@ -133,6 +133,11 @@
             <Symbol name="LessExprTail" type="Nonterminal"/>
         </Production>
         <Production left="LessExprTail">
+            <Symbol name="Equals" type="Terminal"/>
+            <Symbol name="AddSubExpr" type="Nonterminal" attribute="OnBinaryEqualsParse"/>
+            <Symbol name="LessExprTail" type="Nonterminal"/>
+        </Production>
+        <Production left="LessExprTail">
             <Symbol name="#Eps#" type="Epsilon"/>
         </Production>
         <Production left="AddSubExpr">
@@ -215,6 +220,7 @@
         <Pattern name="Bool" origin="Bool" isEnding="false"/>
         <Pattern name="String" origin="String" isEnding="false"/>
         <Pattern name="While" origin="while" isEnding="false"/>
+        <Pattern name="Equals" origin="\=\=" isEnding="false"/>
         <Pattern name="Assign" origin="\=" isEnding="false"/>
         <Pattern name="Var" origin="var" isEnding="false"/>
         <Pattern name="Colon" origin="\:" isEnding="false"/>
@@ -230,15 +236,15 @@
         <Pattern name="LeftCurly" origin="\{" isEnding="false"/>
         <Pattern name="Less" origin="\&lt;" isEnding="false"/>
         <Pattern name="Plus" origin="\+" isEnding="false"/>
-        <Pattern name="Minus" origin="\-" isEnding="false"/>
         <Pattern name="Mul" origin="\*" isEnding="false"/>
+        <Pattern name="Minus" origin="\-" isEnding="false"/>
+        <Pattern name="FloatConstant" origin="(0|[1-9])\.[0-9]+" isEnding="false"/>
         <Pattern name="Negation" origin="\!" isEnding="false"/>
-        <Pattern name="True" origin="True" isEnding="false"/>
-        <Pattern name="False" origin="False" isEnding="false"/>
         <Pattern name="Div" origin="\/" isEnding="false"/>
         <Pattern name="IntegerConstant" origin="0|[1-9][0-9]*" isEnding="false"/>
-        <Pattern name="FloatConstant" origin="(0|[1-9])\.[0-9]+" isEnding="false"/>
+        <Pattern name="True" origin="True" isEnding="false"/>
         <Pattern name="StringLiteral" origin="\&quot;([^\\\&quot;]|\\.)*\&quot;" isEnding="false"/>
+        <Pattern name="False" origin="False" isEnding="false"/>
         <Pattern name="Identifier" origin="([A-Za-z_])([A-Za-z0-9])*" isEnding="false"/>
     </Patterns>
     <Actions>
@@ -253,24 +259,25 @@
         <Action name="CreateIntType" type="CreateIntTypeNode"/>
         <Action name="CreateFloatType" type="CreateFloatTypeNode"/>
         <Action name="OnPrintStatementParse" type="CreatePrintStatementNode"/>
-        <Action name="OnBinaryMinusParse" type="CreateBinaryMinusNode"/>
+        <Action name="OnBinaryPlusParse" type="CreateBinaryPlusNode"/>
         <Action name="OnBinaryAndParse" type="CreateBinaryAndNode"/>
         <Action name="OnBinaryLessParse" type="CreateBinaryLessNode"/>
-        <Action name="OnBinaryPlusParse" type="CreateBinaryPlusNode"/>
+        <Action name="OnBinaryEqualsParse" type="CreateBinaryEqualsNode"/>
         <Action name="MoveCompositeToStatement" type="MoveCompositeToStatement"/>
         <Action name="OnCompositePartParse" type="OnCompositePartParse"/>
         <Action name="OnBinaryOrParse" type="CreateBinaryOrNode"/>
         <Action name="AllocateSpaceForComposite" type="AllocateNewComposite"/>
-        <Action name="OnUnaryNegationParse" type="CreateUnaryNegationNode"/>
-        <Action name="OnTrueParse" type="CreateTrueNode"/>
-        <Action name="OnUnaryMinusParse" type="CreateUnaryMinusNode"/>
+        <Action name="OnBinaryMinusParse" type="CreateBinaryMinusNode"/>
         <Action name="OnUnaryPlusParse" type="CreateUnaryPlusNode"/>
-        <Action name="OnIntegerConstantParse" type="CreateIntegerNumberNode"/>
+        <Action name="OnUnaryNegationParse" type="CreateUnaryNegationNode"/>
         <Action name="OnFloatConstantParse" type="CreateFloatNumberNode"/>
+        <Action name="OnIntegerConstantParse" type="CreateIntegerNumberNode"/>
+        <Action name="OnUnaryMinusParse" type="CreateUnaryMinusNode"/>
         <Action name="OnBinaryMulParse" type="CreateBinaryMulNode"/>
         <Action name="OnBinaryDivParse" type="CreateBinaryDivNode"/>
         <Action name="OnFalseParse" type="CreateFalseNode"/>
-        <Action name="OnStringLiteralParse" type="CreateStringLiteralNode"/>
+        <Action name="OnTrueParse" type="CreateTrueNode"/>
         <Action name="OnIdentifierParse" type="CreateIdentifier"/>
+        <Action name="OnStringLiteralParse" type="CreateStringLiteralNode"/>
     </Actions>
 </Language>

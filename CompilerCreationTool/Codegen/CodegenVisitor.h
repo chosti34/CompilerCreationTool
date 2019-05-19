@@ -1,12 +1,13 @@
 #pragma once
 #include "../AST/AST.h"
 #include "CodegenContext.h"
+#include "ICodegenLogger.h"
 
 
 class ExpressionCodegen : public IExpressionNodeVisitor
 {
 public:
-	explicit ExpressionCodegen(CodegenContext& context);
+	explicit ExpressionCodegen(CodegenContext& context, ICodegenLogger* logger = nullptr);
 	llvm::Value* Visit(const IExpressionAST& node);
 
 private:
@@ -16,15 +17,16 @@ private:
 	void Visit(const IdentifierExpressionAST& identifier) override;
 
 private:
-	CodegenContext& m_context;
-	std::vector<llvm::Value*> m_stack;
+	CodegenContext& mContext;
+	std::vector<llvm::Value*> mStack;
+	ICodegenLogger* mLogger;
 };
 
 
 class StatementCodegen : public IStatementNodeVisitor
 {
 public:
-	explicit StatementCodegen(CodegenContext& context);
+	explicit StatementCodegen(CodegenContext& context, ICodegenLogger* logger = nullptr);
 	void Visit(const IStatementAST& node);
 
 private:
@@ -36,20 +38,22 @@ private:
 	void Visit(const PrintStatementAST& print) override;
 
 private:
-	CodegenContext& m_context;
-	ExpressionCodegen m_expressionCodegen;
-	std::vector<llvm::BasicBlock*> m_branchContinueStack;
+	CodegenContext& mContext;
+	ExpressionCodegen mExpressionCodegen;
+	std::vector<llvm::BasicBlock*> mBranchContinueStack;
+	ICodegenLogger* mLogger; // can be nullptr
 };
 
 
 class Codegen
 {
 public:
-	explicit Codegen(CodegenContext& context);
+	explicit Codegen(CodegenContext& context, std::unique_ptr<ICodegenLogger> && logger = nullptr);
 
 	void Generate(const IStatementAST& statement);
 	void Generate(const IExpressionAST& expression);
 
 private:
-	CodegenContext& m_context;
+	CodegenContext& mContext;
+	std::unique_ptr<ICodegenLogger> mLogger; // can be nullptr
 };

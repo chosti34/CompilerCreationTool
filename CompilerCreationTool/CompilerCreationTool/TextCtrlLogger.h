@@ -1,11 +1,12 @@
 #pragma once
 #include "../Parser/IParserLogger.h"
+#include "../Codegen/ICodegenLogger.h"
 #include <wx/textctrl.h>
 
-class TextCtrlLogger : public IParserLogger
+class TextCtrlParserLogger : public IParserLogger
 {
 public:
-	explicit TextCtrlLogger(wxTextCtrl* ctrl);
+	explicit TextCtrlParserLogger(wxTextCtrl* ctrl);
 
 	void SetMask(int mask) override;
 	int GetMask() const override;
@@ -16,4 +17,14 @@ public:
 private:
 	wxTextCtrl* mTextCtrl;
 	int mMask;
+};
+
+class TextCtrlCodegenLogger : public ICodegenLogger
+{
+public:
+	explicit TextCtrlCodegenLogger(wxTextCtrl* ctrl);
+	void Log(const std::string& message) override;
+
+private:
+	wxTextCtrl* mTextCtrl;
 };

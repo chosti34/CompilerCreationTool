@@ -21,6 +21,7 @@ private: // Signal handlers
 	void OnSaveAsButtonPress();
 	void OnClearButtonPress();
 	void OnLogMessageButtonPress();
+	void OnEnableCodegenButtonPress();
 
 	void OnBuildButtonPress();
 	void OnRunButtonPress();
@@ -60,4 +61,5 @@ private:
 	std::vector<SignalScopedConnection> mConnections;
 	boost::optional<std::string> mDocument;
 	bool mHasUnsavedChanges;
+	bool mNeedCodegen;
 };

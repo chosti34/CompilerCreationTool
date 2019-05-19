@@ -3,6 +3,8 @@
 #include <boost/format.hpp>
 #include <unordered_set>
 
+using namespace std::literals::string_literals;
+
 namespace
 {
 bool Convertible(const ExpressionType& from, const ExpressionType& to)
@@ -434,23 +436,42 @@ llvm::Value* EmitPrintfStringLiteral(llvm::Value* value, llvm::LLVMContext& llvm
 
 	return builder.CreateBitCast(allocaInst, llvm::Type::getInt8PtrTy(llvmContext), "str_to_i8_ptr");
 }
+
+std::string RemoveQuotes(const std::string& str)
+{
+	if (str.length() >= 2 && str.front() == '\"' && str.back() == '\"')
+	{
+		return str.substr(1, str.size() - 2);
+	}
+	return str;
+}
+
+void LogIfNotNull(ICodegenLogger* logger, const std::string& message)
+{
+	if (!logger)
+	{
+		return;
+	}
+	logger->Log(message);
+}
 }
 
 
 // Expression codegen visitor
-ExpressionCodegen::ExpressionCodegen(CodegenContext& context)
-	: m_context(context)
-	, m_stack()
+ExpressionCodegen::ExpressionCodegen(CodegenContext& context, ICodegenLogger* logger /* = nullptr */)
+	: mContext(context)
+	, mStack()
+	, mLogger(logger)
 {
 }
 
 llvm::Value* ExpressionCodegen::Visit(const IExpressionAST& node)
 {
 	node.Accept(*this);
-	if (!m_stack.empty())
+	if (!mStack.empty())
 	{
-		llvm::Value* value = m_stack.back();
-		m_stack.pop_back();
+		llvm::Value* value = mStack.back();
+		mStack.pop_back();
 		return value;
 	}
 	throw std::logic_error("internal error while generating code for expression");
@@ -458,7 +479,8 @@ llvm::Value* ExpressionCodegen::Visit(const IExpressionAST& node)
 
 void ExpressionCodegen::Visit(const BinaryExpressionAST& node)
 {
-	CodegenUtils& utils = m_context.GetUtils();
+	LogIfNotNull(mLogger, "Visiting binary expression node with operator '" + ToString(node.GetOperator()) + "'...\n");
+	CodegenUtils& utils = mContext.GetUtils();
 
 	llvm::IRBuilder<>& builder = utils.GetBuilder();
 	llvm::LLVMContext& llvmContext = utils.GetLLVMContext();
@@ -515,23 +537,25 @@ void ExpressionCodegen::Visit(const BinaryExpressionAST& node)
 	switch (ToExpressionType(left->getType()).value)
 	{
 	case ExpressionType::Int:
-		m_stack.push_back(CreateIntegerBinaryExpression(left, right, node.GetOperator(), llvmContext, builder));
+		mStack.push_back(CreateIntegerBinaryExpression(left, right, node.GetOperator(), llvmContext, builder));
 		break;
 	case ExpressionType::Float:
-		m_stack.push_back(CreateFloatBinaryExpression(left, right, node.GetOperator(), llvmContext, builder));
+		mStack.push_back(CreateFloatBinaryExpression(left, right, node.GetOperator(), llvmContext, builder));
 		break;
 	case ExpressionType::Bool:
-		m_stack.push_back(CreateBooleanBinaryExpression(left, right, node.GetOperator(), llvmContext, builder));
+		mStack.push_back(CreateBooleanBinaryExpression(left, right, node.GetOperator(), llvmContext, builder));
 		break;
 	default:
 		throw std::runtime_error("can't codegen binary operator '" +
 			ToString(node.GetOperator()) + "' for " + ToString(ToExpressionType(left->getType())));
 	}
+
+	LogIfNotNull(mLogger, "End visiting binary expression node with operator '" + ToString(node.GetOperator()) + "'.\n");
 }
 
 void ExpressionCodegen::Visit(const LiteralExpressionAST& node)
 {
-	CodegenUtils& utils = m_context.GetUtils();
+	CodegenUtils& utils = mContext.GetUtils();
 
 	llvm::LLVMContext& llvmContext = utils.GetLLVMContext();
 	llvm::IRBuilder<>& builder = utils.GetBuilder();
@@ -542,23 +566,26 @@ void ExpressionCodegen::Visit(const LiteralExpressionAST& node)
 	{
 		const int number = boost::get<int>(constant);
 		llvm::Value* value = llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvmContext), number);
-		m_stack.push_back(value);
+		mStack.push_back(value);
+		LogIfNotNull(mLogger, "Visiting literal node with int value '" + std::to_string(number) + "'.\n");
 	}
 	else if (constant.type() == typeid(double))
 	{
 		const double number = boost::get<double>(constant);
 		llvm::Value* value = llvm::ConstantFP::get(llvm::Type::getDoubleTy(llvmContext), number);
-		m_stack.push_back(value);
+		mStack.push_back(value);
+		LogIfNotNull(mLogger, "Visiting literal node with double value '" + std::to_string(number) + "'.\n");
 	}
 	else if (constant.type() == typeid(bool))
 	{
 		const bool boolean = boost::get<bool>(constant);
 		llvm::Value* value = llvm::ConstantInt::get(llvm::Type::getInt1Ty(llvmContext), uint64_t(boolean));
-		m_stack.push_back(value);
+		mStack.push_back(value);
+		LogIfNotNull(mLogger, "Visiting literal node with boolean value '" + (boolean ? "true"s : "false"s) + "'.\n");
 	}
 	else if (constant.type() == typeid(std::string))
 	{
-		const std::string& str = boost::get<std::string>(constant);
+		const std::string str = RemoveQuotes(boost::get<std::string>(constant));
 		llvm::Type* i8 = llvm::Type::getInt8Ty(llvmContext);
 		llvm::Constant* constantString = llvm::ConstantDataArray::getString(llvmContext, str, true);
 		llvm::ArrayType* arrayType = llvm::ArrayType::get(i8, str.length() + 1);
@@ -568,7 +595,8 @@ void ExpressionCodegen::Visit(const LiteralExpressionAST& node)
 		llvm::StoreInst* storeInst = builder.CreateStore(constantString, allocaInst);
 		(void)storeInst;
 
-		m_stack.push_back(builder.CreateBitCast(allocaInst, llvm::Type::getInt8PtrTy(llvmContext), "str_to_i8_ptr"));
+		mStack.push_back(builder.CreateBitCast(allocaInst, llvm::Type::getInt8PtrTy(llvmContext), "str_to_i8_ptr"));
+		LogIfNotNull(mLogger, "Visiting literal node with string value '" + str + "'.\n");
 	}
 	else
 	{
@@ -579,7 +607,9 @@ void ExpressionCodegen::Visit(const LiteralExpressionAST& node)
 
 void ExpressionCodegen::Visit(const UnaryExpressionAST& node)
 {
-	CodegenUtils& utils = m_context.GetUtils();
+	LogIfNotNull(mLogger, "Visiting unary '" + ToString(node.GetOperator()) + "' node...\n");
+
+	CodegenUtils& utils = mContext.GetUtils();
 	llvm::IRBuilder<>& builder = utils.GetBuilder();
 	llvm::LLVMContext& llvmContext = utils.GetLLVMContext();
 	llvm::Value* value = Visit(node.GetExpression());
@@ -587,27 +617,31 @@ void ExpressionCodegen::Visit(const UnaryExpressionAST& node)
 	switch (node.GetOperator())
 	{
 	case UnaryExpressionAST::Plus:
-		m_stack.push_back(value);
+		mStack.push_back(value);
 		break;
 	case UnaryExpressionAST::Minus:
-		m_stack.push_back(CodegenNegativeValue(value, builder));
+		mStack.push_back(CodegenNegativeValue(value, builder));
 		break;
 	case UnaryExpressionAST::Negation:
-		m_stack.push_back(CreateValueNegation(value, llvmContext, builder));
+		mStack.push_back(CreateValueNegation(value, llvmContext, builder));
 		break;
 	default:
 		assert(false);
 		throw std::logic_error("Visit(UnaryAST): undefined unary operator");
 	}
+
+	LogIfNotNull(mLogger, "End visiting unary '" + ToString(node.GetOperator()) + "' node.\n");
 }
 
 void ExpressionCodegen::Visit(const IdentifierExpressionAST& node)
 {
-	CodegenUtils& utils = m_context.GetUtils();
+	LogIfNotNull(mLogger, "Visiting identifier '" + node.GetName() + "' node.\n");
+
+	CodegenUtils& utils = mContext.GetUtils();
 	llvm::IRBuilder<>& builder = utils.GetBuilder();
 
 	const std::string& name = node.GetName();
-	llvm::AllocaInst* variable = m_context.GetVariable(name);
+	llvm::AllocaInst* variable = mContext.GetVariable(name);
 
 	if (!variable)
 	{
@@ -615,14 +649,15 @@ void ExpressionCodegen::Visit(const IdentifierExpressionAST& node)
 	}
 
 	llvm::Value* value = builder.CreateLoad(variable, name + "Value");
-	m_stack.push_back(value);
+	mStack.push_back(value);
 }
 
 
 // Statement codegen visitor
-StatementCodegen::StatementCodegen(CodegenContext& context)
-	: m_context(context)
-	, m_expressionCodegen(context)
+StatementCodegen::StatementCodegen(CodegenContext& context, ICodegenLogger* logger /* = nullptr */)
+	: mContext(context)
+	, mExpressionCodegen(context, logger)
+	, mLogger(logger)
 {
 }
 
@@ -633,12 +668,13 @@ void StatementCodegen::Visit(const IStatementAST& node)
 
 void StatementCodegen::Visit(const VariableDeclarationAST& node)
 {
-	CodegenUtils& utils = m_context.GetUtils();
+	LogIfNotNull(mLogger, "Visiting variable declaration node ('" + node.GetIdentifier().GetName() + "', '" + ToString(node.GetType()) + "')...\n");
+	CodegenUtils& utils = mContext.GetUtils();
 	llvm::IRBuilder<>& builder = utils.GetBuilder();
 	llvm::LLVMContext& llvmContext = utils.GetLLVMContext();
 
 	const std::string& name = node.GetIdentifier().GetName();
-	if (m_context.GetVariable(name))
+	if (mContext.GetVariable(name))
 	{
 		throw std::runtime_error("variable '" + name + "' is already defined");
 	}
@@ -652,12 +688,12 @@ void StatementCodegen::Visit(const VariableDeclarationAST& node)
 	builder.CreateStore(defaultValue, variable);
 
 	// Сохраняем переменную в контекст (таблицу символов)
-	m_context.Define(name, variable);
+	mContext.Define(name, variable);
 
 	// Обработка опционального блока присваивания
 	if (const IExpressionAST* expression = node.GetExpression())
 	{
-		llvm::Value* value = m_expressionCodegen.Visit(*expression);
+		llvm::Value* value = mExpressionCodegen.Visit(*expression);
 
 		if (ToExpressionType(value->getType()) != node.GetType())
 		{
@@ -680,22 +716,25 @@ void StatementCodegen::Visit(const VariableDeclarationAST& node)
 		assert(value->getType()->getTypeID() == variable->getType()->getPointerElementType()->getTypeID());
 		builder.CreateStore(value, variable);
 	}
+
+	LogIfNotNull(mLogger, "End visiting variable declaration node ('" + node.GetIdentifier().GetName() + "', '" + ToString(node.GetType()) + "').\n");
 }
 
 void StatementCodegen::Visit(const AssignStatementAST& node)
 {
-	CodegenUtils& utils = m_context.GetUtils();
+	LogIfNotNull(mLogger, "Visiting variable assign node ('" + node.GetIdentifier().GetName() + "')...\n");
+	CodegenUtils& utils = mContext.GetUtils();
 	llvm::IRBuilder<>& builder = utils.GetBuilder();
 	llvm::LLVMContext& llvmContext = utils.GetLLVMContext();
 
 	const std::string& name = node.GetIdentifier().GetName();
-	llvm::AllocaInst* variable = m_context.GetVariable(name);
+	llvm::AllocaInst* variable = mContext.GetVariable(name);
 	if (!variable)
 	{
 		throw std::runtime_error("can't assign because variable '" + name + "' is not defined");
 	}
 
-	llvm::Value* value = m_expressionCodegen.Visit(node.GetExpression());
+	llvm::Value* value = mExpressionCodegen.Visit(node.GetExpression());
 
 	if (ToExpressionType(value->getType()) != ToExpressionType(variable->getType()->getPointerElementType()))
 	{
@@ -717,11 +756,15 @@ void StatementCodegen::Visit(const AssignStatementAST& node)
 
 	assert(value->getType()->getTypeID() == variable->getType()->getPointerElementType()->getTypeID());
 	builder.CreateStore(value, variable);
+
+	LogIfNotNull(mLogger, "End visiting variable assign node ('" + node.GetIdentifier().GetName() + "').\n");
 }
 
 void StatementCodegen::Visit(const IfStatementAST& node)
 {
-	CodegenUtils& utils = m_context.GetUtils();
+	LogIfNotNull(mLogger, "Visiting if statement node...\n");
+
+	CodegenUtils& utils = mContext.GetUtils();
 	llvm::IRBuilder<>& builder = utils.GetBuilder();
 	llvm::LLVMContext& llvmContext = utils.GetLLVMContext();
 
@@ -733,7 +776,8 @@ void StatementCodegen::Visit(const IfStatementAST& node)
 	llvm::BasicBlock* continueBlock = llvm::BasicBlock::Create(llvmContext, "continue_after_if", func);
 
 	// Генерируем код условного выражения
-	llvm::Value* value = m_expressionCodegen.Visit(node.GetExpression());
+	LogIfNotNull(mLogger, "Generating code for if statement's condition expression...\n");
+	llvm::Value* value = mExpressionCodegen.Visit(node.GetExpression());
 	value = ConvertToBooleanValue(value, llvmContext, builder);
 	builder.CreateCondBr(value, thenBlock, elseBlock);
 
@@ -746,10 +790,10 @@ void StatementCodegen::Visit(const IfStatementAST& node)
 		}
 		// Если блок имеет вложенные if инструкции, и при этом блок continue не имеет выхода,
 		//  добавляем безусловный переход
-		if (!m_branchContinueStack.empty())
+		if (!mBranchContinueStack.empty())
 		{
-			const bool hasTerminated = m_branchContinueStack.back()->getTerminator();
-			m_branchContinueStack.pop_back();
+			const bool hasTerminated = mBranchContinueStack.back()->getTerminator();
+			mBranchContinueStack.pop_back();
 			if (!hasTerminated)
 			{
 				builder.CreateBr(continueBlock);
@@ -760,7 +804,8 @@ void StatementCodegen::Visit(const IfStatementAST& node)
 	// Генерируем код для блока then. В конце блока then добавляем безусловный переход на блок continue,
 	//  если блок then не был прерван какой-либо инструкцией
 	{
-		ContextScopeHelper scope(m_context);
+		LogIfNotNull(mLogger, "Generating code for if statement's then clause...\n");
+		ContextScopeHelper scope(mContext);
 		builder.SetInsertPoint(thenBlock);
 		Visit(node.GetThenStatement());
 		putBrAfterBranchInsertionIfNecessary(thenBlock);
@@ -769,10 +814,11 @@ void StatementCodegen::Visit(const IfStatementAST& node)
 	// Генерируем код для блока else. В конце блока else добавляем безусловный переход на блок continue,
 	//  если блок else не был прерван какой-либо инструкцией
 	{
-		ContextScopeHelper scope(m_context);
+		ContextScopeHelper scope(mContext);
 		builder.SetInsertPoint(elseBlock);
 		if (node.GetElseStatement())
 		{
+			LogIfNotNull(mLogger, "Generating code for if statement's else clause...\n");
 			Visit(*node.GetElseStatement());
 		}
 		putBrAfterBranchInsertionIfNecessary(elseBlock);
@@ -781,12 +827,15 @@ void StatementCodegen::Visit(const IfStatementAST& node)
 	// Устанавливаем точку для вставки генерируемого кода в блок continue_after_if,
 	//  сохраняем блок continue в стеке для корректной вставки переходов во вложенных инструкциях if, while
 	builder.SetInsertPoint(continueBlock);
-	m_branchContinueStack.push_back(continueBlock);
+	mBranchContinueStack.push_back(continueBlock);
+	LogIfNotNull(mLogger, "End visiting if statement node.\n");
 }
 
 void StatementCodegen::Visit(const WhileStatementAST& node)
 {
-	CodegenUtils& utils = m_context.GetUtils();
+	LogIfNotNull(mLogger, "Visiting while statement node...\n");
+
+	CodegenUtils& utils = mContext.GetUtils();
 	llvm::IRBuilder<>& builder = utils.GetBuilder();
 	llvm::LLVMContext& llvmContext = utils.GetLLVMContext();
 
@@ -797,12 +846,14 @@ void StatementCodegen::Visit(const WhileStatementAST& node)
 	llvm::BasicBlock* afterLoop = llvm::BasicBlock::Create(llvmContext, "after_loop_body", func);
 
 	// Генерируем код условия цикла
-	llvm::Value* value = ConvertToBooleanValue(m_expressionCodegen.Visit(node.GetExpression()), llvmContext, builder);
+	LogIfNotNull(mLogger, "Generating code for while statement's condition expression...\n");
+	llvm::Value* value = ConvertToBooleanValue(mExpressionCodegen.Visit(node.GetExpression()), llvmContext, builder);
 	builder.CreateCondBr(value, body, afterLoop);
 
 	// Генерируем код для тела цикла
 	{
-		ContextScopeHelper scope(m_context);
+		LogIfNotNull(mLogger, "Generating code for while statement's body...\n");
+		ContextScopeHelper scope(mContext);
 		builder.SetInsertPoint(body);
 		Visit(node.GetStatement());
 
@@ -810,33 +861,37 @@ void StatementCodegen::Visit(const WhileStatementAST& node)
 		//  добаляем условный переход на начало тела цикла (таким образом реализуется цикличность)
 		if (!body->getTerminator())
 		{
-			value = ConvertToBooleanValue(m_expressionCodegen.Visit(node.GetExpression()), llvmContext, builder);
+			LogIfNotNull(mLogger, "Generating code for while statement's condition expression again...\n");
+			value = ConvertToBooleanValue(mExpressionCodegen.Visit(node.GetExpression()), llvmContext, builder);
 			builder.CreateCondBr(value, body, afterLoop);
 		}
 		// Иначе, если стек меток if-while не пуст, и последний элемент стека не имеет терминальной инструкции,
 		//  тогда добавляем условный переход на начало тела цикла (таким образом реализуется цикличность)
-		else if (!m_branchContinueStack.empty())
+		else if (!mBranchContinueStack.empty())
 		{
-			if (!m_branchContinueStack.back()->getTerminator())
+			if (!mBranchContinueStack.back()->getTerminator())
 			{
-				builder.SetInsertPoint(m_branchContinueStack.back());
-				value = ConvertToBooleanValue(m_expressionCodegen.Visit(node.GetExpression()), llvmContext, builder);
+				builder.SetInsertPoint(mBranchContinueStack.back());
+				value = ConvertToBooleanValue(mExpressionCodegen.Visit(node.GetExpression()), llvmContext, builder);
 				builder.CreateCondBr(value, body, afterLoop);
 			}
-			m_branchContinueStack.pop_back();
+			mBranchContinueStack.pop_back();
 		}
 	}
 
 	// Устанавливаем точку для вставки генерируемого кода в блок after_loop_body,
 	//  сохраняем блок continue в стеке для корректной вставки переходов во вложенных инструкциях if, while
 	builder.SetInsertPoint(afterLoop);
-	m_branchContinueStack.push_back(afterLoop);
+	mBranchContinueStack.push_back(afterLoop);
+	LogIfNotNull(mLogger, "End visiting while statement node.\n");
 }
 
 void StatementCodegen::Visit(const CompositeStatementAST& node)
 {
-	ContextScopeHelper scopedContext(m_context);
-	llvm::IRBuilder<>& builder = m_context.GetUtils().GetBuilder();
+	LogIfNotNull(mLogger, "Visiting composite statement...\n");
+
+	ContextScopeHelper scopedContext(mContext);
+	llvm::IRBuilder<>& builder = mContext.GetUtils().GetBuilder();
 
 	for (size_t i = 0; i < node.GetStatementsCount(); ++i)
 	{
@@ -847,30 +902,37 @@ void StatementCodegen::Visit(const CompositeStatementAST& node)
 		}
 		// TODO: produce warning about unreachable code
 	}
+
+	LogIfNotNull(mLogger, "End visiting composite statement.\n");
 }
 
 void StatementCodegen::Visit(const PrintStatementAST& node)
 {
-	CodegenUtils& utils = m_context.GetUtils();
+	LogIfNotNull(mLogger, "Visiting print statement.\n");
+
+	CodegenUtils& utils = mContext.GetUtils();
 	llvm::LLVMContext& llvmContext = utils.GetLLVMContext();
 	llvm::IRBuilder<>& builder = utils.GetBuilder();
 
-	llvm::Value* expressionValue = m_expressionCodegen.Visit(node.GetExpression());
+	llvm::Value* expressionValue = mExpressionCodegen.Visit(node.GetExpression());
 	std::vector<llvm::Value*> printfArgs = {
 		EmitPrintfStringLiteral(expressionValue, llvmContext, builder), expressionValue };
-	builder.CreateCall(m_context.GetPrintf(), printfArgs, "print_tmp");
+	builder.CreateCall(mContext.GetPrintf(), printfArgs, "print_tmp");
 }
 
-Codegen::Codegen(CodegenContext& context)
-	: m_context(context)
+Codegen::Codegen(CodegenContext& context, std::unique_ptr<ICodegenLogger> && logger /* = nullptr */)
+	: mContext(context)
+	, mLogger(std::move(logger))
 {
 }
 
 void Codegen::Generate(const IStatementAST& statement)
 {
-	llvm::LLVMContext& llvmContext = m_context.GetUtils().GetLLVMContext();
-	llvm::Module& llvmModule = m_context.GetUtils().GetModule();
-	llvm::IRBuilder<>& builder = m_context.GetUtils().GetBuilder();
+	LogIfNotNull(mLogger.get(), "Code generation for statement has been started!\n");
+
+	llvm::LLVMContext& llvmContext = mContext.GetUtils().GetLLVMContext();
+	llvm::Module& llvmModule = mContext.GetUtils().GetModule();
+	llvm::IRBuilder<>& builder = mContext.GetUtils().GetBuilder();
 
 	// Генерируем код функции i32 main(void)
 	llvm::FunctionType* mainFuncType = llvm::FunctionType::get(
@@ -882,7 +944,7 @@ void Codegen::Generate(const IStatementAST& statement)
 	llvm::BasicBlock* bb = llvm::BasicBlock::Create(llvmContext, "entry", mainFunc);
 	builder.SetInsertPoint(bb);
 
-	StatementCodegen statementCodegen(m_context);
+	StatementCodegen statementCodegen(mContext, mLogger.get());
 	statement.Accept(statementCodegen);
 
 	// Генерируем код инструкции возврата функции main
@@ -899,9 +961,11 @@ void Codegen::Generate(const IStatementAST& statement)
 
 void Codegen::Generate(const IExpressionAST& expression)
 {
-	llvm::LLVMContext& llvmContext = m_context.GetUtils().GetLLVMContext();
-	llvm::Module& llvmModule = m_context.GetUtils().GetModule();
-	llvm::IRBuilder<>& builder = m_context.GetUtils().GetBuilder();
+	LogIfNotNull(mLogger.get(), "Code generation for expression has been started!\n");
+
+	llvm::LLVMContext& llvmContext = mContext.GetUtils().GetLLVMContext();
+	llvm::Module& llvmModule = mContext.GetUtils().GetModule();
+	llvm::IRBuilder<>& builder = mContext.GetUtils().GetBuilder();
 
 	// Генерируем код функции i32 main(void)
 	llvm::FunctionType* mainFuncType = llvm::FunctionType::get(
@@ -914,12 +978,12 @@ void Codegen::Generate(const IExpressionAST& expression)
 	builder.SetInsertPoint(bb);
 
 	// Генерируем код выражения
-	ExpressionCodegen expressionCodegen(m_context);
+	ExpressionCodegen expressionCodegen(mContext, mLogger.get());
 	llvm::Value* value = expressionCodegen.Visit(expression);
 
 	// Генерируем код вызова функции printf
 	std::vector<llvm::Value*> printfArgs = { EmitPrintfStringLiteral(value, llvmContext, builder), value };
-	builder.CreateCall(m_context.GetPrintf(), printfArgs);
+	builder.CreateCall(mContext.GetPrintf(), printfArgs);
 
 	// Генерируем код инструкции возврата функции main
 	llvm::Value* exitCode = llvm::ConstantInt::get(llvmContext, llvm::APInt(32, uint64_t(0), true));

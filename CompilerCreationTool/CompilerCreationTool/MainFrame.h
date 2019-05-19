@@ -64,6 +64,7 @@ private:
 	void OnHelp(wxCommandEvent& event);
 	void OnClear(wxCommandEvent& event);
 	void OnLogMessages(wxCommandEvent& event);
+	void OnCodegenEnable(wxCommandEvent& event);
 
 private:
 	wxAuiManager mAuiManager;

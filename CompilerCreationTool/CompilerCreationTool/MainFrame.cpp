@@ -32,6 +32,11 @@ wxMenuBar* CreateMenuBar()
 		Buttons::LogMessages,
 		"Log only action's messages",
 		"Check this item if you want to log only action's messages");
+	view->AppendCheckItem(
+		Buttons::EnableCodegen,
+		"Enable code generation",
+		"Check this item if you want to generate LLVM code after parsing"
+	);
 	view->AppendSeparator();
 	view->Append(Buttons::Clear, "Clear output", nullptr, "Clear output window's content");
 
@@ -127,6 +132,7 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	mToolbar->Realize();
 
 	mMenubar->Enable(Buttons::LogMessages, false);
+	mMenubar->Enable(Buttons::EnableCodegen, false);
 	mMenubar->Enable(Buttons::Run, false);
 	mMenubar->Enable(Buttons::Info, false);
 	mMenubar->Enable(Buttons::Up, false);
@@ -365,6 +371,18 @@ void MainFrame::OnLogMessages(wxCommandEvent&)
 	}
 }
 
+void MainFrame::OnCodegenEnable(wxCommandEvent&)
+{
+	try
+	{
+		SendButtonPressedSignal(Buttons::EnableCodegen);
+	}
+	catch (const std::exception& ex)
+	{
+		wxMessageBox("Can't enable code generation: "s + ex.what());
+	}
+}
+
 void MainFrame::OnSize(wxSizeEvent& event)
 {
 	std::cout << event.GetSize().x << " " << event.GetSize().y << std::endl;
@@ -487,6 +505,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(Buttons::Info, MainFrame::OnInfo)
 	EVT_MENU(Buttons::Clear, MainFrame::OnClear)
 	EVT_MENU(Buttons::LogMessages, MainFrame::OnLogMessages)
+	EVT_MENU(Buttons::EnableCodegen, MainFrame::OnCodegenEnable)
 
 	EVT_TOOL(Buttons::New, MainFrame::OnNew)
 	EVT_TOOL(Buttons::Open, MainFrame::OnOpen)

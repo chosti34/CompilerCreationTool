@@ -387,7 +387,7 @@ ParseResults Parser::Parse(const std::string& text)
 	catch (const std::exception& ex)
 	{
 		LogIfNotNull("Lexer error: "s + ex.what(), index);
-		return { false, nullptr };
+		return { false, nullptr, nullptr, ex.what() };
 	}
 
 	while (true)
@@ -429,7 +429,9 @@ ParseResults Parser::Parse(const std::string& text)
 				const std::string acceptables = string_utils::JoinStrings(
 					state.GetAcceptableTerminals(), ", ", "[", "]");
 				LogIfNotNull("List of acceptable tokens: " + acceptables);
-				return { false, nullptr };
+				return { false, nullptr, nullptr,
+					"parser doesn't accept token '" + token.name +
+					"' at state '" + state.GetName() + "' (#" + std::to_string(index) + ")" };
 			}
 			else
 			{
@@ -460,7 +462,7 @@ ParseResults Parser::Parse(const std::string& text)
 			catch (const std::exception& ex)
 			{
 				LogIfNotNull("Lexer error: "s + ex.what(), index);
-				return { false, nullptr };
+				return { false, nullptr, nullptr, ex.what() };
 			}
 		}
 

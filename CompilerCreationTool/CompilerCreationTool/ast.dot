@@ -1,3 +1,7 @@
 digraph {
-0 [shape="circle" label="Identifier (x)"];
+0 [shape="circle" label="+"];
+1 [shape="circle" label="Int: 3"];
+2 [shape="circle" label="Int: 4"];
+0->1 [label=" "];
+0->2 [label=" "];
 }

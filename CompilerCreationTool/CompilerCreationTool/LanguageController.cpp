@@ -339,7 +339,10 @@ void LanguageController::OnBuildButtonPress()
 	mFrame->GetMenuBar()->Check(Buttons::LogMessages, false);
 	mFrame->Refresh(true);
 
-	wxMessageBox("Parser has been successfully built!", "Success!", wxICON_INFORMATION);
+
+	wxMessageBox("Parser has been successfully built!\n\nElapsed time: " +
+		string_utils::TrimTrailingZerosAndPeriod(mLanguage->GetInfo().GetBuildTime().count()) + ".",
+		"Build success!", wxICON_INFORMATION);
 	mHasUnsavedChanges = true;
 	mNeedCodegen = false;
 	UpdateTitle();
@@ -362,6 +365,9 @@ void LanguageController::OnRunButtonPress()
 
 	logger->Log((results.success ? "Successfully parsed!" : "Failed to parse...") +
 		" Elapsed time: "s + string_utils::TrimTrailingZerosAndPeriod(elapsedTime.count()) + " seconds.\n"s);
+
+	bool codeGenerated = false;
+	bool astDrawn = false;
 
 	if (results.success && (results.expression || results.statement))
 	{
@@ -394,6 +400,7 @@ void LanguageController::OnRunButtonPress()
 			{
 				mTreeView->SetImage(img);
 				logger->Log("-- AST has been drawn! --\n");
+				astDrawn = true;
 			}
 			else
 			{
@@ -431,6 +438,7 @@ void LanguageController::OnRunButtonPress()
 				logger->Log("---------------------------------\n");
 				logger->Log("LLVM code has been generated:\n");
 				logger->Log(strm.str());
+				codeGenerated = true;
 			}
 			catch (const std::exception& ex)
 			{
@@ -446,11 +454,18 @@ void LanguageController::OnRunButtonPress()
 	logger->Log("=========================\n");
 	if (results.success)
 	{
-		wxMessageBox("Your code has been succesfully parsed!", "Success!", wxICON_INFORMATION);
+		std::string message = "Text has been succesfully parsed!\n\n";
+		message += (codeGenerated ? "LLVM code has been generated!\n"s : "");
+		message += (astDrawn ? "AST has been drawn!\n\n"s : ""s);
+		message += "Elapsed time: "s + string_utils::TrimTrailingZerosAndPeriod(elapsedTime.count()) + " seconds.";
+		wxMessageBox(message, "Success!", wxICON_INFORMATION);
 	}
 	else
 	{
-		wxMessageBox("Your code doesn't match your grammar...", "Failure...", wxICON_WARNING);
+		std::string message = "Text doesn't match your grammar...\n\n";
+		message += "Error reason: " + results.error + ".\n\n";
+		message += "Elapsed time: "s + string_utils::TrimTrailingZerosAndPeriod(elapsedTime.count()) + " seconds.";
+		wxMessageBox(message, "Failure...", wxICON_WARNING);
 	}
 }
 

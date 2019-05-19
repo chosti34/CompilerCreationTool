@@ -314,7 +314,7 @@ void MainFrame::OnBuild(wxCommandEvent&)
 	}
 	catch (const std::exception& ex)
 	{
-		wxMessageBox("Can't build language: "s + ex.what() + "."s, "Build error", wxICON_WARNING);
+		wxMessageBox("Can't build language: "s + ex.what() + "."s, "Build error...", wxICON_WARNING);
 	}
 }
 
@@ -326,7 +326,7 @@ void MainFrame::OnRun(wxCommandEvent&)
 	}
 	catch (const std::exception& ex)
 	{
-		wxMessageBox("Can't parse text: "s + ex.what() + "."s, "Can't parse", wxICON_WARNING);
+		wxMessageBox("Can't parse text: "s + ex.what() + "."s, "Can't parse...", wxICON_WARNING);
 	}
 }
 
@@ -338,7 +338,7 @@ void MainFrame::OnInfo(wxCommandEvent&)
 	}
 	catch (const std::exception& ex)
 	{
-		wxMessageBox("Can't get info: "s + ex.what() + "."s, "Can't get info", wxICON_WARNING);
+		wxMessageBox("Can't get info: "s + ex.what() + "."s, "Can't get info...", wxICON_WARNING);
 	}
 }
 
@@ -355,7 +355,7 @@ void MainFrame::OnClear(wxCommandEvent&)
 	}
 	catch (const std::exception& ex)
 	{
-		wxMessageBox("Can't clear output: "s + ex.what() + "."s, "Can't clear output", wxICON_WARNING);
+		wxMessageBox("Can't clear output: "s + ex.what() + "."s, "Can't clear output...", wxICON_WARNING);
 	}
 }
 
@@ -367,7 +367,7 @@ void MainFrame::OnLogMessages(wxCommandEvent&)
 	}
 	catch (const std::exception& ex)
 	{
-		wxMessageBox("Can't change logger state: "s + ex.what() + "."s, "Can't set mask", wxICON_WARNING);
+		wxMessageBox("Can't change logger state: "s + ex.what() + "."s, "Can't set mask...", wxICON_WARNING);
 	}
 }
 
@@ -379,7 +379,9 @@ void MainFrame::OnCodegenEnable(wxCommandEvent&)
 	}
 	catch (const std::exception& ex)
 	{
-		wxMessageBox("Can't enable code generation: "s + ex.what());
+		wxMessageBox(
+			"Can't enable code generation: "s + ex.what(),
+			"Can't enable...", wxICON_WARNING);
 	}
 }
 
@@ -399,7 +401,7 @@ void MainFrame::OnNew(wxCommandEvent&)
 	{
 		wxMessageBox(
 			"Can't create new language "s + ex.what() + "."s,
-			"Can't create new language", wxICON_WARNING);
+			"Can't create new language...", wxICON_WARNING);
 	}
 }
 
@@ -413,7 +415,7 @@ void MainFrame::OnOpen(wxCommandEvent&)
 	{
 		wxMessageBox(
 			"Can't open document: "s + ex.what() + "."s,
-			"Can't open document", wxICON_WARNING);
+			"Can't open document...", wxICON_WARNING);
 	}
 }
 
@@ -426,8 +428,8 @@ void MainFrame::OnSave(wxCommandEvent&)
 	catch (const std::exception& ex)
 	{
 		wxMessageBox(
-			"Can't save project: "s + ex.what() + "."s,
-			"Can't save project", wxICON_WARNING);
+			"Can't save document: "s + ex.what() + "."s,
+			"Can't save document...", wxICON_WARNING);
 	}
 }
 
@@ -441,7 +443,7 @@ void MainFrame::OnSaveAs(wxCommandEvent&)
 	{
 		wxMessageBox(
 			"Can't save document as: "s + ex.what() + "."s,
-			"Can't save document as", wxICON_WARNING);
+			"Can't save document as...", wxICON_WARNING);
 	}
 }
 
@@ -455,7 +457,7 @@ void MainFrame::OnItemUp(wxCommandEvent&)
 	{
 		wxMessageBox(
 			"Can't move item up: "s + ex.what() + "."s,
-			"Can't move item up", wxICON_WARNING);
+			"Can't move item up...", wxICON_WARNING);
 	}
 }
 
@@ -469,7 +471,7 @@ void MainFrame::OnItemDown(wxCommandEvent&)
 	{
 		wxMessageBox(
 			"Can't move item up: "s + ex.what() + "."s,
-			"Can't move item down", wxICON_WARNING);
+			"Can't move item down...", wxICON_WARNING);
 	}
 }
 
@@ -483,7 +485,7 @@ void MainFrame::OnItemEdit(wxCommandEvent&)
 	{
 		wxMessageBox(
 			"Can't edit item: "s + ex.what() + "."s,
-			"Can't edit item", wxICON_WARNING);
+			"Can't edit item...", wxICON_WARNING);
 	}
 }
 

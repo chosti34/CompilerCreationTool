@@ -12,6 +12,7 @@ namespace Buttons
 		SaveAs,
 		Build,
 		Run,
+		Cancel,
 		Info,
 		Up,
 		Down,
@@ -34,6 +35,19 @@ namespace StatusBarFields
 		Column,
 		Ch,
 		ContextInfo,
+		Count
+	};
+}
+
+namespace Menubar
+{
+	enum ID
+	{
+		File = 0,
+		Edit,
+		View,
+		Parser,
+		Help,
 		Count
 	};
 }

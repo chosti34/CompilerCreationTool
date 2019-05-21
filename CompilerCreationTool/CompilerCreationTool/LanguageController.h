@@ -15,6 +15,8 @@ private:
 	void UpdateTitle();
 
 private: // Signal handlers
+	void OnFrameClose();
+
 	void OnNewButtonPress();
 	void OnOpenButtonPress();
 	void OnSaveButtonPress();
@@ -25,6 +27,7 @@ private: // Signal handlers
 
 	void OnBuildButtonPress();
 	void OnRunButtonPress();
+	void OnCancelButtonPress();
 	void OnInfoButtonPress();
 
 	void OnUpButtonPress();
@@ -60,6 +63,8 @@ private:
 
 	std::vector<SignalScopedConnection> mConnections;
 	boost::optional<std::string> mDocument;
+
 	bool mHasUnsavedChanges;
 	bool mNeedCodegen;
+	bool mClosing;
 };

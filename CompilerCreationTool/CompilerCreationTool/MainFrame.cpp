@@ -40,10 +40,12 @@ wxMenuBar* CreateMenuBar()
 	view->AppendSeparator();
 	view->Append(Buttons::Clear, "Clear output", nullptr, "Clear output window's content");
 
-	wxMenu* language = new wxMenu;
-	language->Append(Buttons::Build, "Build");
-	language->Append(Buttons::Run, "Run");
-	language->Append(Buttons::Info, "Get info");
+	wxMenu* parser = new wxMenu;
+	parser->Append(Buttons::Build, "Build");
+	parser->Append(Buttons::Run, "Run");
+	parser->Append(Buttons::Cancel, "Cancel");
+	parser->AppendSeparator();
+	parser->Append(Buttons::Info, "Get info...");
 
 	wxMenu* help = new wxMenu;
 	help->Append(wxID_ABOUT);
@@ -51,7 +53,7 @@ wxMenuBar* CreateMenuBar()
 	menubar->Append(file, wxT("&File"));
 	menubar->Append(edit, wxT("&Edit"));
 	menubar->Append(view, wxT("&View"));
-	menubar->Append(language, wxT("&Language"));
+	menubar->Append(parser, wxT("&Parser"));
 	menubar->Append(help, wxT("&Help"));
 	return menubar;
 }
@@ -89,6 +91,7 @@ void AddTools(wxToolBar& toolbar)
 
 	wxIcon buildIcon(gcBuildXpm);
 	wxIcon runIcon(gcRunXpm);
+	wxIcon cancelIcon(wxArtProvider::GetIcon(wxART_ERROR, wxART_OTHER, iconSize));
 	wxIcon infoIcon = wxArtProvider::GetIcon(wxART_INFORMATION, wxART_OTHER, iconSize);
 
 	wxIcon upIcon = wxArtProvider::GetIcon(wxART_GO_UP, wxART_OTHER, iconSize);
@@ -105,6 +108,7 @@ void AddTools(wxToolBar& toolbar)
 
 	toolbar.AddTool(Buttons::Build, wxT("Build"), buildIcon, wxT("Build"));
 	toolbar.AddTool(Buttons::Run, wxT("Run"), runIcon, wxT("Run"));
+	toolbar.AddTool(Buttons::Cancel, wxT("Cancel"), cancelIcon, wxT("Cancel"));
 	toolbar.AddTool(Buttons::Info, wxT("Info"), infoIcon, wxT("Get info"));
 	toolbar.AddSeparator();
 
@@ -134,11 +138,13 @@ MainFrame::MainFrame(const wxString& title, const wxSize& size)
 	mMenubar->Enable(Buttons::LogMessages, false);
 	mMenubar->Enable(Buttons::EnableCodegen, false);
 	mMenubar->Enable(Buttons::Run, false);
+	mMenubar->Enable(Buttons::Cancel, false);
 	mMenubar->Enable(Buttons::Info, false);
 	mMenubar->Enable(Buttons::Up, false);
 	mMenubar->Enable(Buttons::Down, false);
 	mMenubar->Enable(Buttons::Edit, false);
 	mToolbar->EnableTool(Buttons::Run, false);
+	mToolbar->EnableTool(Buttons::Cancel, false);
 	mToolbar->EnableTool(Buttons::Info, false);
 	mToolbar->EnableTool(Buttons::Up, false);
 	mToolbar->EnableTool(Buttons::Down, false);
@@ -254,10 +260,9 @@ wxMenuBar* MainFrame::GetMenuBar()
 	return mMenubar;
 }
 
-SignalScopedConnection MainFrame::DoOnButtonPress(Buttons::ID button,
-	ButtonPressSignal::slot_type slot)
+SignalScopedConnection MainFrame::DoOnButtonPress(Buttons::ID button, Signal<void()>::slot_type slot)
 {
-	return mSignals[button].connect(slot);
+	return mButtonSignals[button].connect(slot);
 }
 
 SignalScopedConnection MainFrame::DoOnHasUnsavedChangesQuery(Signal<bool()>::slot_type slot)
@@ -265,10 +270,15 @@ SignalScopedConnection MainFrame::DoOnHasUnsavedChangesQuery(Signal<bool()>::slo
 	return mHasUnsavedChangesSignal.connect(slot);
 }
 
+SignalScopedConnection MainFrame::DoOnClose(Signal<void()>::slot_type slot)
+{
+	return mOnCloseSignal.connect(slot);
+}
+
 void MainFrame::SendButtonPressedSignal(Buttons::ID buttonID)
 {
-	auto found = mSignals.find(buttonID);
-	assert(found != mSignals.end());
+	auto found = mButtonSignals.find(buttonID);
+	assert(found != mButtonSignals.end());
 	found->second();
 }
 
@@ -293,6 +303,7 @@ void MainFrame::OnClose(wxCloseEvent& event)
 			return;
 		}
 	}
+	mOnCloseSignal();
 	event.Skip(true);
 }
 
@@ -327,6 +338,18 @@ void MainFrame::OnRun(wxCommandEvent&)
 	catch (const std::exception& ex)
 	{
 		wxMessageBox("Can't parse text: "s + ex.what() + "."s, "Can't parse...", wxICON_WARNING);
+	}
+}
+
+void MainFrame::OnCancel(wxCommandEvent&)
+{
+	try
+	{
+		SendButtonPressedSignal(Buttons::Cancel);
+	}
+	catch (const std::exception& ex)
+	{
+		wxMessageBox("Can't cancel task: "s + ex.what() + "."s, "Can't cancel...", wxICON_WARNING);
 	}
 }
 
@@ -504,6 +527,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_MENU(Buttons::Edit, MainFrame::OnItemEdit)
 	EVT_MENU(Buttons::Build, MainFrame::OnBuild)
 	EVT_MENU(Buttons::Run, MainFrame::OnRun)
+	EVT_MENU(Buttons::Cancel, MainFrame::OnCancel)
 	EVT_MENU(Buttons::Info, MainFrame::OnInfo)
 	EVT_MENU(Buttons::Clear, MainFrame::OnClear)
 	EVT_MENU(Buttons::LogMessages, MainFrame::OnLogMessages)
@@ -515,6 +539,7 @@ wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
 	EVT_TOOL(Buttons::SaveAs, MainFrame::OnSaveAs)
 	EVT_TOOL(Buttons::Build, MainFrame::OnBuild)
 	EVT_TOOL(Buttons::Run, MainFrame::OnRun)
+	EVT_TOOL(Buttons::Cancel, MainFrame::OnCancel)
 	EVT_TOOL(Buttons::Info, MainFrame::OnInfo)
 	EVT_TOOL(Buttons::Up, MainFrame::OnItemUp)
 	EVT_TOOL(Buttons::Down, MainFrame::OnItemDown)

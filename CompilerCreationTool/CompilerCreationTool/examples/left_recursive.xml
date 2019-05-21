@@ -5,17 +5,21 @@
             <Symbol name="EOF" type="Terminal"/>
         </Production>
         <Production left="A">
-            <Symbol name="B" type="Nonterminal"/>
-        </Production>
-        <Production left="A">
-            <Symbol name="#Eps#" type="Epsilon"/>
+            <Symbol name="B" type="Nonterminal" attribute="Action1"/>
         </Production>
         <Production left="B">
-            <Symbol name="A" type="Nonterminal"/>
+            <Symbol name="A" type="Nonterminal" attribute="Action2"/>
+        </Production>
+        <Production left="B">
+            <Symbol name="x" type="Terminal"/>
         </Production>
     </Grammar>
     <Patterns>
         <Pattern name="EOF" origin="EOF" isEnding="true"/>
+        <Pattern name="x" origin="x" isEnding="false"/>
     </Patterns>
-    <Actions/>
+    <Actions>
+        <Action name="Action1" type="None"/>
+        <Action name="Action2" type="None"/>
+    </Actions>
 </Language>

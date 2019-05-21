@@ -13,6 +13,9 @@ public:
 	ParseResults Parse(const std::string& text) override;
 	const IParserTable& GetTable() const override;
 
+	void CancelParseTask() override;
+	bool IsParseTaskRunning() const override;
+
 	void SetActionNames(const std::vector<std::string>& actions) override;
 	void SetAction(size_t index, std::unique_ptr<IAction> && action) override;
 	void SetActions(std::vector<std::unique_ptr<IAction>> && actions) override;
@@ -43,4 +46,5 @@ private:
 	ILexer& mLexer;
 	std::vector<std::unique_ptr<IAction>> mActionList;
 	std::unique_ptr<IParserLogger> mLogger;
+	bool mRunTask;
 };

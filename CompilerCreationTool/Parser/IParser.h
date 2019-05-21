@@ -12,6 +12,9 @@ public:
 	virtual T Parse(const std::string& text) = 0;
 	virtual const IParserTable& GetTable() const = 0;
 
+	virtual void CancelParseTask() = 0;
+	virtual bool IsParseTaskRunning() const = 0;
+
 	virtual void SetActionNames(const std::vector<std::string> &actions) = 0;
 	virtual void SetAction(size_t index, std::unique_ptr<IAction> && action) = 0;
 	virtual void SetActions(std::vector<std::unique_ptr<IAction>> && actions) = 0;

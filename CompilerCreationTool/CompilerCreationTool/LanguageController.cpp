@@ -73,9 +73,11 @@ LanguageController::LanguageController(Language* language, MainFrame* frame)
 	, mDocument(boost::none)
 	, mHasUnsavedChanges(false)
 	, mNeedCodegen(false)
+	, mClosing(false)
 {
 	namespace ph = std::placeholders;
 
+	mConnections.push_back(mFrame->DoOnClose(std::bind(&LanguageController::OnFrameClose, this)));
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::New, std::bind(&LanguageController::OnNewButtonPress, this)));
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::Open, std::bind(&LanguageController::OnOpenButtonPress, this)));
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::Save, std::bind(&LanguageController::OnSaveButtonPress, this)));
@@ -87,6 +89,7 @@ LanguageController::LanguageController(Language* language, MainFrame* frame)
 
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::Build, std::bind(&LanguageController::OnBuildButtonPress, this)));
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::Run, std::bind(&LanguageController::OnRunButtonPress, this)));
+	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::Cancel, std::bind(&LanguageController::OnCancelButtonPress, this)));
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::Info, std::bind(&LanguageController::OnInfoButtonPress, this)));
 
 	mConnections.push_back(mFrame->DoOnButtonPress(Buttons::Up, std::bind(&LanguageController::OnUpButtonPress, this)));
@@ -164,8 +167,28 @@ void LanguageController::UpdateTitle()
 	}
 }
 
+void LanguageController::OnFrameClose()
+{
+	mClosing = true;
+	if (mLanguage->IsInitialized())
+	{
+		auto& parser = mLanguage->GetParser();
+		if (parser.IsParseTaskRunning())
+		{
+			parser.CancelParseTask();
+		}
+	}
+}
+
 void LanguageController::OnNewButtonPress()
 {
+#ifdef _DEBUG
+	if (mLanguage->IsInitialized())
+	{
+		assert(!mLanguage->GetParser().IsParseTaskRunning());
+	}
+#endif
+
 	if (mHasUnsavedChanges)
 	{
 		if (wxMessageBox("Current content has not been saved! Proceed?", "Please confirm",
@@ -212,6 +235,13 @@ void LanguageController::OnNewButtonPress()
 
 void LanguageController::OnOpenButtonPress()
 {
+#ifdef _DEBUG
+	if (mLanguage->IsInitialized())
+	{
+		assert(!mLanguage->GetParser().IsParseTaskRunning());
+	}
+#endif
+
 	if (mHasUnsavedChanges)
 	{
 		if (wxMessageBox("Current content has not been saved! Proceed?", "Please confirm",
@@ -260,6 +290,13 @@ void LanguageController::OnOpenButtonPress()
 
 void LanguageController::OnSaveButtonPress()
 {
+#ifdef _DEBUG
+	if (mLanguage->IsInitialized())
+	{
+		assert(!mLanguage->GetParser().IsParseTaskRunning());
+	}
+#endif
+
 	if (!mDocument)
 	{
 		OnSaveAsButtonPress();
@@ -273,6 +310,13 @@ void LanguageController::OnSaveButtonPress()
 
 void LanguageController::OnSaveAsButtonPress()
 {
+#ifdef _DEBUG
+	if (mLanguage->IsInitialized())
+	{
+		assert(!mLanguage->GetParser().IsParseTaskRunning());
+	}
+#endif
+
 	wxFileDialog saveFileDialog(mFrame, "Save language to file",
 		wxEmptyString, wxEmptyString, "XML files (*.xml)|*.xml",
 		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
@@ -316,6 +360,13 @@ void LanguageController::OnEnableCodegenButtonPress()
 
 void LanguageController::OnBuildButtonPress()
 {
+#ifdef _DEBUG
+	if (mLanguage->IsInitialized())
+	{
+		assert(!mLanguage->GetParser().IsParseTaskRunning());
+	}
+#endif
+
 	// Инициализируем модель
 	auto builder = std::make_unique<grammarlib::GrammarBuilder>();
 	mLanguage->SetGrammar(builder->CreateGrammar(mGrammarView->GetText()));
@@ -339,7 +390,6 @@ void LanguageController::OnBuildButtonPress()
 	mFrame->GetMenuBar()->Check(Buttons::LogMessages, false);
 	mFrame->Refresh(true);
 
-
 	wxMessageBox("Parser has been successfully built!\n\nElapsed time: " +
 		string_utils::TrimTrailingZerosAndPeriod(mLanguage->GetInfo().GetBuildTime().count()) + ".",
 		"Build success!", wxICON_INFORMATION);
@@ -350,122 +400,193 @@ void LanguageController::OnBuildButtonPress()
 
 void LanguageController::OnRunButtonPress()
 {
-	assert(mLanguage->IsInitialized());
+	mFrame->GetMenuBar()->GetMenu(Menubar::File)->Enable(wxID_NEW, false);
+	mFrame->GetMenuBar()->GetMenu(Menubar::File)->Enable(wxID_OPEN, false);
+	mFrame->GetMenuBar()->GetMenu(Menubar::File)->Enable(wxID_SAVE, false);
+	mFrame->GetMenuBar()->GetMenu(Menubar::File)->Enable(wxID_SAVEAS, false);
+	mFrame->GetMenuBar()->GetMenu(Menubar::Parser)->Enable(Buttons::Build, false);
+	mFrame->GetMenuBar()->GetMenu(Menubar::Parser)->Enable(Buttons::Run, false);
+	mFrame->GetMenuBar()->GetMenu(Menubar::Parser)->Enable(Buttons::Cancel, true);
+	mFrame->GetToolBar()->EnableTool(Buttons::New, false);
+	mFrame->GetToolBar()->EnableTool(Buttons::Open, false);
+	mFrame->GetToolBar()->EnableTool(Buttons::Save, false);
+	mFrame->GetToolBar()->EnableTool(Buttons::SaveAs, false);
+	mFrame->GetToolBar()->EnableTool(Buttons::Build, false);
+	mFrame->GetToolBar()->EnableTool(Buttons::Run, false);
+	mFrame->GetToolBar()->EnableTool(Buttons::Cancel, true);
 
-	IParser<ParseResults>& parser = mLanguage->GetParser();
-	IParserLogger* logger = parser.GetLogger();
-	assert(logger);
+	std::thread task([this]() {
+		assert(mLanguage->IsInitialized());
+		IParser<ParseResults>& parser = mLanguage->GetParser();
+		IParserLogger* logger = parser.GetLogger();
+		assert(logger);
 
-	logger->Log("[" + time_utils::GetCurrentTimeAsString() + "] Parsing started...\n");
+		logger->Log("[" + time_utils::GetCurrentTimeAsString() + "] Parsing started...\n");
+		const auto nowTime = std::chrono::steady_clock::now();
+		const ParseResults results = parser.Parse(mEditorView->GetText().ToStdString());
 
-	const auto nowTime = std::chrono::steady_clock::now();
-	const ParseResults results = parser.Parse(mEditorView->GetText().ToStdString());
-	const auto endTime = std::chrono::steady_clock::now();
-	const auto elapsedTime = std::chrono::duration<double>(endTime - nowTime);
+		if (mClosing)
+		{
+			std::cout << "closing while thread works" << std::endl;
+			return;
+		}
 
-	logger->Log((results.success ? "Successfully parsed!" : "Failed to parse...") +
+		const auto endTime = std::chrono::steady_clock::now();
+		const auto elapsedTime = std::chrono::duration<double>(endTime - nowTime);
+
+		// If task was cancelled, just log it and don't do anything else
+		if (results.isCancelled)
+		{
+			logger->Log("Parsing was cancelled... Elapsed time: "s +
+				string_utils::TrimTrailingZerosAndPeriod(elapsedTime.count()) + " seconds.\n"s);
+			logger->Log("=========================\n");
+			return;
+		}
+
+		logger->Log((results.success ? "Successfully parsed!" : "Failed to parse...") +
 		" Elapsed time: "s + string_utils::TrimTrailingZerosAndPeriod(elapsedTime.count()) + " seconds.\n"s);
 
-	bool codeGenerated = false;
-	bool astDrawn = false;
+		bool codeGenerated = false;
+		bool astDrawn = false;
 
-	if (results.success && (results.expression || results.statement))
-	{
-		std::ofstream output("ast.dot");
-		size_t index = 0;
-		output << "digraph {" << std::endl;
-
-		if (results.expression)
+		if (results.success && (results.expression || results.statement))
 		{
-			assert(!results.statement);
-			ASTGraphvizExpressionVisualizer visualizer(output, index);
-			visualizer.Visualize(*results.expression);
-		}
-		else if (results.statement)
-		{
-			assert(!results.expression);
-			ASTGraphvizStatementVisualizer visualizer(output, index);
-			visualizer.Visualize(*results.statement);
-		}
+			std::ofstream output("ast.dot");
+			size_t index = 0;
+			output << "digraph {" << std::endl;
 
-		output << "}" << std::endl;
-		output.close();
-
-		if (command_utils::RunCommand(L"dot", L"-T png -o ast.png ast.dot"))
-		{
-			wxImage img;
-			img.LoadFile("ast.png");
-
-			if (img.IsOk())
+			if (results.expression)
 			{
-				mTreeView->SetImage(img);
-				logger->Log("-- AST has been drawn! --\n");
-				astDrawn = true;
+				assert(!results.statement);
+				ASTGraphvizExpressionVisualizer visualizer(output, index);
+				visualizer.Visualize(*results.expression);
+			}
+			else if (results.statement)
+			{
+				assert(!results.expression);
+				ASTGraphvizStatementVisualizer visualizer(output, index);
+				visualizer.Visualize(*results.statement);
+			}
+
+			output << "}" << std::endl;
+			output.close();
+
+			if (command_utils::RunCommand(L"dot", L"-T png -o ast.png ast.dot"))
+			{
+				wxImage img;
+				img.LoadFile("ast.png");
+
+				if (img.IsOk())
+				{
+					mTreeView->SetImage(img);
+					logger->Log("-- AST has been drawn! --\n");
+					astDrawn = true;
+				}
+				else
+				{
+					mTreeView->UnsetImage();
+					logger->Log("-- Can't draw AST... --\n");
+				}
 			}
 			else
 			{
 				mTreeView->UnsetImage();
-				logger->Log("-- Can't draw AST... --\n");
+				logger->Log("-- Install Graphviz package to draw AST... --\n");
+			}
+
+			if (mNeedCodegen)
+			{
+				try
+				{
+					CodegenContext context;
+					Codegen codegen(context, std::make_unique<TextCtrlCodegenLogger>(mOutputView->GetTextCtrl()));
+
+					if (results.expression)
+					{
+						codegen.Generate(*results.expression);
+					}
+					else if (results.statement)
+					{
+						codegen.Generate(*results.statement);
+					}
+
+					std::ostringstream strm;
+					llvm::Module& llvmModule = context.GetUtils().GetModule();
+					llvm::raw_os_ostream os(strm);
+					llvmModule.print(os, nullptr);
+
+					logger->Log("---------------------------------\n");
+					logger->Log("LLVM code has been generated:\n");
+					logger->Log(strm.str());
+					codeGenerated = true;
+				}
+				catch (const std::exception& ex)
+				{
+					logger->Log("Can't generate LLVM code, reason: " + std::string(ex.what()) + ".\n");
+				}
 			}
 		}
 		else
 		{
 			mTreeView->UnsetImage();
-			logger->Log("-- Install Graphviz package to draw AST... --\n");
 		}
 
-		if (mNeedCodegen)
+		mFrame->GetMenuBar()->GetMenu(Menubar::File)->Enable(wxID_NEW, true);
+		mFrame->GetMenuBar()->GetMenu(Menubar::File)->Enable(wxID_OPEN, true);
+		mFrame->GetMenuBar()->GetMenu(Menubar::File)->Enable(wxID_SAVE, true);
+		mFrame->GetMenuBar()->GetMenu(Menubar::File)->Enable(wxID_SAVEAS, true);
+		mFrame->GetMenuBar()->GetMenu(Menubar::Parser)->Enable(Buttons::Build, true);
+		mFrame->GetMenuBar()->GetMenu(Menubar::Parser)->Enable(Buttons::Run, true);
+		mFrame->GetMenuBar()->GetMenu(Menubar::Parser)->Enable(Buttons::Cancel, false);
+		mFrame->GetToolBar()->EnableTool(Buttons::New, true);
+		mFrame->GetToolBar()->EnableTool(Buttons::Open, true);
+		mFrame->GetToolBar()->EnableTool(Buttons::Save, true);
+		mFrame->GetToolBar()->EnableTool(Buttons::SaveAs, true);
+		mFrame->GetToolBar()->EnableTool(Buttons::Build, true);
+		mFrame->GetToolBar()->EnableTool(Buttons::Run, true);
+		mFrame->GetToolBar()->EnableTool(Buttons::Cancel, false);
+
+		logger->Log("=========================\n");
+		if (results.success)
 		{
-			try
-			{
-				CodegenContext context;
-				Codegen codegen(context, std::make_unique<TextCtrlCodegenLogger>(mOutputView->GetTextCtrl()));
-
-				if (results.expression)
-				{
-					codegen.Generate(*results.expression);
-				}
-				else if (results.statement)
-				{
-					codegen.Generate(*results.statement);
-				}
-
-				std::ostringstream strm;
-				llvm::Module& llvmModule = context.GetUtils().GetModule();
-				llvm::raw_os_ostream os(strm);
-				llvmModule.print(os, nullptr);
-
-				logger->Log("---------------------------------\n");
-				logger->Log("LLVM code has been generated:\n");
-				logger->Log(strm.str());
-				codeGenerated = true;
-			}
-			catch (const std::exception& ex)
-			{
-				logger->Log("Can't generate LLVM code, reason: " + std::string(ex.what()) + ".\n");
-			}
+			std::string message = "Text has been succesfully parsed!\n\n";
+			message += (codeGenerated ? "LLVM code has been generated!\n"s : "");
+			message += (astDrawn ? "AST has been drawn!\n\n"s : ""s);
+			message += "Elapsed time: "s + string_utils::TrimTrailingZerosAndPeriod(elapsedTime.count()) + " seconds.";
+			wxMessageBox(message, "Success!", wxICON_INFORMATION);
 		}
-	}
-	else
-	{
-		mTreeView->UnsetImage();
-	}
+		else
+		{
+			std::string message = "Text doesn't match your grammar...\n\n";
+			message += "Error reason: " + results.error + ".\n\n";
+			message += "Elapsed time: "s + string_utils::TrimTrailingZerosAndPeriod(elapsedTime.count()) + " seconds.";
+			wxMessageBox(message, "Failure...", wxICON_WARNING);
+		}
+	});
 
-	logger->Log("=========================\n");
-	if (results.success)
+	task.detach();
+}
+
+void LanguageController::OnCancelButtonPress()
+{
+	assert(mLanguage->IsInitialized());
+	if (mLanguage->GetParser().IsParseTaskRunning())
 	{
-		std::string message = "Text has been succesfully parsed!\n\n";
-		message += (codeGenerated ? "LLVM code has been generated!\n"s : "");
-		message += (astDrawn ? "AST has been drawn!\n\n"s : ""s);
-		message += "Elapsed time: "s + string_utils::TrimTrailingZerosAndPeriod(elapsedTime.count()) + " seconds.";
-		wxMessageBox(message, "Success!", wxICON_INFORMATION);
-	}
-	else
-	{
-		std::string message = "Text doesn't match your grammar...\n\n";
-		message += "Error reason: " + results.error + ".\n\n";
-		message += "Elapsed time: "s + string_utils::TrimTrailingZerosAndPeriod(elapsedTime.count()) + " seconds.";
-		wxMessageBox(message, "Failure...", wxICON_WARNING);
+		mLanguage->GetParser().CancelParseTask();
+		mFrame->GetMenuBar()->GetMenu(Menubar::File)->Enable(wxID_NEW, true);
+		mFrame->GetMenuBar()->GetMenu(Menubar::File)->Enable(wxID_OPEN, true);
+		mFrame->GetMenuBar()->GetMenu(Menubar::File)->Enable(wxID_SAVE, true);
+		mFrame->GetMenuBar()->GetMenu(Menubar::File)->Enable(wxID_SAVEAS, true);
+		mFrame->GetMenuBar()->GetMenu(Menubar::Parser)->Enable(Buttons::Build, true);
+		mFrame->GetMenuBar()->GetMenu(Menubar::Parser)->Enable(Buttons::Run, true);
+		mFrame->GetMenuBar()->GetMenu(Menubar::Parser)->Enable(Buttons::Cancel, false);
+		mFrame->GetToolBar()->EnableTool(Buttons::New, true);
+		mFrame->GetToolBar()->EnableTool(Buttons::Open, true);
+		mFrame->GetToolBar()->EnableTool(Buttons::Save, true);
+		mFrame->GetToolBar()->EnableTool(Buttons::SaveAs, true);
+		mFrame->GetToolBar()->EnableTool(Buttons::Build, true);
+		mFrame->GetToolBar()->EnableTool(Buttons::Run, true);
+		mFrame->GetToolBar()->EnableTool(Buttons::Cancel, false);
 	}
 }
 
@@ -478,6 +599,16 @@ void LanguageController::OnInfoButtonPress()
 
 void LanguageController::OnUpButtonPress()
 {
+	if (mLanguage->IsInitialized())
+	{
+		auto& parser = mLanguage->GetParser();
+		if (parser.IsParseTaskRunning())
+		{
+			wxMessageBox("Can't edit items while parser is running!", "Can't edit...", wxICON_WARNING);
+			return;
+		}
+	}
+
 	assert(mTerminalsView->HasSelection() || mActionsView->HasSelection());
 	if (mTerminalsView->HasSelection() && mTerminalsView->MoveSelectionUp())
 	{
@@ -491,6 +622,16 @@ void LanguageController::OnUpButtonPress()
 
 void LanguageController::OnDownButtonPress()
 {
+	if (mLanguage->IsInitialized())
+	{
+		auto& parser = mLanguage->GetParser();
+		if (parser.IsParseTaskRunning())
+		{
+			wxMessageBox("Can't edit items while parser is running!", "Can't edit...", wxICON_WARNING);
+			return;
+		}
+	}
+
 	assert(mTerminalsView->HasSelection() || mActionsView->HasSelection());
 	if (mTerminalsView->HasSelection() && mTerminalsView->MoveSelectionDown())
 	{
@@ -504,6 +645,16 @@ void LanguageController::OnDownButtonPress()
 
 void LanguageController::OnEditButtonPress()
 {
+	if (mLanguage->IsInitialized())
+	{
+		auto& parser = mLanguage->GetParser();
+		if (parser.IsParseTaskRunning())
+		{
+			wxMessageBox("Can't edit items while parser is running!", "Can't edit...", wxICON_WARNING);
+			return;
+		}
+	}
+
 	assert(mTerminalsView->HasSelection() || mActionsView->HasSelection());
 	if (mTerminalsView->HasSelection())
 	{
@@ -564,6 +715,16 @@ void LanguageController::OnTerminalEdit(int index)
 	assert(mLanguage->IsInitialized());
 	assert(index < mLanguage->GetLexer().GetPatternsCount());
 
+	if (mLanguage->IsInitialized())
+	{
+		auto& parser = mLanguage->GetParser();
+		if (parser.IsParseTaskRunning())
+		{
+			wxMessageBox("Can't edit items while parser is running!", "Can't edit...", wxICON_WARNING);
+			return;
+		}
+	}
+
 	TokenPattern& pattern = mLanguage->GetLexer().GetPattern(index);
 	if (pattern.IsEnding())
 	{
@@ -590,6 +751,16 @@ void LanguageController::OnActionEdit(int index)
 {
 	assert(mLanguage->IsInitialized());
 	assert(index < mLanguage->GetParser().GetActionsCount());
+
+	if (mLanguage->IsInitialized())
+	{
+		auto& parser = mLanguage->GetParser();
+		if (parser.IsParseTaskRunning())
+		{
+			wxMessageBox("Can't edit items while parser is running!", "Can't edit...", wxICON_WARNING);
+			return;
+		}
+	}
 
 	IAction& action = mLanguage->GetParser().GetAction(index);
 	ActionEditDialog dialog(mFrame, action);

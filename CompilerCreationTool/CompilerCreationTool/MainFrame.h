@@ -33,9 +33,9 @@ public:
 	wxToolBar* GetToolBar();
 	wxMenuBar* GetMenuBar();
 
-	using ButtonPressSignal = Signal<void()>;
-	SignalScopedConnection DoOnButtonPress(Buttons::ID button, ButtonPressSignal::slot_type slot);
+	SignalScopedConnection DoOnButtonPress(Buttons::ID button, Signal<void()>::slot_type slot);
 	SignalScopedConnection DoOnHasUnsavedChangesQuery(Signal<bool()>::slot_type slot);
+	SignalScopedConnection DoOnClose(Signal<void()>::slot_type slot);
 
 private:
 	void SendButtonPressedSignal(Buttons::ID buttonID);
@@ -55,6 +55,7 @@ private:
 
 	void OnBuild(wxCommandEvent& event);
 	void OnRun(wxCommandEvent& event);
+	void OnCancel(wxCommandEvent& event);
 	void OnInfo(wxCommandEvent& event);
 
 	void OnItemUp(wxCommandEvent& event);
@@ -83,6 +84,7 @@ private:
 	wxToolBar* mToolbar;
 	wxMenuBar* mMenubar;
 
-	std::map<Buttons::ID, ButtonPressSignal> mSignals;
+	std::map<Buttons::ID, Signal<void()>> mButtonSignals;
 	Signal<bool()> mHasUnsavedChangesSignal;
+	Signal<void()> mOnCloseSignal;
 };

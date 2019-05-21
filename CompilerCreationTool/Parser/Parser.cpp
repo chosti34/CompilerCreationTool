@@ -324,6 +324,26 @@ private:
 	IParserLogger* mLogger;
 	bool mHasErrors;
 };
+
+template <typename T>
+class ScopeHelper
+{
+public:
+	ScopeHelper(T& valueRef, const T& valueOnDestroy)
+		: mValueRef(valueRef)
+		, mValueOnDestroy(valueOnDestroy)
+	{
+	}
+
+	~ScopeHelper()
+	{
+		mValueRef = mValueOnDestroy;
+	}
+
+private:
+	T& mValueRef;
+	T mValueOnDestroy;
+};
 }
 
 Parser::Parser(std::unique_ptr<IParserTable> && table, ILexer& lexer)
@@ -331,11 +351,15 @@ Parser::Parser(std::unique_ptr<IParserTable> && table, ILexer& lexer)
 	, mLexer(lexer)
 	, mActionList()
 	, mLogger(nullptr)
+	, mRunTask(false)
 {
 }
 
 ParseResults Parser::Parse(const std::string& text)
 {
+	mRunTask = true;
+	ScopeHelper<bool> scopeHelper(mRunTask, false);
+
 	size_t index = 0;
 	std::vector<size_t> addresses;
 
@@ -392,6 +416,14 @@ ParseResults Parser::Parse(const std::string& text)
 
 	while (true)
 	{
+		// some condition checking that we need to stop the task
+		{
+			if (!mRunTask)
+			{
+				break;
+			}
+		}
+
 		const IParserState& state = mTable->GetState(index);
 
 		if (state.GetFlag(StateFlag::Attribute))
@@ -480,8 +512,18 @@ ParseResults Parser::Parse(const std::string& text)
 		}
 	}
 
-	assert(false);
-	throw std::logic_error("unreachable code in parse function");
+	std::cout << "Parse cancelled" << std::endl;
+	return ParseResults{ false, nullptr, nullptr, "parse cancelled", true };
+}
+
+void Parser::CancelParseTask()
+{
+	mRunTask = false;
+}
+
+bool Parser::IsParseTaskRunning() const
+{
+	return mRunTask;
 }
 
 const IParserTable& Parser::GetTable() const

@@ -1,0 +1,57 @@
+<Language>
+    <Grammar>
+        <Production left="S">
+            <Symbol name="R1" type="Nonterminal"/>
+            <Symbol name="EOF" type="Terminal"/>
+        </Production>
+        <Production left="R1">
+            <Symbol name="R1" type="Nonterminal"/>
+            <Symbol name="au" type="Terminal"/>
+            <Symbol name="R2" type="Nonterminal"/>
+        </Production>
+        <Production left="R1">
+            <Symbol name="R2" type="Nonterminal"/>
+        </Production>
+        <Production left="R2">
+            <Symbol name="R2" type="Nonterminal"/>
+            <Symbol name="qu" type="Terminal"/>
+            <Symbol name="R3" type="Nonterminal"/>
+        </Production>
+        <Production left="R2">
+            <Symbol name="R3" type="Nonterminal"/>
+        </Production>
+        <Production left="R3">
+            <Symbol name="uhti" type="Terminal"/>
+        </Production>
+        <Production left="R3">
+            <Symbol name="xo" type="Terminal"/>
+            <Symbol name="R3" type="Nonterminal"/>
+        </Production>
+        <Production left="R3">
+            <Symbol name="nu" type="Terminal"/>
+            <Symbol name="R4" type="Nonterminal"/>
+            <Symbol name="inu" type="Terminal"/>
+        </Production>
+        <Production left="R4">
+            <Symbol name="e" type="Terminal"/>
+        </Production>
+        <Production left="R4">
+            <Symbol name="oi" type="Terminal"/>
+            <Symbol name="R1" type="Nonterminal"/>
+            <Symbol name="kakoi" type="Terminal"/>
+        </Production>
+    </Grammar>
+    <Patterns>
+        <Pattern name="EOF" origin="EOF" isEnding="true"/>
+        <Pattern name="au" origin="au" isEnding="false"/>
+        <Pattern name="qu" origin="qu" isEnding="false"/>
+        <Pattern name="uhti" origin="uhti" isEnding="false"/>
+        <Pattern name="xo" origin="xo" isEnding="false"/>
+        <Pattern name="nu" origin="nu" isEnding="false"/>
+        <Pattern name="inu" origin="inu" isEnding="false"/>
+        <Pattern name="e" origin="e" isEnding="false"/>
+        <Pattern name="oi" origin="oi" isEnding="false"/>
+        <Pattern name="kakoi" origin="kakoi" isEnding="false"/>
+    </Patterns>
+    <Actions/>
+</Language>

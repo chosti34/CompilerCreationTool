@@ -54,7 +54,7 @@ void TerminalEditDialog::OnOk(wxCommandEvent& event)
 	if (!m_pattern.SetOrigin(origin))
 	{
 		wxMessageBox(
-			wxT("Token pattern's regular expression must not allow empty strings!"),
+			wxT("Token pattern's regular expression must be semantically valid!"),
 			wxT("Warning"), wxICON_WARNING);
 		return;
 	}

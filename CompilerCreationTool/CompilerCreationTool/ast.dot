@@ -1,7 +1,11 @@
 digraph {
-0 [shape="circle" label="+"];
-1 [shape="circle" label="Int: 2"];
-2 [shape="circle" label="Int: 1"];
+0 [shape="circle" label="-"];
+1 [shape="circle" label="Int: 3"];
+2 [shape="circle" label="+"];
+3 [shape="circle" label="Int: 1"];
+4 [shape="circle" label="Int: 2"];
+2->3 [label=" "];
+2->4 [label=" "];
 0->1 [label=" "];
 0->2 [label=" "];
 }

@@ -391,7 +391,7 @@ void LanguageController::OnBuildButtonPress()
 	mFrame->Refresh(true);
 
 	wxMessageBox("Parser has been successfully built!\n\nElapsed time: " +
-		string_utils::TrimTrailingZerosAndPeriod(mLanguage->GetInfo().GetBuildTime().count()) + ".",
+		string_utils::TrimTrailingZerosAndPeriod(mLanguage->GetInfo().GetBuildTime().count()) + " seconds.",
 		"Build success!", wxICON_INFORMATION);
 	mHasUnsavedChanges = true;
 	mNeedCodegen = false;

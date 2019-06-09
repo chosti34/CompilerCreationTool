@@ -1,0 +1,34 @@
+<Language>
+    <Grammar>
+        <Production left="S">
+            <Symbol name="E" type="Nonterminal"/>
+            <Symbol name="EOF" type="Terminal"/>
+        </Production>
+        <Production left="E">
+            <Symbol name="E" type="Nonterminal"/>
+            <Symbol name="Plus" type="Terminal"/>
+            <Symbol name="T" type="Nonterminal"/>
+        </Production>
+        <Production left="E">
+            <Symbol name="T" type="Nonterminal"/>
+        </Production>
+        <Production left="T">
+            <Symbol name="T" type="Nonterminal"/>
+            <Symbol name="Mul" type="Terminal"/>
+            <Symbol name="F" type="Nonterminal"/>
+        </Production>
+        <Production left="T">
+            <Symbol name="F" type="Nonterminal"/>
+        </Production>
+        <Production left="F">
+            <Symbol name="Int" type="Terminal"/>
+        </Production>
+    </Grammar>
+    <Patterns>
+        <Pattern name="EOF" origin="EOF" isEnding="true"/>
+        <Pattern name="Plus" origin="\+" isEnding="false"/>
+        <Pattern name="Mul" origin="\*" isEnding="false"/>
+        <Pattern name="Int" origin="0|[1-9][0-9]*" isEnding="false"/>
+    </Patterns>
+    <Actions/>
+</Language>

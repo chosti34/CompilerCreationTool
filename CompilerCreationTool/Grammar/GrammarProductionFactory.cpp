@@ -82,7 +82,7 @@ bool ReadChars(const std::string& text, size_t& offset, std::string& chars)
 	std::string characters;
 	ReadWhile(text, characters, offsetCopy, [](char ch) {
 		const unsigned char converted = unsigned char(ch);
-		return std::isalnum(converted) || (std::ispunct(converted) && !IsSpecialCharacter(converted));
+		return std::isalnum(converted)/* || (std::ispunct(converted) && !IsSpecialCharacter(converted))*/;
 	});
 
 	if (!characters.empty())

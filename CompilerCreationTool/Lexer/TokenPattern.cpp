@@ -47,12 +47,19 @@ const std::string& TokenPattern::GetName() const
 
 bool TokenPattern::SetOrigin(const std::string& origin)
 {
-	std::regex newRegex(origin);
-	if (!RegexAllowsEmptyString(newRegex))
+	try
 	{
-		m_regex = std::move(newRegex);
-		m_origin = origin;
-		return true;
+		std::regex newRegex(origin);
+		if (!RegexAllowsEmptyString(newRegex))
+		{
+			m_regex = std::move(newRegex);
+			m_origin = origin;
+			return true;
+		}
+	}
+	catch (...)
+	{
+		return false;
 	}
 	return false;
 }
